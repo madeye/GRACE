@@ -19,13 +19,6 @@
 #ifndef CPU_I386_H
 #define CPU_I386_H
 
-#define PPI_DEBUG_TOOL
-#define PPI_DEBUG_TOOL_TCG
-
-#ifdef PPI_DEBUG_TOOL
-#include "../module/interface.h"
-#endif
-
 #include "config.h"
 
 #ifdef TARGET_X86_64
@@ -588,30 +581,11 @@ typedef struct {
 
 #define NB_MMU_MODES 2
 
+#define PPI_DEBUG_TOOL
+#define PPI_DEBUG_SWITCHER
+
 #ifdef PPI_DEBUG_TOOL
-
-struct trace_content {
-    uint8_t type;
-    uint8_t size;
-    union {
-        struct {	
-            uint64_t address;
-            uint64_t index;
-        } mem;
-        struct {
-            uint64_t args[2];
-        } syn;
-    } value;
-    uint64_t pc;
-};
-
-typedef struct DEBUGInfo {
-    /* memory trace for data race detector  */
-    struct trace_content trace_mem_buf[TRACE_PRIVATE_BUF_SIZE];
-    volatile struct trace_content *trace_mem_ptr, *trace_mem_end;
-    /* uint8_t current_thread_id; */
-} DEBUGInfo;
-
+#include "../module/interface.h"
 #endif
 
 typedef struct CPUX86State {
@@ -751,6 +725,10 @@ typedef struct CPUX86State {
     uint16_t fpus_vmstate;
     uint16_t fptag_vmstate;
     uint16_t fpregs_format_vmstate;
+
+#ifdef PPI_DEBUG_TOOL
+    DEBUGInfo debug_info;    
+#endif
 
 } CPUX86State;/*}}}*/
 

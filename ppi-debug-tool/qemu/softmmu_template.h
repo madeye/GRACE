@@ -53,6 +53,21 @@
 #define ADDR_READ addr_read
 #endif
 
+#ifndef PPI_DEBUG_TOOL_SOFTMMU
+#define PPI_DEBUG_TOOL_SOFTMMU
+
+#include <stdlib.h>
+extern uint8_t is_collect;
+extern __thread struct trace_content *trace_mem_ptr;
+extern FILE* stderr;
+
+#define trace_b 1
+#define trace_w 2
+#define trace_l 4
+#define trace_q 8
+
+#endif
+
 static DATA_TYPE glue(glue(slow_ld, SUFFIX), MMUSUFFIX)(target_ulong addr,
                                                         int mmu_idx,
                                                         void *retaddr);
@@ -145,6 +160,15 @@ DATA_TYPE REGPARM glue(glue(__ld, SUFFIX), MMUSUFFIX)(target_ulong addr,
 #endif
         tlb_fill(addr, READ_ACCESS_TYPE, mmu_idx, retaddr);
         goto redo;
+    }
+/* PPI DEBUG TOOL */
+    if(is_collect)
+    {
+        trace_mem_ptr->type = 0;
+        trace_mem_ptr->size = glue(trace_, SUFFIX);
+        trace_mem_ptr->value.mem.address = addr;
+        trace_mem_ptr->pc = env->eip;
+        trace_mem_ptr++;
     }
     return res;
 }
@@ -290,6 +314,15 @@ void REGPARM glue(glue(__st, SUFFIX), MMUSUFFIX)(target_ulong addr,
 #endif
         tlb_fill(addr, 1, mmu_idx, retaddr);
         goto redo;
+    }
+/* PPI DEBUG TOOL */
+    if(is_collect)
+    {
+        trace_mem_ptr->type = 1;
+        trace_mem_ptr->size = glue(trace_, SUFFIX);
+        trace_mem_ptr->value.mem.address = addr;
+        trace_mem_ptr->pc = env->eip;
+        trace_mem_ptr++;
     }
 }
 

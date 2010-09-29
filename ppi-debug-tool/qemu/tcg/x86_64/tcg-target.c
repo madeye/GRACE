@@ -26,8 +26,8 @@
 
 #ifdef PPI_DEBUG_TOOL_TCG
 
-COREMU_THREAD DEBUGInfo debug_info;
-uint8_t is_collect = 0;
+extern DEBUGInfo debug_info;
+extern uint8_t is_collect;
 
 #endif
 
@@ -569,9 +569,9 @@ static void tcg_out_qemu_ld(TCGContext *s, const TCGArg *args,
     int addr_reg, data_reg, r0, r1, mem_index, s_bits, bswap, rexw;
     int32_t offset;
 
-#ifdef PPI_DEBUG_TOOL_TCG_0
-    uint64_t trace_addr_ptr;
-    uint8_t size_type;
+#ifdef PPI_DEBUG_TOOL_TCG
+    uint64_t trace_ptr;
+    uint64_t size_type;
 #endif
 
 #if defined(CONFIG_SOFTMMU)
@@ -759,20 +759,20 @@ static void tcg_out_qemu_ld(TCGContext *s, const TCGArg *args,
             tcg_abort();
     }
 
-#ifdef PPI_DEBUG_TOOL_TCG_0
+#ifdef PPI_DEBUG_TOOL_TCG
     if(is_collect)
     {
         switch(opc) {
             case 0:
-            case 0 | 4:
+            /*case 0 | 4:*/
                 size_type = TRACE_MEM_SIZE_BYTE;
                 break;
             case 1:
-            case 1 | 4:
+            /*case 1 | 4:*/
                 size_type = TRACE_MEM_SIZE_WORD;
                 break;
             case 2:
-            case 2 | 4:
+            /*case 2 | 4:*/
                 size_type = TRACE_MEM_SIZE_LONG;
                 break;
             case 3:
@@ -785,36 +785,83 @@ static void tcg_out_qemu_ld(TCGContext *s, const TCGArg *args,
         {
             case 0:
             case 1:
-            /*case 1 | 4:*/
+            /* case 1 | 4: */
             case 2:
-            /*case 2 | 4:*/
+            /*case 2 | 4: */
             case 3:
+                /* XXX: init stage: push %rcx, push %rdx: to protect the context*/
+                tcg_out_opc(s, (0x50 + (TCG_REG_RCX & 7)), 0, TCG_REG_RCX, 0);
+                tcg_out_opc(s, (0x50 + (TCG_REG_RDX & 7)), 0, TCG_REG_RDX, 0);
+
                 /* get mem trace store address */
-                trace_addr_ptr = &(debug_info.trace_mem_ptr->value.mem.address);
+                trace_ptr = (uint64_t)&(debug_info.trace_mem_ptr);
 
-                /* push %rcx: to protect the context*/
-                tcg_out_opc(s, (0x50 + (TCG_REG_RCX & 7)) | P_REXW, 0, TCG_REG_RCX, 0);
+                /* movq trace_ptr_addr, %rdx */
+                tcg_out_opc(s, (0xb8 + (TCG_REG_RDX & 7)) | P_REXW, 0, TCG_REG_RDX, 0);
+                tcg_out32(s, trace_ptr);
+                tcg_out32(s, trace_ptr >> 32);
 
-                /* movq trace_addr, %rcx */
-                tcg_out_opc(s, (0xb8 + (TCG_REG_RCX & 7)) | P_REXW, 0, TCG_REG_RCX, 0);
-                tcg_out32(s, trace_addr_ptr);
-                tcg_out32(s, trace_addr_ptr >> 32);
+                /* movq (%rdx), %rcx */
+                tcg_out_modrm_offset(s, 0x8b | P_REXW, TCG_REG_RCX, TCG_REG_RDX, 0);
 
-                /*fprintf(stderr, "PPI DEBUG: trace addr ptr: 0x%lx \n", trace_addr_ptr);*/
+                /* XXX: step 1: store type,    8bit, offset 0 */
 
-                /* movq r0, (%rcx)*/
-                tcg_out_modrm_offset(s, 0x89 | P_REXW, r0, TCG_REG_RCX, 0);
+                /* movq TRACE_MEM_LOAD, %rdx */
+                tcg_out_opc(s, (0xb8 + (TCG_REG_RDX & 7)) | P_REXW, 0, TCG_REG_RDX, 0);
+                tcg_out32(s, TRACE_MEM_LOAD);
+                tcg_out32(s, 0);
 
-                /* pop %rcx */
-                tcg_out_opc(s, (0x58 + (TCG_REG_RCX & 7)) | P_REXW, 0, TCG_REG_RCX, 0);
+                /* movb */
+                tcg_out_modrm_offset(s, 0x88 | P_REXB_R, TCG_REG_RDX, TCG_REG_RCX, 
+                        offsetof(struct trace_content, type));
 
-                /* 
-                 * trace mem: 
-                 * 0 means that here should wait for runtime to collect the address
-                 */
-                trace_mem_collection(TRACE_MEM_LOAD, size_type, 0, 
-                        (uint64_t)s->code_ptr);
-                /*((TranslationBlock *)s->tb_next)->pc); */
+                /* XXX: step 2: store size,    8bit, offset 8 */
+
+                /* movq size_type, %rdx */
+                tcg_out_opc(s, (0xb8 + (TCG_REG_RDX & 7)) | P_REXW, 0, TCG_REG_RDX, 0);
+                tcg_out32(s, size_type);
+                tcg_out32(s, 0);
+
+                /* movb */
+                tcg_out_modrm_offset(s, 0x88 | P_REXB_R, TCG_REG_RDX, TCG_REG_RCX, 
+                        offsetof(struct trace_content, size));
+
+                /* XXX: step 3: store address, 64bit, offset 16 */
+
+                /* movq */
+                tcg_out_modrm_offset(s, 0x89 | P_REXW, r0, TCG_REG_RCX,
+                        offsetof(struct trace_content, value.mem.address));
+
+                /* XXX: step 4: store pc,      64bit, offset 144 */
+
+                /* movq s->code_ptr, %rdx */
+                tcg_out_opc(s, (0xb8 + (TCG_REG_RDX & 7)) | P_REXW, 0, TCG_REG_RDX, 0);
+                tcg_out32(s, (uint64_t)s->code_ptr);
+                tcg_out32(s, ((uint64_t)s->code_ptr) >> 32);
+
+                /* movq */
+                tcg_out_modrm_offset(s, 0x89 | P_REXW, TCG_REG_RDX, TCG_REG_RCX,
+                        offsetof(struct trace_content, pc));
+
+                /* XXX: step 5: inc trace_ptr */
+
+                /* movq trace_ptr_addr, %rdx */
+                tcg_out_opc(s, (0xb8 + (TCG_REG_RDX & 7)) | P_REXW, 0, TCG_REG_RDX, 0);
+                tcg_out32(s, trace_ptr);
+                tcg_out32(s, trace_ptr >> 32);
+
+                /* add 208, %rcx */
+                tcg_out_modrm(s, 0x81 | P_REXW, ARITH_ADD, TCG_REG_RCX);
+                tcg_out32(s, sizeof(struct trace_content));
+
+                /* movq */
+                tcg_out_modrm_offset(s, 0x89 | P_REXW, TCG_REG_RCX, TCG_REG_RDX, 0);
+                
+                /* XXX: final stage: pop %rdx, pop %rdx */
+                /* NOTICE: pop sequence is very important here */
+                tcg_out_opc(s, (0x58 + (TCG_REG_RDX & 7)), 0, TCG_REG_RDX, 0);
+                tcg_out_opc(s, (0x58 + (TCG_REG_RCX & 7)), 0, TCG_REG_RCX, 0);
+
                 break;
         }
     }
@@ -980,7 +1027,7 @@ static void tcg_out_qemu_st(TCGContext *s, const TCGArg *args,
             tcg_abort();
     }
 
-#ifdef PPI_DEBUG_TOOL_TCG
+#ifdef PPI_DEBUG_TOOL_TCG_0
     if(is_collect)
     {
         switch(opc) {
@@ -1015,7 +1062,7 @@ static void tcg_out_qemu_st(TCGContext *s, const TCGArg *args,
                 tcg_out_opc(s, (0x50 + (TCG_REG_RDX & 7)), 0, TCG_REG_RDX, 0);
 
                 /* get mem trace store address */
-                trace_ptr = &(debug_info.trace_mem_ptr);
+                trace_ptr = (uint64_t)&(debug_info.trace_mem_ptr);
 
                 /* movq trace_ptr_addr, %rdx */
                 tcg_out_opc(s, (0xb8 + (TCG_REG_RDX & 7)) | P_REXW, 0, TCG_REG_RDX, 0);
@@ -1489,10 +1536,10 @@ void tcg_target_qemu_prologue(TCGContext *s)
         tcg_out_push(s, tcg_target_callee_save_regs[i]);
     }
     /* reserve some stack space */
-#ifndef PPI_DEBUG_TOOL_TCG
-    push_size = 8 + ARRAY_SIZE(tcg_target_callee_save_regs) * 8;
+#ifdef PPI_DEBUG_TOOL_TCG
+    push_size = 8 + 16 + ARRAY_SIZE(tcg_target_callee_save_regs) * 8;
 #else
-    push_size = 32 + ARRAY_SIZE(tcg_target_callee_save_regs) * 8;
+    push_size = 8 + ARRAY_SIZE(tcg_target_callee_save_regs) * 8;
 #endif
     frame_size = push_size + TCG_STATIC_CALL_ARGS_SIZE;
     frame_size = (frame_size + TCG_TARGET_STACK_ALIGN - 1) & 

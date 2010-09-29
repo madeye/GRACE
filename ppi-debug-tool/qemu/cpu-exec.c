@@ -22,14 +22,19 @@
 #include "tcg.h"
 #include "kvm.h"
 
+
 #include "coremu-config.h"
 #include "coremu-intr.h"
 
 #ifdef PPI_DEBUG_TOOL
 
+#include <assert.h>
+#include <stdlib.h>
+
 extern FILE *stderr;
-extern COREMU_THREAD DEBUGInfo debug_info;
-extern uint8_t is_collect;
+
+COREMU_THREAD struct trace_content *trace_mem_ptr;
+uint8_t is_collect = 0;
 
 #endif
 
@@ -672,10 +677,23 @@ int cpu_exec(CPUState *env1)
                 }
                 /* reset soft MMU for next block (it can currently
                    only be set by a memory fault) */
+#ifdef PPI_DEBUG_TOOL
+    if (is_collect && trace_mem_ptr && 
+            (uint64_t)(trace_mem_ptr - env->debug_info.trace_mem_buf) > TRACE_BUF_SIZE) 
+    {
+        for(trace_ptr = env->debug_info.trace_mem_buf; 
+                trace_ptr != trace_mem_ptr; trace_ptr++)
+        {
+            fprintf(stderr, "PPI_DEBUG_TOOL: type: %ld, size: %ld, pc: 0x%lx, address: 0x%lx \n",
+                    trace_ptr->type, trace_ptr->size, 
+                    trace_ptr->pc, trace_ptr->value.mem.address);
+        }
+        trace_mem_ptr = env->debug_info.trace_mem_buf;
+    }
+#endif
             } /* for(;;) */
         }
     } /* for(;;) */
-
 
 #if defined(TARGET_I386)
     /* restore flags in standard format */
@@ -700,6 +718,16 @@ int cpu_exec(CPUState *env1)
 #error unsupported target CPU
 #endif
 
+#ifdef PPI_DEBUG_TOOL
+    if (!trace_mem_ptr) {
+        trace_mem_ptr = env->debug_info.trace_mem_buf;
+#ifdef PPI_PRINT_INFO
+        printf("\ntrace content size : 0x%lx\n", sizeof(struct trace_content));
+        printf("trace memory buffer size : 0x%lx\n", sizeof(env->debug_info.trace_mem_buf));
+#endif
+    }
+#endif
+
     /* restore global registers */
     asm("");
     env = (void *) saved_env_reg;
@@ -709,31 +737,6 @@ int cpu_exec(CPUState *env1)
     cpu_single_env = NULL;
 #endif
 
-#ifdef PPI_DEBUG_TOOL
-    if (!debug_info.trace_mem_ptr) {
-        debug_info.trace_mem_ptr = debug_info.trace_mem_buf;
-	    debug_info.trace_mem_end = debug_info.trace_mem_ptr + TRACE_BUF_SIZE;
-#ifdef PPI_PRINT_INFO
-        printf("\ntrace content size : 0x%lx\n", sizeof(struct trace_content));   
-        printf("trace memory buffer size : 0x%lx\n", sizeof(debug_info.trace_mem_buf));
-#endif
-    }
-#endif
-
-#ifdef PPI_DEBUG_TOOL
-    if (is_collect && 
-            (uint64_t)debug_info.trace_mem_ptr > (uint64_t)debug_info.trace_mem_buf) 
-    {
-        for(trace_ptr = debug_info.trace_mem_buf; 
-                trace_ptr != debug_info.trace_mem_ptr; trace_ptr++)
-        {
-            fprintf(stderr, "PPI_DEBUG_TOOL: type: %d, size: %d, pc: 0x%lx, address: 0x%lx \n",
-                    trace_ptr->type, trace_ptr->size, 
-                    trace_ptr->pc, trace_ptr->value.mem.address);
-        }
-        debug_info.trace_mem_ptr = debug_info.trace_mem_buf;
-    }
-#endif
     return ret;
 }/*}}}*/
 

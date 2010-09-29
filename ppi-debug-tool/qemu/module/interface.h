@@ -18,25 +18,6 @@
 
 #define TRACE_BUF_SIZE (1 * 1024)
 
-#define trace_mem_collection(type1, size1, addr1, pc1) { \
-    if (is_collect) { \
-        debug_info.trace_mem_ptr->type = (type1); \
-        debug_info.trace_mem_ptr->size = (size1); \
-        debug_info.trace_mem_ptr->value.mem.address = (addr1); \
-        debug_info.trace_mem_ptr->pc = (pc1); \
-        debug_info.trace_mem_ptr++; \
-    } \
-}
-
-#define trace_syn_collection(type1, size1, arg1, arg2, pc1) { \
-    env->trace_mem_ptr->type = (type1); \
-    env->trace_mem_ptr->size = (size1); \
-    env->trace_mem_ptr->value.syn.args[0] = (arg1); \
-    env->trace_mem_ptr->value.syn.args[1] = (arg2); \
-    env->trace_mem_ptr->pc = (pc1); \
-    env->trace_mem_ptr++; \
-}
-
 enum {
     TRACE_TYPE_BASE,
     TRACE_MEM_LOAD,
@@ -58,6 +39,26 @@ enum {
     TRACE_MEM_SIZE_QUAD = 8,
 };
 
+
+struct trace_content {
+    uint64_t type;
+    uint64_t size;
+    union {
+        struct {	
+            uint64_t address;
+            uint64_t index;
+        } mem;
+        struct {
+            uint64_t args[2];
+        } syn;
+    } value;
+    uint64_t pc;
+};
+
+typedef struct DEBUGInfo {
+    /* memory trace for data race detector  */
+    struct trace_content trace_mem_buf[TRACE_PRIVATE_BUF_SIZE];
+} DEBUGInfo;
 
 //void data_race_detector_init();
 //void data_race_detector(uint8_t tid, uint32_t size, struct trace_content *buf);

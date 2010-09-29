@@ -91,10 +91,6 @@
  *
  */
 
-#ifdef PPI_DEBUG_TOOL
-extern uint8_t is_collect;
-#endif
-
 typedef struct MonitorCompletionData MonitorCompletionData;
 struct MonitorCompletionData {
     Monitor *mon;
@@ -480,7 +476,10 @@ static int do_qmp_capabilities(Monitor *mon, const QDict *params,
     return 0;
 }
 
-#ifdef PPI_DEBUG_TOOL
+#ifdef PPI_DEBUG_SWITCHER
+
+extern uint8_t is_collect; 
+
 static void do_marker(Monitor *mon, QObject **ret_data)
 {
     if (is_collect) {
@@ -2535,7 +2534,7 @@ static const mon_cmd_t info_cmds[] = {
         .user_print = monitor_user_noop,
         .mhandler.info_new = do_info_commands,
     },
-#ifdef PPI_DEBUG_TOOL
+#ifdef PPI_DEBUG_SWITCHER
     {
         .name       = "ppidebug",
         .args_type  = "",
