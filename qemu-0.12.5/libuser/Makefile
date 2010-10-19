@@ -1,0 +1,1 @@
+/root/qemu-0.12.5/Makefile.user
