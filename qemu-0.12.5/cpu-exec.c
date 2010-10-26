@@ -24,6 +24,29 @@
 
 #ifdef PPI_DEBUG_TOOL
 
+#include "module/monitor.h"
+#include "module/copy.h"
+
+extern uint8_t thread_start;
+extern uint8_t thread_exit;
+extern uint8_t timing_start;
+extern uint8_t timing_end;
+extern uint8_t current_id;
+extern uint8_t last_id;
+extern uint8_t is_detect_start;
+extern struct monitor_syn_info syn_info;
+extern struct map_queue map;
+
+#ifdef PPI_PRINT_INFO
+#include <time.h>
+
+clock_t start_time;
+clock_t end_time;
+
+time_t first_time;
+time_t second_time;
+#endif
+
 #include <assert.h>
 #include <stdlib.h>
 
@@ -637,6 +660,66 @@ int cpu_exec(CPUState *env1)
                     env = cpu_single_env;
 #define env cpu_single_env
 #endif
+
+#ifdef PPI_DEBUG_TOOL
+        if (thread_start) {
+#ifdef PPI_PRINT_INFO
+            printf("\tthread start : last tid : %d ; current tid : %d\n", last_id, current_id);
+#endif
+
+            trace_syn_collection(TRACE_SYN_CREATE, 0, 0, 0, EIP);      
+
+            thread_start = 0;
+        }
+        if (thread_exit) {
+#ifdef PPI_PRINT_INFO
+            printf("\tthread exit : last tid : %d ; current tid : %d\n", last_id, current_id);
+#endif
+
+            trace_syn_collection(TRACE_SYN_JOIN, 0, 0, 0, EIP);
+
+            thread_exit= 0;
+        }
+        /*if (last_id != current_id) {*/
+            /*trace_mem_buf_clear(&map, last_id);*/
+
+            /*last_id = current_id;*/
+        /*} else {	*/
+            /*if ((uint32_t)env->trace_mem_ptr >= (uint32_t)env->trace_mem_end) {*/
+                /*trace_mem_buf_clear(&map, last_id);*/
+            /*}*/
+        /*}*/
+
+
+/*#ifdef PPI_SYN_INFO*/
+            /*monitor_syn_info_print(&syn_info);*/
+/*#endif*/
+
+        if (timing_start) {
+
+#ifdef PPI_PRINT_INFO
+            start_time= clock();
+            first_time = time(NULL);
+            printf("\ttiming start!\n");
+#endif
+
+            timing_start = 0;
+        }
+
+        if (timing_end) {
+            /*data_race_detector_report();*/
+
+#ifdef PPI_PRINT_INFO
+            end_time = clock();
+            second_time = time(NULL);
+            printf("\ttiming end!\n");
+            printf("\nTime costs : %f (s) ; %f (s)\n", 
+                    (double)(end_time - start_time) / 1000000, difftime(second_time, first_time));
+#endif
+
+            timing_end = 0;
+        }
+#endif
                     next_tb = tcg_qemu_tb_exec(tc_ptr);
                     env->current_tb = NULL;
                     if ((next_tb & 3) == 2) {
@@ -669,29 +752,29 @@ int cpu_exec(CPUState *env1)
                 }
                 /* reset soft MMU for next block (it can currently
                    only be set by a memory fault) */
-#ifdef PPI_DEBUG_TOOL
-    if (is_collect && trace_mem_ptr && 
-            (uint64_t)(trace_mem_ptr - env->debug_info.trace_mem_buf) > TRACE_BUF_SIZE) 
-    {
-            /*fprintf(stderr, "start: trace_mem_ptr: %lx \n", trace_mem_ptr);*/
-        /*m = (uint64_t)trace_mem_ptr;*/
-                /*m = 0;*/
-        for(trace_ptr = env->debug_info.trace_mem_buf; 
-                trace_ptr != trace_mem_ptr; trace_ptr++)
-        {
-            fprintf(stderr, "PPI_DEBUG_TOOL: type: %ld, size: %ld, pc: 0x%lx, address: 0x%lx \n",
-                    trace_ptr->type, trace_ptr->size, 
-                    trace_ptr->pc, trace_ptr->value.mem.address);
-            /*m++;*/
-        }
-        /*assert(m == (uint64_t)trace_mem_ptr);*/
-        trace_mem_ptr = env->debug_info.trace_mem_buf;
-            /*fprintf(stderr, "end: trace_mem_ptr: %lx \n", trace_mem_ptr);*/
-            /*fprintf(stderr, "TRACE_BUFFER_SIZE: %d \n", m);*/
-            /*fprintf(stderr, "trace_mem_ptr: %lx , trace_mem_buf: %lx \n",*/
-                    /*trace_mem_ptr, debug_info.trace_mem_buf);*/
-    }
-#endif
+        /*#ifdef PPI_DEBUG_TOOL*/
+        /*if (is_collect && trace_mem_ptr && */
+        /*(uint64_t)(trace_mem_ptr - env->debug_info.trace_mem_buf) > TRACE_BUF_SIZE) */
+        /*{*/
+        /*[>fprintf(stderr, "start: trace_mem_ptr: %lx \n", trace_mem_ptr);<]*/
+        /*[>m = (uint64_t)trace_mem_ptr;<]*/
+        /*[>m = 0;<]*/
+        /*for(trace_ptr = env->debug_info.trace_mem_buf; */
+        /*trace_ptr != trace_mem_ptr; trace_ptr++)*/
+        /*{*/
+        /*fprintf(stderr, "PPI_DEBUG_TOOL: type: %ld, size: %ld, pc: 0x%lx, address: 0x%lx \n",*/
+        /*trace_ptr->type, trace_ptr->size, */
+        /*trace_ptr->pc, trace_ptr->value.mem.address);*/
+        /*[>m++;<]*/
+        /*}*/
+        /*[>assert(m == (uint64_t)trace_mem_ptr);<]*/
+        /*trace_mem_ptr = env->debug_info.trace_mem_buf;*/
+        /*[>fprintf(stderr, "end: trace_mem_ptr: %lx \n", trace_mem_ptr);<]*/
+        /*[>fprintf(stderr, "TRACE_BUFFER_SIZE: %d \n", m);<]*/
+        /*[>fprintf(stderr, "trace_mem_ptr: %lx , trace_mem_buf: %lx \n",<]*/
+        /*[>trace_mem_ptr, debug_info.trace_mem_buf);<]*/
+        /*}*/
+        /*#endif*/
             } /* for(;;) */
         } else {
             env_to_regs();
@@ -710,7 +793,7 @@ int cpu_exec(CPUState *env1)
     cpu_m68k_flush_flags(env, env->cc_op);
     env->cc_op = CC_OP_FLAGS;
     env->sr = (env->sr & 0xffe0)
-              | env->cc_dest | (env->cc_x << 4);
+        | env->cc_dest | (env->cc_x << 4);
 #elif defined(TARGET_MICROBLAZE)
 #elif defined(TARGET_MIPS)
 #elif defined(TARGET_SH4)
@@ -729,7 +812,7 @@ int cpu_exec(CPUState *env1)
         /*assert(debug_info.trace_mem_buf);*/
         /*memset(debug_info.trace_mem_buf, 0, sizeof(struct trace_content) * TRACE_PRIVATE_BUF_SIZE);*/
         /*debug_info.trace_mem_ptr = debug_info.trace_mem_buf;*/
-		/*debug_info.trace_mem_end = debug_info.trace_mem_ptr + TRACE_BUF_SIZE;*/
+        /*debug_info.trace_mem_end = debug_info.trace_mem_ptr + TRACE_BUF_SIZE;*/
 #ifdef PPI_PRINT_INFO
         printf("\ntrace content size : 0x%lx\n", sizeof(struct trace_content));
         printf("trace memory buffer size : 0x%lx\n", sizeof(env->debug_info.trace_mem_buf));
@@ -769,7 +852,7 @@ void cpu_x86_load_seg(CPUX86State *s, int seg_reg, int selector)
     if (!(env->cr[0] & CR0_PE_MASK) || (env->eflags & VM_MASK)) {
         selector &= 0xffff;
         cpu_x86_load_seg_cache(env, seg_reg, selector,
-                               (selector << 4), 0xffff, 0);
+                (selector << 4), 0xffff, 0);
     } else {
         helper_load_seg(seg_reg, selector);
     }
@@ -815,8 +898,8 @@ void cpu_x86_frstor(CPUX86State *s, target_ulong ptr, int data32)
    write caused the exception and otherwise 0'. 'old_set' is the
    signal set which should be restored */
 static inline int handle_cpu_signal(unsigned long pc, unsigned long address,
-                                    int is_write, sigset_t *old_set,
-                                    void *puc)
+        int is_write, sigset_t *old_set,
+        void *puc)
 {
     TranslationBlock *tb;
     int ret;
@@ -825,7 +908,7 @@ static inline int handle_cpu_signal(unsigned long pc, unsigned long address,
         env = cpu_single_env; /* XXX: find a correct solution for multithread */
 #if defined(DEBUG_SIGNAL)
     qemu_printf("qemu: SIGSEGV pc=0x%08lx address=%08lx w=%d oldset=0x%08lx\n",
-                pc, address, is_write, *(unsigned long *)old_set);
+            pc, address, is_write, *(unsigned long *)old_set);
 #endif
     /* XXX: locking issue */
     if (is_write && page_unprotect(h2g(address), pc, puc)) {
@@ -891,7 +974,7 @@ static inline int handle_cpu_signal(unsigned long pc, unsigned long address,
 #endif
 
 int cpu_signal_handler(int host_signum, void *pinfo,
-                       void *puc)
+        void *puc)
 {
     siginfo_t *info = pinfo;
 #if defined(__NetBSD__) || defined (__FreeBSD__) || defined(__DragonFly__)
@@ -905,7 +988,7 @@ int cpu_signal_handler(int host_signum, void *pinfo,
     int trapno;
 
 #ifndef REG_EIP
-/* for glibc 2.1 */
+    /* for glibc 2.1 */
 #define REG_EIP    EIP
 #define REG_ERR    ERR
 #define REG_TRAPNO TRAPNO
@@ -913,9 +996,9 @@ int cpu_signal_handler(int host_signum, void *pinfo,
     pc = EIP_sig(uc);
     trapno = TRAP_sig(uc);
     return handle_cpu_signal(pc, (unsigned long)info->si_addr,
-                             trapno == 0xe ?
-                             (ERROR_sig(uc) >> 1) & 1 : 0,
-                             &MASK_sig(uc), puc);
+            trapno == 0xe ?
+            (ERROR_sig(uc) >> 1) & 1 : 0,
+            &MASK_sig(uc), puc);
 }
 
 #elif defined(__x86_64__)
@@ -945,7 +1028,7 @@ int cpu_signal_handler(int host_signum, void *pinfo,
 #endif
 
 int cpu_signal_handler(int host_signum, void *pinfo,
-                       void *puc)
+        void *puc)
 {
     siginfo_t *info = pinfo;
     unsigned long pc;
@@ -959,9 +1042,9 @@ int cpu_signal_handler(int host_signum, void *pinfo,
 
     pc = PC_sig(uc);
     return handle_cpu_signal(pc, (unsigned long)info->si_addr,
-                             TRAP_sig(uc) == 0xe ?
-                             (ERROR_sig(uc) >> 1) & 1 : 0,
-                             &MASK_sig(uc), puc);
+            TRAP_sig(uc) == 0xe ?
+            (ERROR_sig(uc) >> 1) & 1 : 0,
+            &MASK_sig(uc), puc);
 }
 
 #elif defined(_ARCH_PPC)
@@ -1016,7 +1099,7 @@ typedef struct ucontext SIGCONTEXT;
 #endif /* __APPLE__ */
 
 int cpu_signal_handler(int host_signum, void *pinfo,
-                       void *puc)
+        void *puc)
 {
     siginfo_t *info = pinfo;
     struct ucontext *uc = puc;
@@ -1034,13 +1117,13 @@ int cpu_signal_handler(int host_signum, void *pinfo,
         is_write = 1;
 #endif
     return handle_cpu_signal(pc, (unsigned long)info->si_addr,
-                             is_write, &uc->uc_sigmask, puc);
+            is_write, &uc->uc_sigmask, puc);
 }
 
 #elif defined(__alpha__)
 
 int cpu_signal_handler(int host_signum, void *pinfo,
-                           void *puc)
+        void *puc)
 {
     siginfo_t *info = pinfo;
     struct ucontext *uc = puc;
@@ -1050,27 +1133,27 @@ int cpu_signal_handler(int host_signum, void *pinfo,
 
     /* XXX: need kernel patch to get write flag faster */
     switch (insn >> 26) {
-    case 0x0d: // stw
-    case 0x0e: // stb
-    case 0x0f: // stq_u
-    case 0x24: // stf
-    case 0x25: // stg
-    case 0x26: // sts
-    case 0x27: // stt
-    case 0x2c: // stl
-    case 0x2d: // stq
-    case 0x2e: // stl_c
-    case 0x2f: // stq_c
-	is_write = 1;
+        case 0x0d: // stw
+        case 0x0e: // stb
+        case 0x0f: // stq_u
+        case 0x24: // stf
+        case 0x25: // stg
+        case 0x26: // sts
+        case 0x27: // stt
+        case 0x2c: // stl
+        case 0x2d: // stq
+        case 0x2e: // stl_c
+        case 0x2f: // stq_c
+            is_write = 1;
     }
 
     return handle_cpu_signal(pc, (unsigned long)info->si_addr,
-                             is_write, &uc->uc_sigmask, puc);
+            is_write, &uc->uc_sigmask, puc);
 }
 #elif defined(__sparc__)
 
 int cpu_signal_handler(int host_signum, void *pinfo,
-                       void *puc)
+        void *puc)
 {
     siginfo_t *info = pinfo;
     int is_write;
@@ -1096,38 +1179,38 @@ int cpu_signal_handler(int host_signum, void *pinfo,
     is_write = 0;
     insn = *(uint32_t *)pc;
     if ((insn >> 30) == 3) {
-      switch((insn >> 19) & 0x3f) {
-      case 0x05: // stb
-      case 0x15: // stba
-      case 0x06: // sth
-      case 0x16: // stha
-      case 0x04: // st
-      case 0x14: // sta
-      case 0x07: // std
-      case 0x17: // stda
-      case 0x0e: // stx
-      case 0x1e: // stxa
-      case 0x24: // stf
-      case 0x34: // stfa
-      case 0x27: // stdf
-      case 0x37: // stdfa
-      case 0x26: // stqf
-      case 0x36: // stqfa
-      case 0x25: // stfsr
-      case 0x3c: // casa
-      case 0x3e: // casxa
-	is_write = 1;
-	break;
-      }
+        switch((insn >> 19) & 0x3f) {
+            case 0x05: // stb
+            case 0x15: // stba
+            case 0x06: // sth
+            case 0x16: // stha
+            case 0x04: // st
+            case 0x14: // sta
+            case 0x07: // std
+            case 0x17: // stda
+            case 0x0e: // stx
+            case 0x1e: // stxa
+            case 0x24: // stf
+            case 0x34: // stfa
+            case 0x27: // stdf
+            case 0x37: // stdfa
+            case 0x26: // stqf
+            case 0x36: // stqfa
+            case 0x25: // stfsr
+            case 0x3c: // casa
+            case 0x3e: // casxa
+                is_write = 1;
+                break;
+        }
     }
     return handle_cpu_signal(pc, (unsigned long)info->si_addr,
-                             is_write, sigmask, NULL);
+            is_write, sigmask, NULL);
 }
 
 #elif defined(__arm__)
 
 int cpu_signal_handler(int host_signum, void *pinfo,
-                       void *puc)
+        void *puc)
 {
     siginfo_t *info = pinfo;
     struct ucontext *uc = puc;
@@ -1142,14 +1225,14 @@ int cpu_signal_handler(int host_signum, void *pinfo,
     /* XXX: compute is_write */
     is_write = 0;
     return handle_cpu_signal(pc, (unsigned long)info->si_addr,
-                             is_write,
-                             &uc->uc_sigmask, puc);
+            is_write,
+            &uc->uc_sigmask, puc);
 }
 
 #elif defined(__mc68000)
 
 int cpu_signal_handler(int host_signum, void *pinfo,
-                       void *puc)
+        void *puc)
 {
     siginfo_t *info = pinfo;
     struct ucontext *uc = puc;
@@ -1160,14 +1243,14 @@ int cpu_signal_handler(int host_signum, void *pinfo,
     /* XXX: compute is_write */
     is_write = 0;
     return handle_cpu_signal(pc, (unsigned long)info->si_addr,
-                             is_write,
-                             &uc->uc_sigmask, puc);
+            is_write,
+            &uc->uc_sigmask, puc);
 }
 
 #elif defined(__ia64)
 
 #ifndef __ISR_VALID
-  /* This ought to be in <bits/siginfo.h>... */
+/* This ought to be in <bits/siginfo.h>... */
 # define __ISR_VALID	1
 #endif
 
@@ -1180,28 +1263,28 @@ int cpu_signal_handler(int host_signum, void *pinfo, void *puc)
 
     ip = uc->uc_mcontext.sc_ip;
     switch (host_signum) {
-      case SIGILL:
-      case SIGFPE:
-      case SIGSEGV:
-      case SIGBUS:
-      case SIGTRAP:
-	  if (info->si_code && (info->si_segvflags & __ISR_VALID))
-	      /* ISR.W (write-access) is bit 33:  */
-	      is_write = (info->si_isr >> 33) & 1;
-	  break;
+        case SIGILL:
+        case SIGFPE:
+        case SIGSEGV:
+        case SIGBUS:
+        case SIGTRAP:
+            if (info->si_code && (info->si_segvflags & __ISR_VALID))
+                /* ISR.W (write-access) is bit 33:  */
+                is_write = (info->si_isr >> 33) & 1;
+            break;
 
-      default:
-	  break;
+        default:
+            break;
     }
     return handle_cpu_signal(ip, (unsigned long)info->si_addr,
-                             is_write,
-                             &uc->uc_sigmask, puc);
+            is_write,
+            &uc->uc_sigmask, puc);
 }
 
 #elif defined(__s390__)
 
 int cpu_signal_handler(int host_signum, void *pinfo,
-                       void *puc)
+        void *puc)
 {
     siginfo_t *info = pinfo;
     struct ucontext *uc = puc;
@@ -1212,13 +1295,13 @@ int cpu_signal_handler(int host_signum, void *pinfo,
     /* XXX: compute is_write */
     is_write = 0;
     return handle_cpu_signal(pc, (unsigned long)info->si_addr,
-                             is_write, &uc->uc_sigmask, puc);
+            is_write, &uc->uc_sigmask, puc);
 }
 
 #elif defined(__mips__)
 
 int cpu_signal_handler(int host_signum, void *pinfo,
-                       void *puc)
+        void *puc)
 {
     siginfo_t *info = pinfo;
     struct ucontext *uc = puc;
@@ -1228,13 +1311,13 @@ int cpu_signal_handler(int host_signum, void *pinfo,
     /* XXX: compute is_write */
     is_write = 0;
     return handle_cpu_signal(pc, (unsigned long)info->si_addr,
-                             is_write, &uc->uc_sigmask, puc);
+            is_write, &uc->uc_sigmask, puc);
 }
 
 #elif defined(__hppa__)
 
 int cpu_signal_handler(int host_signum, void *pinfo,
-                       void *puc)
+        void *puc)
 {
     struct siginfo *info = pinfo;
     struct ucontext *uc = puc;
@@ -1245,8 +1328,8 @@ int cpu_signal_handler(int host_signum, void *pinfo,
     /* FIXME: compute is_write */
     is_write = 0;
     return handle_cpu_signal(pc, (unsigned long)info->si_addr, 
-                             is_write,
-                             &uc->uc_sigmask, puc);
+            is_write,
+            &uc->uc_sigmask, puc);
 }
 
 #else

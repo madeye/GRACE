@@ -41,8 +41,9 @@ enum {
 
 
 struct trace_content {
-    uint64_t type;
-    uint64_t size;
+    uint8_t tid;
+    uint8_t type;
+    uint8_t size;
     union {
         struct {	
             uint64_t address;
@@ -62,6 +63,25 @@ typedef struct DEBUGInfo {
     /* uint8_t current_thread_id; */
 } DEBUGInfo;
 
+#define trace_mem_collection(type1, size1, pc1, arg1) { \
+    fprintf(stderr, "mem_trace: %d, %d, 0x%llx, 0x%llx \n", type1, size1, arg1, pc1); \
+}
+    //trace_mem_ptr->type = (type1); \
+    trace_mem_ptr->size = (size1); \
+    trace_mem_ptr->value.syn.args[0] = (arg1); \
+    trace_mem_ptr->value.syn.args[1] = (arg2); \
+    trace_mem_ptr->pc = (pc1); \
+}
+
+#define trace_syn_collection(type1, size1, arg1, arg2, pc1) { \
+    fprintf(stderr, "syn_trace: %d, 0x%llx, 0x%llx \n", type1, arg1, pc1); \
+}
+    //trace_mem_ptr->type = (type1); \
+    trace_mem_ptr->size = (size1); \
+    trace_mem_ptr->value.syn.args[0] = (arg1); \
+    trace_mem_ptr->value.syn.args[1] = (arg2); \
+    trace_mem_ptr->pc = (pc1); \
+}
 //void data_race_detector_init();
 //void data_race_detector(uint8_t tid, uint32_t size, struct trace_content *buf);
 //void data_race_detector_report();

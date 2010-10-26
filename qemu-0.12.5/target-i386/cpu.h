@@ -727,7 +727,7 @@ typedef struct CPUX86State {
     uint16_t fpregs_format_vmstate;
 
 #ifdef PPI_DEBUG_TOOL
-    DEBUGInfo debug_info;    
+    DEBUGInfo debug_info; 
 #endif
 
 } CPUX86State;

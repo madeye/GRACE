@@ -25,6 +25,9 @@
 
 #ifdef PPI_DEBUG_TOOL
 #include "module/process.h"
+#include <stdlib.h>
+
+extern FILE *stderr;
 
 extern uint8_t is_detect_start;             // Detection started flag
 extern uint8_t is_process_captured;         // Process captured flag
@@ -119,6 +122,57 @@ static const CPU86_LDouble f15rk[7] =
     1.44269504088896340739L,  /*l2e*/
     3.32192809488736234781L,  /*l2t*/
 };
+
+#ifdef PPI_DEBUG_TOOL_GUEST
+
+void helper_load_byte_trace(target_ulong pc, target_ulong addr) {
+    trace_mem_collection(TRACE_MEM_LOAD, TRACE_MEM_SIZE_BYTE, pc, addr);
+}
+void helper_load_word_trace(target_ulong pc, target_ulong addr) {
+    trace_mem_collection(TRACE_MEM_LOAD, TRACE_MEM_SIZE_WORD, pc, addr);
+}
+void helper_load_long_trace(target_ulong pc, target_ulong addr) {
+    trace_mem_collection(TRACE_MEM_LOAD, TRACE_MEM_SIZE_LONG, pc, addr);
+}
+void helper_load_quad_trace(target_ulong pc, target_ulong addr) {
+    trace_mem_collection(TRACE_MEM_LOAD, TRACE_MEM_SIZE_QUAD, pc, addr);
+}
+void helper_store_byte_trace(target_ulong pc, target_ulong addr) {
+    trace_mem_collection(TRACE_MEM_STORE, TRACE_MEM_SIZE_BYTE, pc, addr);
+}
+void helper_store_word_trace(target_ulong pc, target_ulong addr) {
+    trace_mem_collection(TRACE_MEM_STORE, TRACE_MEM_SIZE_WORD, pc, addr);
+}
+void helper_store_long_trace(target_ulong pc, target_ulong addr) {
+    trace_mem_collection(TRACE_MEM_STORE, TRACE_MEM_SIZE_LONG, pc, addr);
+}
+void helper_store_quad_trace(target_ulong pc, target_ulong addr) {
+    trace_mem_collection(TRACE_MEM_STORE, TRACE_MEM_SIZE_QUAD, pc, addr);
+}
+
+#endif
+
+#ifdef PPI_DEBUG_TOOL
+void helper_syn_lock_trace(target_ulong pc) {
+    trace_syn_collection(TRACE_SYN_LOCK, 1, EDI, 0, pc);
+}
+
+void helper_syn_unlock_trace(target_ulong pc) {
+    trace_syn_collection(TRACE_SYN_UNLOCK, 1, EDI, 0, pc);
+}
+
+void helper_syn_barrier_trace(target_ulong pc) {
+    trace_syn_collection(TRACE_SYN_BARRIER, 1, EDI, 0, pc);
+}
+
+void helper_syn_condwait_trace(target_ulong pc) {
+    trace_syn_collection(TRACE_SYN_COND_WAIT, 2, EDI, ESI, pc);
+}
+
+void helper_syn_condbroad_trace(target_ulong pc) {
+    trace_syn_collection(TRACE_SYN_COND_BROADCAST, 2, EDI, ESI, pc);
+}
+#endif
 
 /* broken thread support */
 

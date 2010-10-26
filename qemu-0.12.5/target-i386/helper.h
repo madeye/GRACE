@@ -1,11 +1,5 @@
 #include "def-helper.h"
 
-//[> #ifdef PPI_DEBUG_TOOL_GUEST <]
-
-//DEF_HELPER_2()
-
-//[> #endif  <]
-
 DEF_HELPER_FLAGS_1(cc_compute_all, TCG_CALL_PURE, i32, int)
 DEF_HELPER_FLAGS_1(cc_compute_c, TCG_CALL_PURE, i32, int)
 
@@ -63,6 +57,24 @@ DEF_HELPER_1(sysexit, void, int)
 #ifdef TARGET_X86_64
 DEF_HELPER_1(syscall, void, int)
 DEF_HELPER_1(sysret, void, int)
+#endif
+#ifdef PPI_DEBUG_TOOL_GUEST
+DEF_HELPER_2(load_byte_trace, void, tl, tl)
+DEF_HELPER_2(load_word_trace, void, tl, tl)
+DEF_HELPER_2(load_long_trace, void, tl, tl)
+DEF_HELPER_2(load_quad_trace, void, tl, tl)
+
+DEF_HELPER_2(store_byte_trace, void, tl, tl)
+DEF_HELPER_2(store_word_trace, void, tl, tl)
+DEF_HELPER_2(store_long_trace, void, tl, tl)
+DEF_HELPER_2(store_quad_trace, void, tl, tl)
+#endif
+#ifdef PPI_DEBUG_TOOL
+DEF_HELPER_1(syn_lock_trace, void, tl)
+DEF_HELPER_1(syn_unlock_trace, void, tl)
+DEF_HELPER_1(syn_barrier_trace, void, tl)
+DEF_HELPER_1(syn_condwait_trace, void, tl)
+DEF_HELPER_1(syn_condbroad_trace, void, tl)
 #endif
 DEF_HELPER_1(hlt, void, int)
 DEF_HELPER_1(monitor, void, tl)
