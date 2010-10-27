@@ -179,9 +179,9 @@ int main(int argc, char **argv)
 #define PPI_COPY_INIT
 
 #include "module/process.h"
-/*#include "module/monitor.h"*/
-/*#include "module/copy.h"*/
+#include "module/copy.h"
 
+uint8_t bench_mark_id = 0;
 uint8_t is_detect_start = 0;
 uint8_t is_process_captured = 0;
 uint8_t just_exec = 0;
@@ -195,8 +195,7 @@ uint32_t total_id = 1;
 uint32_t current_id = 0;
 uint8_t last_id = 0;
 struct ProcessQueue process_queue;
-/*struct monitor_syn_info syn_info;*/
-/*struct map_queue map;*/
+struct map_queue map;
 #endif
 
 static const char *data_dir;
@@ -4876,7 +4875,6 @@ static int virtcon_parse(const char *devname)
 
 int main(int argc, char **argv, char **envp)
 {
-
     const char *gdbstub_dev = NULL;
     uint32_t boot_devices_bitmap = 0;
     int i;
@@ -4909,6 +4907,12 @@ int main(int argc, char **argv, char **envp)
     int show_vnc_port = 0;
 
     init_clocks();
+
+#ifdef PPI_DEBUG_TOOL
+    data_race_detector_init();
+    process_queue_init(&process_queue);
+    map_queue_init(&map);
+#endif
 
     qemu_errors_to_file(stderr);
     qemu_cache_utils_init(envp);
@@ -5034,6 +5038,11 @@ int main(int argc, char **argv, char **envp)
             case QEMU_OPTION_initrd:
                 initrd_filename = optarg;
                 break;
+#ifdef PPI_DEBUG_TOOL
+            case QEMU_OPTION_benchmark:
+                bench_mark_id = atoi(optarg);
+                break;
+#endif
             case QEMU_OPTION_hda:
                 if (cyls == 0)
                     hda_opts = drive_add(optarg, HD_ALIAS, 0);

@@ -40,7 +40,7 @@ all: $(PROGS)
 
 #########################################################
 # cpu emulator library
-libobj-y = exec.o translate-all.o cpu-exec.o translate.o
+libobj-y = exec.o translate-all.o cpu-exec.o translate.o 
 libobj-y += tcg/tcg.o
 libobj-$(CONFIG_SOFTFLOAT) += fpu/softfloat.o
 libobj-$(CONFIG_NOSOFTFLOAT) += fpu/softfloat-native.o
@@ -323,7 +323,7 @@ qemu-monitor.h: $(SRC_PATH)/qemu-monitor.hx
 	$(call quiet-command,sh $(SRC_PATH)/hxtool -h < $< > $@,"  GEN   $(TARGET_DIR)$@")
 
 clean:
-	rm -f *.o *.a *~ $(PROGS) nwfpe/*.o fpu/*.o
+	rm -f *.o *.a *~ $(PROGS) nwfpe/*.o fpu/*.o 
 	rm -f *.d */*.d tcg/*.o ide/*.o
 	rm -f qemu-options.h qemu-monitor.h gdbstub-xml.c
 

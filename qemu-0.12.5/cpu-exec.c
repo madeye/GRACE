@@ -24,8 +24,7 @@
 
 #ifdef PPI_DEBUG_TOOL
 
-#include "module/monitor.h"
-#include "module/copy.h"
+#define PPI_DETECTOR_MODULE
 
 extern uint8_t thread_start;
 extern uint8_t thread_exit;
@@ -34,8 +33,11 @@ extern uint8_t timing_end;
 extern uint8_t current_id;
 extern uint8_t last_id;
 extern uint8_t is_detect_start;
-extern struct monitor_syn_info syn_info;
 extern struct map_queue map;
+volatile struct trace_content *trace_mem_ptr;
+uint8_t is_collect = 0;
+
+#include "module/copy.h"
 
 #ifdef PPI_PRINT_INFO
 #include <time.h>
@@ -52,8 +54,6 @@ time_t second_time;
 
 extern FILE *stderr;
 
-struct trace_content *trace_mem_ptr;
-uint8_t is_collect = 0;
 
 #endif
 
@@ -254,11 +254,6 @@ int cpu_exec(CPUState *env1)
     TranslationBlock *tb;
     uint8_t *tc_ptr;
     unsigned long next_tb;
-
-#ifdef PPI_DEBUG_TOOL
-    volatile struct trace_content *trace_ptr;
-    uint64_t m;
-#endif
 
     if (cpu_halted(env1) == EXCP_HALTED)
         return EXCP_HALTED;
@@ -680,15 +675,16 @@ int cpu_exec(CPUState *env1)
 
             thread_exit= 0;
         }
-        /*if (last_id != current_id) {*/
-            /*trace_mem_buf_clear(&map, last_id);*/
 
-            /*last_id = current_id;*/
-        /*} else {	*/
-            /*if ((uint32_t)env->trace_mem_ptr >= (uint32_t)env->trace_mem_end) {*/
-                /*trace_mem_buf_clear(&map, last_id);*/
-            /*}*/
-        /*}*/
+        if (last_id != current_id) {
+            trace_mem_buf_clear(&map, last_id);
+            last_id = current_id;
+        } else {	
+            if (trace_mem_ptr - env->debug_info.trace_mem_buf > TRACE_BUF_SIZE) {
+                /*printf("trace size: %d\n", trace_mem_ptr - env->debug_info.trace_mem_buf);*/
+                trace_mem_buf_clear(&map, last_id);
+            }
+        }
 
 
 /*#ifdef PPI_SYN_INFO*/
@@ -707,7 +703,7 @@ int cpu_exec(CPUState *env1)
         }
 
         if (timing_end) {
-            /*data_race_detector_report();*/
+            data_race_detector_report();
 
 #ifdef PPI_PRINT_INFO
             end_time = clock();

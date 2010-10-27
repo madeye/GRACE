@@ -2,54 +2,54 @@
 /* synchronization */
 
 struct mutex_entry {
-    uint32_t id;
+    uint64_t id;
     int is_lock;
     int is_require[MAX_PROCESS_NUM];
     uint8_t last_lock_tid;
     uint8_t last_unlock_tid;
-    uint32_t last_lock_ts_index;
-    uint32_t last_unlock_ts_index;
+    uint64_t last_lock_ts_index;
+    uint64_t last_unlock_ts_index;
 };
 
 #define MAX_MUTEX_NUM (1 << 16)
 
 struct mutex_queue {
     struct mutex_entry entry[MAX_MUTEX_NUM];
-    uint32_t count;
+    uint64_t count;
 };
 
 struct barrier_entry {
-    uint32_t id;
+    uint64_t id;
     uint8_t is_barrier;
     uint8_t is_require[MAX_PROCESS_NUM];
-    uint32_t last_barrier_ts_index[MAX_PROCESS_NUM];
+    uint64_t last_barrier_ts_index[MAX_PROCESS_NUM];
 };
 
 #define MAX_BARRIER_NUM (1 << 10)
 
 struct barrier_queue {
     struct barrier_entry entry[MAX_BARRIER_NUM];
-    uint32_t count;
+    uint64_t count;
 };
 
 struct cond_entry {
-    uint32_t id;
-    uint32_t lock_id;
+    uint64_t id;
+    uint64_t lock_id;
     uint8_t is_cond;
     uint8_t is_require[MAX_PROCESS_NUM];
-    uint32_t last_cond_ts_index[MAX_PROCESS_NUM];
+    uint64_t last_cond_ts_index[MAX_PROCESS_NUM];
 };
 
 #define MAX_COND_NUM (1 << 10)
 
 struct cond_queue {
     struct cond_entry entry[MAX_COND_NUM];
-    uint32_t count;
+    uint64_t count;
 };
 
 struct thread_info {
-    uint32_t create_ts_index;
-    uint32_t join_ts_index[MAX_PROCESS_NUM];
+    uint64_t create_ts_index;
+    uint64_t join_ts_index[MAX_PROCESS_NUM];
 };
 
 struct global_syn_info {
@@ -75,13 +75,13 @@ static inline void module_syn_print()
 
 #ifdef DETECTOR_STATISTICS_PRINT
 struct statistics_syn_info {
-    uint32_t lock_count;
-    uint32_t unlock_count;
-    uint32_t barrier_count;
-    uint32_t create_count;
-    uint32_t join_count;
-    uint32_t cond_wait_count;
-    uint32_t cond_broadcast_count;
+    uint64_t lock_count;
+    uint64_t unlock_count;
+    uint64_t barrier_count;
+    uint64_t create_count;
+    uint64_t join_count;
+    uint64_t cond_wait_count;
+    uint64_t cond_broadcast_count;
 };
 
 struct statistics_syn_info stat_syn;
@@ -133,10 +133,10 @@ static inline void module_mem_store_handler(struct trace_content *content)
 
 void module_syn_lock_handler(struct trace_content *content) 
 {
-    uint32_t i, k;
+    uint64_t i, k;
     uint8_t tid;
-    uint32_t lock_id;
-    uint32_t index;
+    uint64_t lock_id;
+    uint64_t index;
 
     tid = content->tid;
     lock_id = content->value.syn.args[0];
@@ -196,10 +196,10 @@ void module_syn_lock_handler(struct trace_content *content)
 
 void module_syn_unlock_handler(struct trace_content *content) 
 {
-    uint32_t i, k;
+    uint64_t i, k;
     uint8_t tid;
-    uint32_t lock_id;
-    uint32_t index;
+    uint64_t lock_id;
+    uint64_t index;
 
     tid = content->tid;
     lock_id = content->value.syn.args[0];
@@ -246,10 +246,10 @@ void module_syn_unlock_handler(struct trace_content *content)
 
 void module_syn_barrier_handler(struct trace_content *content)
 {
-    uint32_t i, k;
+    uint64_t i, k;
     uint8_t tid;
-    uint32_t barrier_id;
-    uint32_t index;
+    uint64_t barrier_id;
+    uint64_t index;
 
     tid = content->tid;
     barrier_id = content->value.syn.args[0];
@@ -313,7 +313,7 @@ void module_syn_barrier_handler(struct trace_content *content)
 void module_syn_create_handler(struct trace_content *content)
 {
     uint8_t tid;
-    uint32_t index;
+    uint64_t index;
 
     tid = content->tid;
 
@@ -337,7 +337,7 @@ void module_syn_create_handler(struct trace_content *content)
 void module_syn_join_handler(struct trace_content *content) 
 {
     uint8_t tid;
-    uint32_t index;
+    uint64_t index;
 
     tid = content->tid;
 
@@ -364,10 +364,10 @@ void module_syn_join_handler(struct trace_content *content)
 
 void module_syn_cond_wait_handler(struct trace_content *content)
 {
-    uint32_t i;
+    uint64_t i;
     uint8_t tid;
-    uint32_t cond_id, lock_id;
-    uint32_t index;
+    uint64_t cond_id, lock_id;
+    uint64_t index;
 
     tid = content->tid;
     cond_id = content->value.syn.args[0];
@@ -421,10 +421,10 @@ void module_syn_cond_wait_handler(struct trace_content *content)
 
 void module_syn_cond_broadcast_handler(struct trace_content *content) 
 {
-    uint32_t i, k;
+    uint64_t i, k;
     uint8_t tid;
-    uint32_t cond_id;
-    uint32_t index;
+    uint64_t cond_id;
+    uint64_t index;
 
     tid = content->tid;
     cond_id = content->value.syn.args[0];

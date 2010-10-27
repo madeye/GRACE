@@ -119,20 +119,101 @@ typedef struct DisasContext {
 
 #ifdef PPI_DEBUG_TOOL
 
+#if 0
+//enum {
+    //PPI_SPLASH2_BARNES,
+    //PPI_SPLASH2_FMM,
+    //PPI_SPLASH2_OCEAN,
+    //PPI_SPLASH2_RADIOSITY,
+    //PPI_SPLASH2_RAYTRACE,
+    //PPI_SPLASH2_VOLREND,
+    //PPI_SPLASH2_WATER_NSQUARED,
+    //PPI_SPLASH2_WATER_SPATIAL,
+    //PPI_SPLASH2_CHOLESKY,
+    //PPI_SPLASH2_FFT,
+    //PPI_SPLASH2_LU,
+    //PPI_SPLASH2_RADIX
+//};
+#endif
+
+const uint64_t lock_call[12] = {
+    0x400d88, /* 0 */
+    0x400d88, /* 1 */
+    0x400a50, /* 2 */
+    0x400af0, /* 3 */
+    0x400d80, /* 4 */
+    0x400ed0, /* 5 */
+    0x400bc0, /* 6 */
+    0x400c08, /* 7 */
+    0x400d40, /* 8 */
+    0x400aa0, /* 9 */
+    0x400b70, /* 10 */
+    0x400a98  /* 11 */
+};
+
+const uint64_t unlock_call[12] = {
+    0x400dc8, /* 0 */
+    0x400dc8, /* 1 */
+    0x400a80, /* 2 */
+    0x400b20, /* 3 */
+    0x400db0, /* 4 */
+    0x400f10, /* 5 */
+    0x400c00, /* 6 */
+    0x400c48, /* 7 */
+    0x400d80, /* 8 */
+    0x400ac0, /* 9 */
+    0x400ba0, /* 10 */
+    0x400ac8  /* 11 */
+};
+
+const uint64_t barrier_call[12] = {
+    0x400c98, /* 0 */
+    0x400cb8, /* 1 */
+    0x4009d0, /* 2 */
+    0x400a50, /* 3 */
+    0x400c70, /* 4 */
+    0x400dd0, /* 5 */
+    0x400b10, /* 6 */
+    0x400b58, /* 7 */
+    0x400c80, /* 8 */
+    0x400a20, /* 9 */
+    0x400ad0, /* 10 */
+    0x4009f8  /* 11 */
+};
+
+const uint64_t cond_wait_call[12] = {
+    -1, /* 0 */
+    -1, /* 1 */
+    -1, /* 2 */
+    -1, /* 3 */
+    -1, /* 4 */
+    -1, /* 5 */
+    -1, /* 6 */
+    -1, /* 7 */
+    -1, /* 8 */
+    -1, /* 9 */
+    -1, /* 10 */
+    0x400a78  /* 11 */
+};
+const uint64_t cond_broad_call[12] = {
+    -1, /* 0 */
+    -1, /* 1 */
+    -1, /* 2 */
+    -1, /* 3 */
+    -1, /* 4 */
+    -1, /* 5 */
+    -1, /* 6 */
+    -1, /* 7 */
+    -1, /* 8 */
+    -1, /* 9 */
+    -1, /* 10 */
+    0x400ab8  /* 11 */
+};
+
+extern uint8_t bench_mark_id;
 extern uint8_t is_detect_start;
 extern uint8_t is_collect;
 extern uint8_t current_id;
-extern struct trace_content *trace_mem_ptr;
-
-const uint8_t bench_mark_id = 0;
-const uint64_t lock_call[1] = {0x413870};
-const uint64_t unlock_call[1] = {0x414240};
-const uint64_t barrier_call[1] = {0x4142b0};
-/*const uint64_t lock_call[1] = {0x400d40};*/
-/*const uint64_t unlock_call[1] = {0x400d84};*/
-/*const uint64_t barrier_call[1] = {0x400c80};*/
-const uint64_t cond_wait_call[1] = {-1};
-const uint64_t cond_broad_call[1] = {-1};
 
 #endif
 
@@ -6427,13 +6508,13 @@ do_lret:
                     if (tval == lock_call[bench_mark_id])
                         gen_helper_syn_lock_trace(tcg_const_tl(pc_start));
                     else if (tval == unlock_call[bench_mark_id])
-                        gen_helper_syn_unlock_trace(tcg_const_tl(s->pc));
+                        gen_helper_syn_unlock_trace(tcg_const_tl(pc_start));
                     else if (tval == barrier_call[bench_mark_id])
-                        gen_helper_syn_barrier_trace(tcg_const_tl(s->pc));
+                        gen_helper_syn_barrier_trace(tcg_const_tl(pc_start));
                     else if (tval == cond_wait_call[bench_mark_id])
-                        gen_helper_syn_condwait_trace(tcg_const_tl(s->pc));
+                        gen_helper_syn_condwait_trace(tcg_const_tl(pc_start));
                     else if (tval == cond_broad_call[bench_mark_id])
-                        gen_helper_syn_condbroad_trace(tcg_const_tl(s->pc));
+                        gen_helper_syn_condbroad_trace(tcg_const_tl(pc_start));
                 }
 #endif
                 gen_movtl_T0_im(next_eip);
@@ -6470,13 +6551,13 @@ do_lret:
                 if (tval == lock_call[bench_mark_id])
                     gen_helper_syn_lock_trace(tcg_const_tl(pc_start));
                 else if (tval == unlock_call[bench_mark_id])
-                    gen_helper_syn_unlock_trace(tcg_const_tl(s->pc));
+                    gen_helper_syn_unlock_trace(tcg_const_tl(pc_start));
                 else if (tval == barrier_call[bench_mark_id])
-                    gen_helper_syn_barrier_trace(tcg_const_tl(s->pc));
+                    gen_helper_syn_barrier_trace(tcg_const_tl(pc_start));
                 else if (tval == cond_wait_call[bench_mark_id])
-                    gen_helper_syn_condwait_trace(tcg_const_tl(s->pc));
+                    gen_helper_syn_condwait_trace(tcg_const_tl(pc_start));
                 else if (tval == cond_broad_call[bench_mark_id])
-                    gen_helper_syn_condbroad_trace(tcg_const_tl(s->pc));
+                    gen_helper_syn_condbroad_trace(tcg_const_tl(pc_start));
             }
 #endif
             gen_jmp(s, tval);

@@ -29,6 +29,7 @@
 
 extern FILE *stderr;
 
+extern volatile struct trace_content *trace_mem_ptr;
 extern uint8_t is_detect_start;             // Detection started flag
 extern uint8_t is_process_captured;         // Process captured flag
 extern uint8_t just_exec;                   // Exec syscalled flag
