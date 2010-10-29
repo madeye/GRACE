@@ -64,8 +64,8 @@ typedef struct DEBUGInfo {
     /* uint8_t current_thread_id; */
 } DEBUGInfo;
 
-    //fprintf(stderr, "mem_trace: %d, %d, 0x%llx, 0x%llx \n", type1, size1, arg1, pc1); \
-}
+    //fprintf(stderr, "mem_trace: %d, %d, 0x%llx, 0x%llx \n", type1, size1, arg1, pc1); 
+//}
 
 #define trace_mem_collection(type1, size1, pc1, arg1) { \
     trace_mem_ptr->type = (type1); \
@@ -75,8 +75,8 @@ typedef struct DEBUGInfo {
     trace_mem_ptr++; \
 }
 
-    //fprintf(stderr, "syn_trace: %d, 0x%llx, 0x%llx \n", type1, arg1, pc1); \
-}
+    //fprintf(stderr, "syn_trace: %d, 0x%llx, 0x%llx \n", type1, arg1, pc1); 
+//}
 
 #define trace_syn_collection(type1, size1, arg1, arg2, pc1) { \
     trace_mem_ptr->type = (type1); \
