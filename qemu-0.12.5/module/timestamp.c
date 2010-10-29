@@ -2,20 +2,20 @@
 /* timestamp */
 
 struct timestamp {
-    uint64_t scalar[MAX_PROCESS_NUM];
+    uint32_t scalar[MAX_PROCESS_NUM];
 };
 
 #define MAX_TIMESTAMP_NUM (1 << 18)
 
 struct timestamp_queue {
     struct timestamp entry[MAX_TIMESTAMP_NUM];
-    uint64_t count;
+    uint32_t count;
 };
 
 struct global_timestamp_queue {
     struct timestamp_queue *thread[MAX_PROCESS_NUM];
     struct timestamp current_ts[MAX_PROCESS_NUM];
-    uint64_t current_ts_index[MAX_PROCESS_NUM];
+    uint32_t current_ts_index[MAX_PROCESS_NUM];
 };
 
 struct global_timestamp_queue ts;
@@ -46,7 +46,7 @@ static inline void module_timestamp_print()
     printf("\n");
 }
 
-static inline uint8_t module_timestamp_order(uint8_t tid1, uint64_t index1, uint8_t tid2, uint64_t index2) 
+static inline uint8_t module_timestamp_order(uint8_t tid1, uint32_t index1, uint8_t tid2, uint32_t index2) 
 {
     struct timestamp *ts1, *ts2;
 
@@ -62,7 +62,7 @@ static inline uint8_t module_timestamp_order(uint8_t tid1, uint64_t index1, uint
 
 static inline void module_timestamp_save(uint8_t tid)
 {
-    uint64_t index;
+    uint32_t index;
     struct timestamp_queue *temp_queue;
 
     temp_queue = ts.thread[tid];
@@ -83,7 +83,7 @@ static inline void module_timestamp_merge_two(uint8_t tid1, struct timestamp *ts
 	uint8_t tid2, struct timestamp *ts2) 
 {
     uint8_t j;
-    uint64_t scalar;
+    uint32_t scalar;
 
     for (j = 0; j < MAX_PROCESS_NUM; j++) {
         scalar = ts1->scalar[j];

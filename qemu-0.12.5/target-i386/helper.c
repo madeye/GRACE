@@ -1008,52 +1008,6 @@ void cpu_x86_update_cr0(CPUX86State *env, uint32_t new_cr0)
    the PDPT */
 void cpu_x86_update_cr3(CPUX86State *env, target_ulong new_cr3)
 {
-#ifdef PPI_DEBUG_TOOL
-            if (is_detect_start) {
-                if (just_exec) {
-                    int index = process_enqueue(&process_queue, new_cr3, (env->regs[R_ESP] & 0xffffe000), total_id);
-#ifdef PPI_PROCESS_INFO
-                    fprintf(stderr, "process enqueue : cr3 : 0x%x ; esp : 0x%x ; id : %d ; index : %d\n", 
-                            new_cr3, (env->regs[R_ESP] & 0xffffe000), total_id, index);
-#endif
-                    if (index >= 0) {
-                        current_id = get_thread_id(&process_queue, index);
-                        total_id++;
-                        is_process_captured = 1;
-                        just_exec = 0;
-
-                        timing_start = 1;
-                    }
-#ifdef PPI_PROCESS_INFO
-                    else {
-                        fprintf(stderr, "process enqueue : should not be here!\n");
-                    }
-#endif
-                } else if (just_exit) {
-                    int index = process_dequeue(&process_queue, env->cr[3]);
-#ifdef PPI_PROCESS_INFO
-                    fprintf(stderr, "process dequeue : cr3 : 0x%x ; esp : 0x%x ; index : %d\n", 
-                            env->cr[3], (env->regs[R_ESP] & 0xffffe000), index);
-#endif
-                    if (index >= 0) {
-                        current_id = 0;
-                        is_process_captured = 0;
-                        just_exit = 0;
-                        timing_end = 1;
-                    }
-#ifdef PPI_PROCESS_INFO
-                    else {
-                        fprintf(stderr, "process dequeue : should not be here!\n");
-                    }
-#endif
-#ifdef PPI_PROCESS_INFO
-                    if (is_empty(&process_queue)) {
-                        fprintf(stderr, "No process is running now.\n");
-                    }
-#endif
-                }
-            }
-#endif
     env->cr[3] = new_cr3;
     if (env->cr[0] & CR0_PG_MASK) {
 #if defined(DEBUG_MMU)

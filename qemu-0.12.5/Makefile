@@ -257,7 +257,7 @@ check-qjson: check-qjson.o qfloat.o qint.o qdict.o qstring.o qlist.o qbool.o qjs
 clean:
 # avoid old build problems by removing potentially incorrect old files
 	rm -f config.mak op-i386.h opc-i386.h gen-op-i386.h op-arm.h opc-arm.h gen-op-arm.h
-	rm -f *.o *.d *.a $(TOOLS) TAGS cscope.* *.pod *~ */*~
+	rm -f *.o *.d *.a $(TOOLS) TAGS cscope.* *.pod 
 	rm -f slirp/*.o slirp/*.d audio/*.o audio/*.d block/*.o block/*.d net/*.o net/*.d module/*.o module/*.d
 	rm -f qemu-img-cmds.h
 	$(MAKE) -C tests clean

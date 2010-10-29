@@ -258,8 +258,8 @@ extern uint8_t current_id;
 
 #define tcg_gen_qemu_ld64(arg, addr, mem_index)                                     \
 {                                                                                   \
-    (tcg_gen_qemu_ld64)(arg, addr, mem_index);                                      \
     gen_mem_trace(TRACE_MEM_LOAD, TRACE_MEM_SIZE_QUAD, addr);                       \
+    (tcg_gen_qemu_ld64)(arg, addr, mem_index);                                      \
 }
 
 #define tcg_gen_qemu_st8u(arg, addr, mem_index)                                     \
@@ -707,7 +707,7 @@ static inline void gen_op_addq_A0_reg_sN(int shift, int reg)
 
 #ifdef PPI_DEBUG_TOOL_GUEST
 static inline void gen_mem_trace(uint8_t type1, uint8_t size1, TCGv addr1) {
-    if (is_collect) {
+    if (is_detect_start && is_collect) {
         switch (type1)
         {
             case TRACE_MEM_LOAD:
@@ -745,7 +745,6 @@ static inline void gen_mem_trace(uint8_t type1, uint8_t size1, TCGv addr1) {
                 }
                 break;
         }
-
     }
 }
 #endif
@@ -3333,6 +3332,10 @@ static void gen_sse(DisasContext *s, int b, target_ulong pc_start, int rex_r)
     int modrm, mod, rm, reg, reg_addr, offset_addr;
     void *sse_op2;
 
+/*#ifdef PPI_DEBUG_TOOL_GUEST*/
+    /*uint8_t t_is_collect = is_collect;*/
+    /*is_collect = 0;*/
+/*#endif*/
     b &= 0xff;
     if (s->prefix & PREFIX_DATA)
         b1 = 1;
@@ -4314,6 +4317,9 @@ crc32:
             s->cc_op = CC_OP_EFLAGS;
         }
     }
+/*#ifdef PPI_DEBUG_TOOL_GUEST*/
+    /*is_collect = t_is_collect;*/
+/*#endif*/
 }
 
 /* convert one instruction. s->is_jmp is set if the translation must
@@ -4325,6 +4331,17 @@ static target_ulong disas_insn(DisasContext *s, target_ulong pc_start)
     int modrm, reg, rm, mod, reg_addr, op, opreg, offset_addr, val;
     target_ulong next_eip, tval;
     int rex_w, rex_r;
+
+#ifdef PPI_DEBUG_TOOL_GUEST
+    current_pc = pc_start;
+#endif
+#ifdef PPI_DEBUG_TOOL
+    if (current_id && pc_start < 0x500000 && pc_start > 0x400000) {
+        is_collect = 1;    	
+    } else {
+        is_collect = 0;
+    }
+#endif
 
     if (unlikely(qemu_loglevel_mask(CPU_LOG_TB_OP)))
         tcg_gen_debug_insn_start(pc_start);
@@ -6504,7 +6521,7 @@ do_lret:
                 else if(!CODE64(s))
                     tval &= 0xffffffff;
 #ifdef PPI_DEBUG_TOOL
-                if (is_collect) {
+                if (is_detect_start && is_collect) {
                     if (tval == lock_call[bench_mark_id])
                         gen_helper_syn_lock_trace(tcg_const_tl(pc_start));
                     else if (tval == unlock_call[bench_mark_id])
@@ -6517,9 +6534,16 @@ do_lret:
                         gen_helper_syn_condbroad_trace(tcg_const_tl(pc_start));
                 }
 #endif
+#ifdef PPI_DEBUG_TOOL_GUEST
+                uint8_t t_is_collect = is_collect;
+                is_collect = 0;
+#endif
                 gen_movtl_T0_im(next_eip);
                 gen_push_T0(s);
                 gen_jmp(s, tval);
+#ifdef PPI_DEBUG_TOOL_GUEST
+                is_collect = t_is_collect;
+#endif
             }
             break;
         case 0x9a: /* lcall im */
@@ -6547,7 +6571,7 @@ do_lret:
             else if(!CODE64(s))
                 tval &= 0xffffffff;
 #ifdef PPI_DEBUG_TOOL
-            if (is_collect) {
+            if (is_detect_start && is_collect) {
                 if (tval == lock_call[bench_mark_id])
                     gen_helper_syn_lock_trace(tcg_const_tl(pc_start));
                 else if (tval == unlock_call[bench_mark_id])
@@ -6967,12 +6991,14 @@ bt_op:
 
 #ifdef PPI_DEBUG_TOOL
                 if (val == 0x86)
-                    if (is_detect_start)
+                    if (is_detect_start) {
                         is_detect_start = 0;
-                    else
+                    }
+                    else {
                         is_detect_start = 1;
+                    }
                 else if (val == 0x88)
-                    _exit(0);
+                    exit(0);
                 else if (val == 0x8a)
                     printf("SYNC");
                 else
@@ -8040,20 +8066,9 @@ static inline void gen_intermediate_code_internal(CPUState *env,
 
     /* generate intermediate code */
     pc_start = tb->pc;
-#ifdef PPI_DEBUG_TOOL_GUEST
-    current_pc = pc_start;
-#endif
     cs_base = tb->cs_base;
     flags = tb->flags;
     cflags = tb->cflags;
-
-#ifdef PPI_DEBUG_TOOL
-        if (current_id && pc_start < 0x500000 && pc_start > 0x400000) {
-            is_collect = 1;    	
-        } else {
-            is_collect = 0;
-        }
-#endif
 
     dc->pe = (flags >> HF_PE_SHIFT) & 1;
     dc->code32 = (flags >> HF_CS32_SHIFT) & 1;

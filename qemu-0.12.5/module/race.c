@@ -4,14 +4,14 @@
 struct race_entry {
     struct trace_content content1;
     struct trace_content content2;
-    uint64_t instance;
+    uint32_t instance;
 };
 
 #define MAX_RACE_NUM (1 << 16)
 
 struct race_queue {
     struct race_entry entry[MAX_RACE_NUM];
-    uint64_t count;
+    uint32_t count;
 };
 
 struct global_race_queue {
@@ -23,7 +23,7 @@ struct global_race_queue race;
 
 static inline void module_race_init() 
 {
-    uint64_t i;
+    uint32_t i;
 
     memset(&race, 0, sizeof(struct global_race_queue));
 
@@ -46,7 +46,7 @@ static inline uint8_t module_race_equal(struct race_entry *race1, struct race_en
 
 static inline void module_race_filter(struct race_queue *remain, struct race_entry *race) 
 {
-    uint64_t i;
+    uint32_t i;
 
     for (i = 0; i < remain->count; i++) {
         if (module_race_equal(&remain->entry[i], race)) {
@@ -67,7 +67,7 @@ static inline void module_race_filter(struct race_queue *remain, struct race_ent
 
 static inline void module_race_print() 
 {
-    uint64_t i, j;
+    uint32_t i, j;
 
     for (i = 0; i < MAX_PROCESS_NUM; i++) {
         for (j = 0; j < race.thread[i]->count; j++) {
@@ -104,7 +104,7 @@ static inline uint8_t module_race_content_equal(struct trace_content *content1, 
 
 static inline void module_race_collection(struct trace_content *content1, struct trace_content *content2) 
 {
-    uint64_t i;
+    uint32_t i;
     struct race_queue *temp_queue;
 
     temp_queue = race.thread[content2->tid];

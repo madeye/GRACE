@@ -655,7 +655,7 @@ int cpu_exec(CPUState *env1)
                     env = cpu_single_env;
 #define env cpu_single_env
 #endif
-
+                    next_tb = tcg_qemu_tb_exec(tc_ptr);
 #ifdef PPI_DEBUG_TOOL
         if (thread_start) {
 #ifdef PPI_PRINT_INFO
@@ -716,7 +716,6 @@ int cpu_exec(CPUState *env1)
             timing_end = 0;
         }
 #endif
-                    next_tb = tcg_qemu_tb_exec(tc_ptr);
                     env->current_tb = NULL;
                     if ((next_tb & 3) == 2) {
                         /* Instruction counter expired.  */

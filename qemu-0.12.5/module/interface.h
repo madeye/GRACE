@@ -5,7 +5,7 @@
 #define PPI_PROCESS_INFO
 #define PPI_SYN_INFO
 
-#define TRACE_PRIVATE_BUF_SIZE (16 * 16 * 1024)
+#define TRACE_PRIVATE_BUF_SIZE (16 * 1024 * 1024)
 
 #define TRACE_MEM_INT
 #define TRACE_MEM_FLOAT

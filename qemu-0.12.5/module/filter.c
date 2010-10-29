@@ -37,7 +37,7 @@ static inline void module_filter_load(struct trace_content *content)
 #ifdef MOD_FILTER
     uint8_t i;
     uint8_t tid;
-    uint32_t address;
+    uint64_t address;
     uint32_t temp_index;
 
     tid = content->tid;
@@ -62,7 +62,7 @@ static inline void module_filter_store(struct trace_content *content)
 #ifdef MOD_FILTER
     uint8_t i;
     uint8_t tid;
-    uint32_t address;
+    uint64_t address;
     uint32_t temp_index;
 
     tid = content->tid;
