@@ -6534,16 +6534,16 @@ do_lret:
                         gen_helper_syn_condbroad_trace(tcg_const_tl(pc_start));
                 }
 #endif
-#ifdef PPI_DEBUG_TOOL_GUEST
-                uint8_t t_is_collect = is_collect;
-                is_collect = 0;
-#endif
+/*#ifdef PPI_DEBUG_TOOL_GUEST*/
+                /*uint8_t t_is_collect = is_collect;*/
+                /*is_collect = 0;*/
+/*#endif*/
                 gen_movtl_T0_im(next_eip);
                 gen_push_T0(s);
                 gen_jmp(s, tval);
-#ifdef PPI_DEBUG_TOOL_GUEST
-                is_collect = t_is_collect;
-#endif
+/*#ifdef PPI_DEBUG_TOOL_GUEST*/
+                /*is_collect = t_is_collect;*/
+/*#endif*/
             }
             break;
         case 0x9a: /* lcall im */
