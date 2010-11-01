@@ -2,8 +2,8 @@
 #define PROCESS_H
 
 struct ProcessIdentify {
-    unsigned long cr3;
-    unsigned long kernel_esp;
+    unsigned long long cr3;
+    unsigned long long kernel_esp;
     unsigned int id;
 };
 
@@ -23,7 +23,7 @@ static inline int is_empty(struct ProcessQueue *queue)
     return (queue->count == 0);
 }
 
-static inline int process_enqueue(struct ProcessQueue *queue, unsigned long cr3, unsigned long esp, unsigned int id) 
+static inline int process_enqueue(struct ProcessQueue *queue, unsigned long long cr3, unsigned long long esp, unsigned int id) 
 {
     unsigned int count;
 
@@ -42,7 +42,7 @@ static inline int process_enqueue(struct ProcessQueue *queue, unsigned long cr3,
     return count;
 }
 
-static inline int process_dequeue(struct ProcessQueue *queue, unsigned long cr3) 
+static inline int process_dequeue(struct ProcessQueue *queue, unsigned long long cr3) 
 {
     int i, count;
     int index = 0;
@@ -74,7 +74,7 @@ static inline int process_dequeue(struct ProcessQueue *queue, unsigned long cr3)
     return index;
 }
 
-static inline int is_process_in_queue(struct ProcessQueue *queue, unsigned long cr3) 
+static inline int is_process_in_queue(struct ProcessQueue *queue, unsigned long long cr3) 
 {
     int i;
 
@@ -87,7 +87,7 @@ static inline int is_process_in_queue(struct ProcessQueue *queue, unsigned long 
     return -1;
 }
 
-static inline int is_thread_in_queue(struct ProcessQueue *queue, unsigned long cr3, unsigned long esp) 
+static inline int is_thread_in_queue(struct ProcessQueue *queue, unsigned long long cr3, unsigned long long esp) 
 {
     int i;
 

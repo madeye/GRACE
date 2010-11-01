@@ -2753,30 +2753,30 @@ static inline void helper_ret_protected(int shift, int is_iret, int addend)
     cpl = env->hflags & HF_CPL_MASK;
     rpl = new_cs & 3;
 #ifdef PPI_DEBUG_TOOL
-            if (is_detect_start) {
-                if (just_exec && rpl == 3) {
-                    target_ulong new_cr3 = env->cr[3];
-                    int index = process_enqueue(&process_queue, new_cr3, (env->regs[R_ESP] & 0xffffe000), total_id);
+    if (is_detect_start && is_iret && !is_process_captured && rpl == 3) {
+        if (just_exec) {
+            target_ulong new_cr3 = env->cr[3];
+            int index = process_enqueue(&process_queue, new_cr3, (ESP & 0xffffe000), total_id);
 #ifdef PPI_PROCESS_INFO
-                    fprintf(stderr, "Process Enqueue\n");
-                    printf("process enqueue : cr3 : 0x%x ; esp : 0x%x ; id : %d ; index : %d\n", 
-                            new_cr3, (env->regs[R_ESP] & 0xffffe000), total_id, index);
+            fprintf(stderr, "Process Enqueue\n");
+            printf("process enqueue : cr3 : 0x%x ; esp : 0x%x ; id : %d ; index : %d\n", 
+                    new_cr3, (ESP & 0xffffe000), total_id, index);
 #endif
-                    if (index >= 0) {
-                        current_id = get_thread_id(&process_queue, index);
-                        total_id++;
-                        is_process_captured = 1;
-                        just_exec = 0;
+            if (index >= 0) {
+                current_id = get_thread_id(&process_queue, index);
+                total_id++;
+                is_process_captured = 1;
+                just_exec = 0;
 
-                        timing_start = 1;
-                    }
-#ifdef PPI_PROCESS_INFO
-                    else {
-                        printf("process enqueue : should not be here!\n");
-                    }
-#endif
-                } 
+                timing_start = 1;
             }
+#ifdef PPI_PROCESS_INFO
+            else {
+                printf("process enqueue : should not be here!\n");
+            }
+#endif
+        } 
+    }
 #endif
 #ifdef PPI_DEBUG_TOOL
     if (is_detect_start && is_iret && is_process_captured && rpl == 3) {
