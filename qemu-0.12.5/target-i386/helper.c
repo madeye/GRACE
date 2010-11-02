@@ -28,23 +28,6 @@
 #include "qemu-common.h"
 #include "kvm.h"
 
-#ifdef PPI_DEBUG_TOOL
-#include "module/process.h"
-
-extern uint8_t is_detect_start;             // Detection started flag
-extern uint8_t is_process_captured;         // Process captured flag
-extern uint8_t just_exec;                   // Exec syscalled flag
-extern uint8_t just_clone;                  // Clone syscalled flag
-extern uint8_t just_exit;                   // Exit syscalled flag
-extern uint8_t thread_start;                // Thread captured flag
-extern uint8_t thread_exit;                 // Thread exited flag
-extern uint8_t timing_start;                // Timing started flag
-extern uint8_t timing_end;                  // Timing ended flag
-extern uint32_t total_id;                   // Thread index
-extern uint32_t current_id;                 // Current thread index
-extern struct ProcessQueue process_queue;   // Process queue
-#endif
-
 //#define DEBUG_MMU
 
 /* feature flags taken from "Intel Processor Identification and the CPUID

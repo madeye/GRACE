@@ -6000,6 +6000,9 @@ int main(int argc, char **argv, char **envp)
 #endif
 
     for (env = first_cpu; env != NULL; env = env->next_cpu) {
+#ifdef PPI_DEBUG_TOOL
+        env->trace_mem_ptr = env->debug_info.trace_mem_buf;
+#endif
         for (i = 0; i < nb_numa_nodes; i++) {
             if (node_cpumask[i] & (1 << env->cpu_index)) {
                 env->numa_node = i;

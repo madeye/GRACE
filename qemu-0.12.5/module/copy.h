@@ -53,15 +53,15 @@ static inline void trace_mem_buf_clear(struct map_queue *map, uint8_t id)
     uint32_t size;
     struct trace_content *buf;
 
-    if ((id > 0) && (trace_mem_ptr - env->debug_info.trace_mem_buf > 0)) {
+    if ((id > 0) && (env->trace_mem_ptr - env->debug_info.trace_mem_buf > 0)) {
         tid = trace_thread_id_map(map, id);
-        size = trace_mem_ptr - env->debug_info.trace_mem_buf;
+        size = env->trace_mem_ptr - env->debug_info.trace_mem_buf;
         buf = env->debug_info.trace_mem_buf;
         data_race_detector(tid, size, buf);
     }
 #endif
 
-    trace_mem_ptr = env->debug_info.trace_mem_buf;
+    env->trace_mem_ptr = env->debug_info.trace_mem_buf;
 }
 #endif
 

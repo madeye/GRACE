@@ -3332,10 +3332,6 @@ static void gen_sse(DisasContext *s, int b, target_ulong pc_start, int rex_r)
     int modrm, mod, rm, reg, reg_addr, offset_addr;
     void *sse_op2;
 
-/*#ifdef PPI_DEBUG_TOOL_GUEST*/
-    /*uint8_t t_is_collect = is_collect;*/
-    /*is_collect = 0;*/
-/*#endif*/
     b &= 0xff;
     if (s->prefix & PREFIX_DATA)
         b1 = 1;
@@ -4317,9 +4313,6 @@ crc32:
             s->cc_op = CC_OP_EFLAGS;
         }
     }
-/*#ifdef PPI_DEBUG_TOOL_GUEST*/
-    /*is_collect = t_is_collect;*/
-/*#endif*/
 }
 
 /* convert one instruction. s->is_jmp is set if the translation must
@@ -6534,16 +6527,9 @@ do_lret:
                         gen_helper_syn_condbroad_trace(tcg_const_tl(pc_start));
                 }
 #endif
-/*#ifdef PPI_DEBUG_TOOL_GUEST*/
-                /*uint8_t t_is_collect = is_collect;*/
-                /*is_collect = 0;*/
-/*#endif*/
                 gen_movtl_T0_im(next_eip);
                 gen_push_T0(s);
                 gen_jmp(s, tval);
-/*#ifdef PPI_DEBUG_TOOL_GUEST*/
-                /*is_collect = t_is_collect;*/
-/*#endif*/
             }
             break;
         case 0x9a: /* lcall im */

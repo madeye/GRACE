@@ -60,7 +60,7 @@ struct trace_content {
 typedef struct DEBUGInfo {
     /* memory trace for data race detector  */
     struct trace_content trace_mem_buf[TRACE_PRIVATE_BUF_SIZE];
-    //struct trace_content *trace_mem_ptr, *trace_mem_end;
+    //struct trace_content *env->trace_mem_ptr, *trace_mem_end;
     /* uint8_t current_thread_id; */
 } DEBUGInfo;
 
@@ -68,23 +68,25 @@ typedef struct DEBUGInfo {
 //}
 
 #define trace_mem_collection(type1, size1, pc1, arg1) { \
-    trace_mem_ptr->type = (type1); \
-    trace_mem_ptr->size = (size1); \
-    trace_mem_ptr->value.mem.address = (arg1); \
-    trace_mem_ptr->pc = (pc1); \
-    trace_mem_ptr++; \
+    env->trace_mem_ptr->type = (type1); \
+    env->trace_mem_ptr->size = (size1); \
+    env->trace_mem_ptr->value.mem.address = (arg1); \
+    env->trace_mem_ptr->pc = (pc1); \
+}
+    //env->trace_mem_ptr++; \
 }
 
     //fprintf(stderr, "syn_trace: %d, 0x%llx, 0x%llx \n", type1, arg1, pc1); 
 //}
 
 #define trace_syn_collection(type1, size1, arg1, arg2, pc1) { \
-    trace_mem_ptr->type = (type1); \
-    trace_mem_ptr->size = (size1); \
-    trace_mem_ptr->value.syn.args[0] = (arg1); \
-    trace_mem_ptr->value.syn.args[1] = (arg2); \
-    trace_mem_ptr->pc = (pc1); \
-    trace_mem_ptr++; \
+    env->trace_mem_ptr->type = (type1); \
+    env->trace_mem_ptr->size = (size1); \
+    env->trace_mem_ptr->value.syn.args[0] = (arg1); \
+    env->trace_mem_ptr->value.syn.args[1] = (arg2); \
+    env->trace_mem_ptr->pc = (pc1); \
+}
+    //env->trace_mem_ptr++; \
 }
 
 void data_race_detector_init(void);

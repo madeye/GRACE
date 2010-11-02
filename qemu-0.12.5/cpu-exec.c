@@ -33,11 +33,13 @@ extern uint8_t timing_end;
 extern uint8_t current_id;
 extern uint8_t last_id;
 extern uint8_t is_detect_start;
+extern uint8_t is_process_captured;
 extern struct map_queue map;
-volatile struct trace_content *trace_mem_ptr;
+extern struct ProcessQueue process_queue;   // Process queue
 uint8_t is_collect = 0;
 
 #include "module/copy.h"
+#include "module/process.h"
 
 #ifdef PPI_PRINT_INFO
 #include <time.h>
@@ -656,6 +658,29 @@ int cpu_exec(CPUState *env1)
 #define env cpu_single_env
 #endif
                     next_tb = tcg_qemu_tb_exec(tc_ptr);
+
+/*#ifdef PPI_DEBUG_TOOL*/
+    /*if (is_detect_start && is_process_captured) {*/
+        /*// Kernelstack located at offset 16 of X8664PDA*/
+        /*[>target_ulong kernel_rsp = ldq(env->kernelgsbase + 16);<]*/
+        
+        /*target_ulong a1 = env->kernelgsbase + 0;*/
+        /*if (a1) {*/
+        /*target_ulong d1 = ldq(env->kernelgsbase + 0);*/
+        /*target_ulong d2 = ldq(env->kernelgsbase + 8);*/
+        /*target_ulong d3 = ldq(env->kernelgsbase + 16);*/
+        /*printf("a1, d1, d2, d3: %lx, %lx, %lx, %lx\n", a1, d1, d2, d3);*/
+        /*[>int index = is_thread_in_queue(&process_queue, env->cr[3], (kernel_rsp & 0xffffe000));<]*/
+        /*[>if (index < 0) {<]*/
+            /*[>current_id = 0;<]*/
+        /*[>} else {<]*/
+            /*[>printf("kernel_rsp: %llx\n", kernel_rsp);<]*/
+            /*[>current_id = get_thread_id(&process_queue, index);<]*/
+        /*[>}<]*/
+        /*}*/
+    /*}*/
+/*#endif*/
+
 #ifdef PPI_DEBUG_TOOL
         if (thread_start) {
 #ifdef PPI_PRINT_INFO
@@ -677,11 +702,12 @@ int cpu_exec(CPUState *env1)
         }
 
         if (last_id != current_id) {
+            /*printf("now tid: %d\n", current_id);*/
             trace_mem_buf_clear(&map, last_id);
             last_id = current_id;
         } else {	
-            if (trace_mem_ptr - env->debug_info.trace_mem_buf > TRACE_BUF_SIZE) {
-                /*printf("trace size: %d\n", trace_mem_ptr - env->debug_info.trace_mem_buf);*/
+            if (env->trace_mem_ptr - env->debug_info.trace_mem_buf > TRACE_BUF_SIZE) {
+                /*printf("trace size: %d\n", env->trace_mem_ptr - env->debug_info.trace_mem_buf);*/
                 trace_mem_buf_clear(&map, last_id);
             }
         }
@@ -748,26 +774,26 @@ int cpu_exec(CPUState *env1)
                 /* reset soft MMU for next block (it can currently
                    only be set by a memory fault) */
         /*#ifdef PPI_DEBUG_TOOL*/
-        /*if (is_collect && trace_mem_ptr && */
-        /*(uint64_t)(trace_mem_ptr - env->debug_info.trace_mem_buf) > TRACE_BUF_SIZE) */
+        /*if (is_collect && env->trace_mem_ptr && */
+        /*(uint64_t)(env->trace_mem_ptr - env->debug_info.trace_mem_buf) > TRACE_BUF_SIZE) */
         /*{*/
-        /*[>fprintf(stderr, "start: trace_mem_ptr: %lx \n", trace_mem_ptr);<]*/
-        /*[>m = (uint64_t)trace_mem_ptr;<]*/
+        /*[>fprintf(stderr, "start: env->trace_mem_ptr: %lx \n", env->trace_mem_ptr);<]*/
+        /*[>m = (uint64_t)env->trace_mem_ptr;<]*/
         /*[>m = 0;<]*/
         /*for(trace_ptr = env->debug_info.trace_mem_buf; */
-        /*trace_ptr != trace_mem_ptr; trace_ptr++)*/
+        /*trace_ptr != env->trace_mem_ptr; trace_ptr++)*/
         /*{*/
         /*fprintf(stderr, "PPI_DEBUG_TOOL: type: %ld, size: %ld, pc: 0x%lx, address: 0x%lx \n",*/
         /*trace_ptr->type, trace_ptr->size, */
         /*trace_ptr->pc, trace_ptr->value.mem.address);*/
         /*[>m++;<]*/
         /*}*/
-        /*[>assert(m == (uint64_t)trace_mem_ptr);<]*/
-        /*trace_mem_ptr = env->debug_info.trace_mem_buf;*/
-        /*[>fprintf(stderr, "end: trace_mem_ptr: %lx \n", trace_mem_ptr);<]*/
+        /*[>assert(m == (uint64_t)env->trace_mem_ptr);<]*/
+        /*env->trace_mem_ptr = env->debug_info.trace_mem_buf;*/
+        /*[>fprintf(stderr, "end: env->trace_mem_ptr: %lx \n", env->trace_mem_ptr);<]*/
         /*[>fprintf(stderr, "TRACE_BUFFER_SIZE: %d \n", m);<]*/
-        /*[>fprintf(stderr, "trace_mem_ptr: %lx , trace_mem_buf: %lx \n",<]*/
-        /*[>trace_mem_ptr, debug_info.trace_mem_buf);<]*/
+        /*[>fprintf(stderr, "env->trace_mem_ptr: %lx , trace_mem_buf: %lx \n",<]*/
+        /*[>env->trace_mem_ptr, debug_info.trace_mem_buf);<]*/
         /*}*/
         /*#endif*/
             } /* for(;;) */
@@ -800,20 +826,20 @@ int cpu_exec(CPUState *env1)
 #error unsupported target CPU
 #endif
 
-#ifdef PPI_DEBUG_TOOL
-    if (!trace_mem_ptr) {
-        trace_mem_ptr = env->debug_info.trace_mem_buf;
-        /*debug_info.trace_mem_buf = malloc(sizeof(struct trace_content) * TRACE_PRIVATE_BUF_SIZE);*/
-        /*assert(debug_info.trace_mem_buf);*/
-        /*memset(debug_info.trace_mem_buf, 0, sizeof(struct trace_content) * TRACE_PRIVATE_BUF_SIZE);*/
-        /*debug_info.trace_mem_ptr = debug_info.trace_mem_buf;*/
-        /*debug_info.trace_mem_end = debug_info.trace_mem_ptr + TRACE_BUF_SIZE;*/
-#ifdef PPI_PRINT_INFO
-        printf("\ntrace content size : 0x%lx\n", sizeof(struct trace_content));
-        printf("trace memory buffer size : 0x%lx\n", sizeof(env->debug_info.trace_mem_buf));
-#endif
-    }
-#endif
+/*#ifdef PPI_DEBUG_TOOL*/
+    /*if (!env->trace_mem_ptr) {*/
+        /*env->trace_mem_ptr = env->debug_info.trace_mem_buf;*/
+        /*[>debug_info.trace_mem_buf = malloc(sizeof(struct trace_content) * TRACE_PRIVATE_BUF_SIZE);<]*/
+        /*[>assert(debug_info.trace_mem_buf);<]*/
+        /*[>memset(debug_info.trace_mem_buf, 0, sizeof(struct trace_content) * TRACE_PRIVATE_BUF_SIZE);<]*/
+        /*[>debug_info.env->trace_mem_ptr = debug_info.trace_mem_buf;<]*/
+        /*[>debug_info.trace_mem_end = debug_info.env->trace_mem_ptr + TRACE_BUF_SIZE;<]*/
+/*#ifdef PPI_PRINT_INFO*/
+        /*printf("\ntrace content size : 0x%lx\n", sizeof(struct trace_content));*/
+        /*printf("trace memory buffer size : 0x%lx\n", sizeof(env->debug_info.trace_mem_buf));*/
+/*#endif*/
+    /*}*/
+/*#endif*/
 
     /* restore global registers */
 #include "hostregs_helper.h"
