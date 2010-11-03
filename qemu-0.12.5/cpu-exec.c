@@ -688,7 +688,7 @@ int cpu_exec(CPUState *env1)
                     }
 
                     // TODO: Necessary to add is_detect_start here?
-                    if (is_detect_start)
+                    if (is_detect_start) {
                         if (last_id != current_id) {
                             trace_mem_buf_clear(&map, last_id);
                             last_id = current_id;
@@ -697,6 +697,7 @@ int cpu_exec(CPUState *env1)
                                 trace_mem_buf_clear(&map, last_id);
                             }
                         }
+                    }
 
                     if (timing_start) {
 
