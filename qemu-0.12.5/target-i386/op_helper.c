@@ -1145,6 +1145,7 @@ void helper_syscall(int next_eip_addend)
                         current_id = 0;
                         is_process_captured = 0;
                         timing_end = 1;
+                        // TODO: Necessary to set is_detect_start 0 here?
                         is_detect_start = 0;
                     }
 #ifdef PPI_PROCESS_INFO

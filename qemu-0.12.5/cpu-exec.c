@@ -687,14 +687,16 @@ int cpu_exec(CPUState *env1)
                         thread_exit= 0;
                     }
 
-                    if (last_id != current_id) {
-                        trace_mem_buf_clear(&map, last_id);
-                        last_id = current_id;
-                    } else {	
-                        if (env->trace_mem_ptr - env->debug_info.trace_mem_buf > TRACE_BUF_SIZE) {
+                    // TODO: Necessary to add is_detect_start here?
+                    if (is_detect_start)
+                        if (last_id != current_id) {
                             trace_mem_buf_clear(&map, last_id);
+                            last_id = current_id;
+                        } else {	
+                            if (env->trace_mem_ptr - env->debug_info.trace_mem_buf > TRACE_BUF_SIZE) {
+                                trace_mem_buf_clear(&map, last_id);
+                            }
                         }
-                    }
 
                     if (timing_start) {
 
