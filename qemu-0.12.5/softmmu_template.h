@@ -78,25 +78,6 @@ static inline DATA_TYPE glue(io_read, SUFFIX)(target_phys_addr_t physaddr,
     return res;
 }
 
-//#define PPI_DEBUG_TOOL_SOFTMMU
-
-#ifndef PPI_DEBUG_TOOL_SOFTMMU_HEADER
-#define PPI_DEBUG_TOOL_SOFTMMU_HEADER
-
-#ifdef PPI_DEBUG_TOOL_SOFTMMU
-#include <stdlib.h>
-extern uint8_t is_collect;
-extern struct trace_content *trace_mem_ptr;
-extern FILE* stderr;
-
-#define trace_b 1
-#define trace_w 2
-#define trace_l 4
-#define trace_q 8
-#endif
-
-#endif
-
 /* handle all cases except unaligned access which span two pages */
 DATA_TYPE REGPARM glue(glue(__ld, SUFFIX), MMUSUFFIX)(target_ulong addr,
                                                       int mmu_idx)
@@ -150,18 +131,6 @@ DATA_TYPE REGPARM glue(glue(__ld, SUFFIX), MMUSUFFIX)(target_ulong addr,
         tlb_fill(addr, READ_ACCESS_TYPE, mmu_idx, retaddr);
         goto redo;
     }
- //PPI DEBUG TOOL 
-#ifdef PPI_DEBUG_TOOL_SOFTMMU
-    if(is_collect)
-    {
-        fprintf(stderr, "ld %d bytes, pc: %lx, address: %lx\n", glue(trace_, SUFFIX), env->eip, addr);
-        //trace_mem_ptr->type = 0;
-        //trace_mem_ptr->size = glue(trace_, SUFFIX);
-        //trace_mem_ptr->value.mem.address = addr;
-        //trace_mem_ptr->pc = env->eip;
-        //trace_mem_ptr++;
-    }
-#endif
     return res;
 }
 
@@ -299,18 +268,6 @@ void REGPARM glue(glue(__st, SUFFIX), MMUSUFFIX)(target_ulong addr,
         tlb_fill(addr, 1, mmu_idx, retaddr);
         goto redo;
     }
-/* PPI DEBUG TOOL */
-#ifdef PPI_DEBUG_TOOL_SOFTMMU
-    if(is_collect)
-    {
-        fprintf(stderr, "st %d bytes, pc: %lx, address: %lx\n", glue(trace_, SUFFIX), env->eip, addr);
-        //trace_mem_ptr->type = 1;
-        //trace_mem_ptr->size = glue(trace_, SUFFIX);
-        //trace_mem_ptr->value.mem.address = addr;
-        //trace_mem_ptr->pc = env->eip;
-        //trace_mem_ptr++;
-    }
-#endif
 }
 
 /* handles all unaligned cases */

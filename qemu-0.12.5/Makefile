@@ -25,7 +25,7 @@ configure: ;
 .PHONY: all clean cscope distclean dvi html info install install-doc \
 	recurse-all speed tar tarbin test build-all
 
-VPATH=$(SRC_PATH):$(SRC_PATH)/hw
+VPATH=$(SRC_PATH):$(SRC_PATH)/hw:$(SRC_PATH)/module
 
 LIBS+=-lz $(LIBS_TOOLS)
 
@@ -128,6 +128,7 @@ obj-y = $(block-obj-y)
 obj-y += $(net-obj-y)
 obj-y += $(qobject-obj-y)
 obj-y += readline.o console.o
+obj-y += detector.o
 
 obj-y += tcg-runtime.o host-utils.o
 obj-y += irq.o ioport.o
@@ -201,6 +202,8 @@ obj-$(CONFIG_XEN) += xen_console.o xenfb.o xen_disk.o xen_nic.o
 
 QEMU_CFLAGS+=$(CURL_CFLAGS)
 
+detector.o: detector.c
+
 cocoa.o: cocoa.m
 
 keymaps.o: keymaps.c keymaps.h
@@ -254,8 +257,8 @@ check-qjson: check-qjson.o qfloat.o qint.o qdict.o qstring.o qlist.o qbool.o qjs
 clean:
 # avoid old build problems by removing potentially incorrect old files
 	rm -f config.mak op-i386.h opc-i386.h gen-op-i386.h op-arm.h opc-arm.h gen-op-arm.h
-	rm -f *.o *.d *.a $(TOOLS) TAGS cscope.* *.pod *~ */*~
-	rm -f slirp/*.o slirp/*.d audio/*.o audio/*.d block/*.o block/*.d net/*.o net/*.d
+	rm -f *.o *.d *.a $(TOOLS) TAGS cscope.* *.pod 
+	rm -f slirp/*.o slirp/*.d audio/*.o audio/*.d block/*.o block/*.d net/*.o net/*.d module/*.o module/*.d
 	rm -f qemu-img-cmds.h
 	$(MAKE) -C tests clean
 	for d in $(ALL_SUBDIRS) libhw32 libhw64 libuser; do \

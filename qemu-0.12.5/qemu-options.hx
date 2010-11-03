@@ -76,6 +76,12 @@ Use @var{file} as floppy disk 0/1 image (@pxref{disk_images}). You can
 use the host floppy by using @file{/dev/fd0} as filename (@pxref{host_drives}).
 ETEXI
 
+DEF("bench", HAS_ARG, QEMU_OPTION_benchmark,
+    "-bench n[Benchmark Index]")
+STEXI
+Set the benchmark id for synchronization information collection.
+ETEXI
+
 DEF("hda", HAS_ARG, QEMU_OPTION_hda,
     "-hda/-hdb file  use 'file' as IDE hard disk 0/1 image\n")
 DEF("hdb", HAS_ARG, QEMU_OPTION_hdb, "")

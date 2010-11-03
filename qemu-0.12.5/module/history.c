@@ -44,7 +44,7 @@ static inline void module_history_load_record(struct trace_content *content)
 {
 #ifdef MOD_HISTORY
     uint8_t tid;
-    uint32_t address;
+    uint64_t address;
     struct history_queue *temp_queue;
     uint32_t tail;
     struct history_entry *temp_entry;
@@ -70,7 +70,7 @@ static inline void module_history_store_record(struct trace_content *content)
 {
 #ifdef MOD_HISTORY
     uint8_t tid;
-    uint32_t address;
+    uint64_t address;
     struct history_queue *temp_queue;
     uint32_t tail;
     struct history_entry *temp_entry;
@@ -98,7 +98,7 @@ void module_match_with_load(struct trace_content *content, uint8_t other_tid)
 {
 #ifdef MOD_MATCH
     uint8_t tid;
-    uint32_t address, other_address;
+    uint64_t address, other_address;
     uint32_t index, other_index, last_index;
     struct history_queue *temp_queue;
     uint32_t head, tail;
@@ -139,9 +139,9 @@ void module_match_with_load(struct trace_content *content, uint8_t other_tid)
         other_address = temp_entry->content.value.mem.address;
 
         if (address == other_address) {
-            if ((address % content->size) != 0) {
-                content->size = address % content->size;
-            }
+            /*if ((address % content->size) != 0) {*/
+                /*content->size = address % content->size;*/
+            /*}*/
 
             module_race_collection(&temp_entry->content, content);
 
@@ -155,7 +155,7 @@ void module_match_with_store(struct trace_content *content, uint8_t other_tid)
 {
 #ifdef MOD_MATCH
     uint8_t tid;
-    uint32_t address, other_address;
+    uint64_t address, other_address;
     uint32_t index, other_index, last_index;
     struct history_queue *temp_queue;
     uint32_t head, tail;
@@ -196,9 +196,9 @@ void module_match_with_store(struct trace_content *content, uint8_t other_tid)
         other_address = temp_entry->content.value.mem.address;
 
         if (address == other_address) {
-            if ((address % content->size) != 0) {
-                content->size = address % content->size;
-            }
+            /*if ((address % content->size) != 0) {*/
+                /*content->size = address % content->size;*/
+            /*}*/
 
             module_race_collection(&temp_entry->content, content);
 

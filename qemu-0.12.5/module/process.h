@@ -3,7 +3,7 @@
 
 struct ProcessIdentify {
     unsigned long cr3;
-    unsigned long kernel_esp;
+    unsigned long esp;
     unsigned int id;
 };
 
@@ -34,7 +34,7 @@ static inline int process_enqueue(struct ProcessQueue *queue, unsigned long cr3,
     }
 
     queue->process[count].cr3 = cr3;
-    queue->process[count].kernel_esp = esp;
+    queue->process[count].esp = esp;
     queue->process[count].id = id;
 
     queue->count++;
@@ -42,7 +42,7 @@ static inline int process_enqueue(struct ProcessQueue *queue, unsigned long cr3,
     return count;
 }
 
-static inline int process_dequeue(struct ProcessQueue *queue, unsigned long cr3) 
+static inline int process_dequeue(struct ProcessQueue *queue, unsigned long cr3, unsigned long esp) 
 {
     int i, count;
     int index = 0;
@@ -51,9 +51,10 @@ static inline int process_dequeue(struct ProcessQueue *queue, unsigned long cr3)
     for (i = 0; i < queue->count; i++) {
         if (find) {
             queue->process[i - 1].cr3 = queue->process[i].cr3;
-            queue->process[i - 1].kernel_esp = queue->process[i].kernel_esp;
+            queue->process[i - 1].esp = queue->process[i].esp;
             queue->process[i - 1].id = queue->process[i].id;
-        } else if ((queue->process[i].cr3 == cr3)) {
+        } else if ((queue->process[i].cr3 == cr3) 
+                 && queue->process[i].esp == esp) {
             find = 1;
             index = i;	
         }
@@ -68,7 +69,7 @@ static inline int process_dequeue(struct ProcessQueue *queue, unsigned long cr3)
     count = queue->count;
 
     queue->process[count].cr3 = 0;
-    queue->process[count].kernel_esp = 0;
+    queue->process[count].esp = 0;
     queue->process[count].id = 0;
 
     return index;
@@ -92,7 +93,7 @@ static inline int is_thread_in_queue(struct ProcessQueue *queue, unsigned long c
     int i;
 
     for (i = 0; i < queue->count; i++) {
-        if ((queue->process[i].cr3 == cr3) && (queue->process[i].kernel_esp == esp)) {
+        if ((queue->process[i].cr3 == cr3) && (queue->process[i].esp == esp)) {
             return i;
         }
     }

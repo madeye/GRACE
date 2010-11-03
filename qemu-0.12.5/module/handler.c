@@ -2,7 +2,7 @@
 /* synchronization */
 
 struct mutex_entry {
-    uint32_t id;
+    uint64_t id;
     int is_lock;
     int is_require[MAX_PROCESS_NUM];
     uint8_t last_lock_tid;
@@ -19,7 +19,7 @@ struct mutex_queue {
 };
 
 struct barrier_entry {
-    uint32_t id;
+    uint64_t id;
     uint8_t is_barrier;
     uint8_t is_require[MAX_PROCESS_NUM];
     uint32_t last_barrier_ts_index[MAX_PROCESS_NUM];
@@ -33,8 +33,8 @@ struct barrier_queue {
 };
 
 struct cond_entry {
-    uint32_t id;
-    uint32_t lock_id;
+    uint64_t id;
+    uint64_t lock_id;
     uint8_t is_cond;
     uint8_t is_require[MAX_PROCESS_NUM];
     uint32_t last_cond_ts_index[MAX_PROCESS_NUM];
@@ -135,7 +135,7 @@ void module_syn_lock_handler(struct trace_content *content)
 {
     uint32_t i, k;
     uint8_t tid;
-    uint32_t lock_id;
+    uint64_t lock_id;
     uint32_t index;
 
     tid = content->tid;
@@ -198,7 +198,7 @@ void module_syn_unlock_handler(struct trace_content *content)
 {
     uint32_t i, k;
     uint8_t tid;
-    uint32_t lock_id;
+    uint64_t lock_id;
     uint32_t index;
 
     tid = content->tid;
@@ -248,7 +248,7 @@ void module_syn_barrier_handler(struct trace_content *content)
 {
     uint32_t i, k;
     uint8_t tid;
-    uint32_t barrier_id;
+    uint64_t barrier_id;
     uint32_t index;
 
     tid = content->tid;
@@ -366,7 +366,7 @@ void module_syn_cond_wait_handler(struct trace_content *content)
 {
     uint32_t i;
     uint8_t tid;
-    uint32_t cond_id, lock_id;
+    uint64_t cond_id, lock_id;
     uint32_t index;
 
     tid = content->tid;
@@ -423,7 +423,7 @@ void module_syn_cond_broadcast_handler(struct trace_content *content)
 {
     uint32_t i, k;
     uint8_t tid;
-    uint32_t cond_id;
+    uint64_t cond_id;
     uint32_t index;
 
     tid = content->tid;
