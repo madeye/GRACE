@@ -212,8 +212,6 @@ const uint64_t cond_broad_call[12] = {
 
 extern uint8_t bench_mark_id;
 extern uint8_t is_detect_start;
-extern uint8_t is_collect;
-extern uint8_t current_id;
 
 #endif
 
@@ -262,42 +260,23 @@ extern uint8_t current_id;
     (tcg_gen_qemu_ld64)(arg, addr, mem_index);                                      \
 }
 
-#define tcg_gen_qemu_st8u(arg, addr, mem_index)                                     \
+#define tcg_gen_qemu_st8(arg, addr, mem_index)                                     \
 {                                                                                   \
     gen_mem_trace(TRACE_MEM_STORE, TRACE_MEM_SIZE_BYTE, addr);                      \
-    (tcg_gen_qemu_st8u)(arg, addr, mem_index);                                      \
+    (tcg_gen_qemu_st8)(arg, addr, mem_index);                                      \
 }
 
-#define tcg_gen_qemu_st16u(arg, addr, mem_index)                                    \
+#define tcg_gen_qemu_st16(arg, addr, mem_index)                                    \
 {                                                                                   \
     gen_mem_trace(TRACE_MEM_STORE, TRACE_MEM_SIZE_WORD, addr);                      \
-    (tcg_gen_qemu_st16u)(arg, addr, mem_index);                                     \
+    (tcg_gen_qemu_st16)(arg, addr, mem_index);                                     \
 }
 
-#define tcg_gen_qemu_st32u(arg, addr, mem_index)                                    \
+#define tcg_gen_qemu_st32(arg, addr, mem_index)                                    \
 {                                                                                   \
     gen_mem_trace(TRACE_MEM_STORE, TRACE_MEM_SIZE_LONG, addr);                      \
-    (tcg_gen_qemu_st32u)(arg, addr, mem_index);                                     \
+    (tcg_gen_qemu_st32)(arg, addr, mem_index);                                     \
 }
-
-#define tcg_gen_qemu_st8s(arg, addr, mem_index)                                     \
-{                                                                                   \
-    gen_mem_trace(TRACE_MEM_STORE, TRACE_MEM_SIZE_BYTE, addr);                      \
-    (tcg_gen_qemu_st8s)(arg, addr, mem_index);                                      \
-}
-
-#define tcg_gen_qemu_st16s(arg, addr, mem_index)                                    \
-{                                                                                   \
-    gen_mem_trace(TRACE_MEM_STORE, TRACE_MEM_SIZE_WORD, addr);                      \
-    (tcg_gen_qemu_st16s)(arg, addr, mem_index);                                     \
-}
-
-#define tcg_gen_qemu_st32s(arg, addr, mem_index)                                    \
-{                                                                                   \
-    gen_mem_trace(TRACE_MEM_STORE, TRACE_MEM_SIZE_LONG, addr);                      \
-    (tcg_gen_qemu_st32s)(arg, addr, mem_index);                                     \
-}
-
 
 #define tcg_gen_qemu_st64(arg, addr, mem_index)                                     \
 {                                                                                   \
@@ -707,7 +686,7 @@ static inline void gen_op_addq_A0_reg_sN(int shift, int reg)
 
 #ifdef PPI_DEBUG_TOOL_GUEST
 static inline void gen_mem_trace(uint8_t type1, uint8_t size1, TCGv addr1) {
-    if (is_detect_start && is_collect) {
+    if (is_detect_start && current_pc < 0x420000 && current_pc > 0x400000) {
         switch (type1)
         {
             case TRACE_MEM_LOAD:
@@ -4328,14 +4307,6 @@ static target_ulong disas_insn(DisasContext *s, target_ulong pc_start)
 #ifdef PPI_DEBUG_TOOL_GUEST
     current_pc = pc_start;
 #endif
-#ifdef PPI_DEBUG_TOOL
-    if (current_id && pc_start < 0x500000 && pc_start > 0x400000) {
-        is_collect = 1;    	
-    } else {
-        is_collect = 0;
-    }
-#endif
-
     if (unlikely(qemu_loglevel_mask(CPU_LOG_TB_OP)))
         tcg_gen_debug_insn_start(pc_start);
     s->pc = pc_start;
@@ -6514,7 +6485,7 @@ do_lret:
                 else if(!CODE64(s))
                     tval &= 0xffffffff;
 #ifdef PPI_DEBUG_TOOL
-                if (is_detect_start && is_collect) {
+                if (is_detect_start && pc_start < 0x420000 && pc_start > 0x400000) {
                     if (tval == lock_call[bench_mark_id])
                         gen_helper_syn_lock_trace(tcg_const_tl(pc_start));
                     else if (tval == unlock_call[bench_mark_id])
@@ -6557,7 +6528,7 @@ do_lret:
             else if(!CODE64(s))
                 tval &= 0xffffffff;
 #ifdef PPI_DEBUG_TOOL
-            if (is_detect_start && is_collect) {
+            if (is_detect_start && pc_start < 0x420000 && pc_start > 0x400000) {
                 if (tval == lock_call[bench_mark_id])
                     gen_helper_syn_lock_trace(tcg_const_tl(pc_start));
                 else if (tval == unlock_call[bench_mark_id])

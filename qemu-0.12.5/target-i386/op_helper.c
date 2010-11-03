@@ -30,6 +30,7 @@
 #define STACK_MASK 0xffffffffffffc000
 extern FILE *stderr;
 
+extern volatile uint8_t is_collect;
 extern uint8_t is_detect_start;             // Detection started flag
 extern uint8_t is_process_captured;         // Process captured flag
 extern uint8_t just_exec;                   // Exec syscalled flag
@@ -1209,23 +1210,32 @@ void helper_sysret(int dflag)
     selector = (env->star >> 48) & 0xffff;
 
 #ifdef PPI_DEBUG_TOOL  
-    /*int i;*/
-    /*if (is_detect_start && is_process_captured) {*/
-        /*// Kernelstack located at offset 16 of X8664PDA*/
-        /*[>for (i = 0; i < 50; i++) {<]*/
-            /*[>uint32_t d = ldl(env->kernelgsbase - i*4);<]*/
-            /*[>printf("%x, ", d);<]*/
-        /*[>}<]*/
-        /*[>printf("\n");<]*/
-        /*[>target_ulong kernel_rsp = ldq(env->kernelgsbase + 16);<]*/
-        /*[>printf("kernel_rsp: %lx\n", kernel_rsp);<]*/
-        /*int index = is_thread_in_queue(&process_queue, env->cr[3], (ESP & STACK_MASK));*/
-        /*if (index < 0) {*/
-            /*current_id = 0;*/
-        /*} else {*/
-            /*current_id = get_thread_id(&process_queue, index);*/
-        /*}*/
-    /*}*/
+    if (is_detect_start && is_process_captured) {
+        if (just_clone) {
+            if (is_process_in_queue(&process_queue, env->cr[3]) >= 0) {
+                if ((is_thread_in_queue(&process_queue, env->cr[3], (ESP & STACK_MASK)) < 0)) {
+#ifdef PPI_PROCESS_INFO
+                    printf("next cr3 : 0x%lx\n", env->cr[3]);
+                    printf("next esp : 0x%lx\n", ESP & STACK_MASK);
+#endif
+                    int index = process_enqueue(&process_queue,env->cr[3], 
+                            (ESP & STACK_MASK), total_id);
+#ifdef PPI_PROCESS_INFO
+                    printf("thread enqueue : cr3 : 0x%lx ; esp : 0x%lx ; id : %d; index : %d ; is_process_captured : %d\n", 
+                            env->cr[3], (ESP & STACK_MASK), total_id, index, is_process_captured);
+#endif
+                    total_id++;
+                    just_clone--;
+                }
+            }
+        }
+        int index = is_thread_in_queue(&process_queue, env->cr[3], (ESP & STACK_MASK));
+        if (index < 0) {
+            current_id = 0;
+        } else {
+            current_id = get_thread_id(&process_queue, index);
+        }
+    }
 #endif
 
     if (env->hflags & HF_LMA_MASK) {
