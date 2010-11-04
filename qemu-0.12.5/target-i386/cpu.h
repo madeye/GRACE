@@ -28,7 +28,7 @@
 #endif
 
 #define PPI_DEBUG_TOOL
-#define PPI_DEBUG_TOOL_GUEST
+//#define PPI_DEBUG_TOOL_GUEST
 #define PPI_DEBUG_SWITCHER
 
 #ifdef PPI_DEBUG_TOOL

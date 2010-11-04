@@ -6483,8 +6483,10 @@ do_lret:
                 tval += next_eip;
 #ifdef PPI_DEBUG_TOOL
                 if (is_detect_start && current_id && pc_start < 0x420000 && pc_start > 0x400000) {
-                    if (tval == lock_call[bench_mark_id])
+                    if (tval == lock_call[bench_mark_id]) {
+                        printf("syn at: 0x%lx\n", pc_start);
                         gen_helper_syn_lock_trace(tcg_const_tl(pc_start));
+                    }
                     else if (tval == unlock_call[bench_mark_id])
                         gen_helper_syn_unlock_trace(tcg_const_tl(pc_start));
                     else if (tval == barrier_call[bench_mark_id])

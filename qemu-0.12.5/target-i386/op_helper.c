@@ -30,8 +30,8 @@
 #define STACK_MASK 0xffffffffffffc000
 extern FILE *stderr;
 
-extern volatile uint8_t is_collect;
-extern volatile uint8_t is_detect_start;             // Detection started flag
+extern uint8_t is_collect;
+extern uint8_t is_detect_start;             // Detection started flag
 extern uint8_t is_process_captured;         // Process captured flag
 extern uint8_t just_exec;                   // Exec syscalled flag
 extern uint8_t just_clone;                  // Clone syscalled flag
@@ -1145,8 +1145,6 @@ void helper_syscall(int next_eip_addend)
                         current_id = 0;
                         is_process_captured = 0;
                         timing_end = 1;
-                        // TODO: Necessary to set is_detect_start 0 here?
-                        /*is_detect_start = 0;*/
                     }
 #ifdef PPI_PROCESS_INFO
                     else {
@@ -1209,6 +1207,32 @@ void helper_sysret(int dflag)
         raise_exception_err(EXCP0D_GPF, 0);
     }
     selector = (env->star >> 48) & 0xffff;
+
+#ifdef PPI_DEBUG_TOOL
+    if (is_detect_start && !is_process_captured) {
+        if (just_exec) {
+            target_ulong new_cr3 = env->cr[3];
+            int index = process_enqueue(&process_queue, new_cr3, (ESP & STACK_MASK), total_id);
+#ifdef PPI_PROCESS_INFO
+            fprintf(stderr, "Process Enqueue\n");
+            printf("process enqueue : cr3 : 0x%lx ; esp : 0x%lx ; id : %d ; index : %d\n", 
+                    new_cr3, (ESP & STACK_MASK), total_id, index);
+#endif
+            if (index >= 0) {
+                current_id = get_thread_id(&process_queue, index);
+                total_id++;
+                is_process_captured = 1;
+                just_exec = 0;
+                timing_start = 1;
+            }
+#ifdef PPI_PROCESS_INFO
+            else {
+                printf("process enqueue : should not be here!\n");
+            }
+#endif
+        } 
+    }
+#endif
 
 #ifdef PPI_DEBUG_TOOL  
     if (is_detect_start && is_process_captured) {
