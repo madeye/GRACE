@@ -659,13 +659,6 @@ int cpu_exec(CPUState *env1)
 #endif
                     next_tb = tcg_qemu_tb_exec(tc_ptr);
 
-#ifdef PPI_DEBUG_TOOL
-                    if (is_detect_start && current_id) {
-                        is_collect = 1;    	
-                    } else {
-                        is_collect = 0;
-                    }
-#endif
 
 #ifdef PPI_DEBUG_TOOL
 
@@ -686,6 +679,12 @@ int cpu_exec(CPUState *env1)
                         trace_syn_collection(TRACE_SYN_JOIN, 0, 0, 0, EIP);
 
                         thread_exit= 0;
+                    }
+
+                    if (is_detect_start && current_id) {
+                        is_collect = 1;    	
+                    } else {
+                        is_collect = 0;
                     }
 
                     // TODO: Necessary to add is_detect_start here?
