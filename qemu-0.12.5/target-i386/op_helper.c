@@ -31,7 +31,7 @@
 extern FILE *stderr;
 
 extern volatile uint8_t is_collect;
-extern uint8_t is_detect_start;             // Detection started flag
+extern volatile uint8_t is_detect_start;             // Detection started flag
 extern uint8_t is_process_captured;         // Process captured flag
 extern uint8_t just_exec;                   // Exec syscalled flag
 extern uint8_t just_clone;                  // Clone syscalled flag
@@ -1146,7 +1146,7 @@ void helper_syscall(int next_eip_addend)
                         is_process_captured = 0;
                         timing_end = 1;
                         // TODO: Necessary to set is_detect_start 0 here?
-                        is_detect_start = 0;
+                        /*is_detect_start = 0;*/
                     }
 #ifdef PPI_PROCESS_INFO
                     else {

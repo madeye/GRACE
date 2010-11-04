@@ -495,7 +495,7 @@ help:
 
 #ifdef PPI_DEBUG_SWITCHER
 
-extern uint8_t is_detect_start; 
+extern volatile uint8_t is_detect_start; 
 
 static void do_marker(Monitor *mon, QObject **ret_data)
 {

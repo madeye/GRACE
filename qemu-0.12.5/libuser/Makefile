@@ -1,1 +1,1 @@
-/root/projects/repo-ppi-debug/qemu-0.12.5/Makefile.user
+/root/hg/qemu-0.12.5/Makefile.user

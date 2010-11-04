@@ -181,8 +181,8 @@ int main(int argc, char **argv)
 #include "module/process.h"
 #include "module/copy.h"
 
-uint8_t bench_mark_id = 0;
-uint8_t is_detect_start = 0;
+uint32_t bench_mark_id = 0;
+volatile uint8_t is_detect_start = 0;
 uint8_t is_process_captured = 0;
 uint8_t just_exec = 0;
 uint8_t just_clone = 0;
@@ -5041,6 +5041,7 @@ int main(int argc, char **argv, char **envp)
 #ifdef PPI_DEBUG_TOOL
             case QEMU_OPTION_benchmark:
                 bench_mark_id = atoi(optarg);
+                printf("bench mark: %d\n", bench_mark_id);
                 break;
 #endif
             case QEMU_OPTION_hda:

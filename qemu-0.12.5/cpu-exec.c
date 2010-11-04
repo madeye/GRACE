@@ -32,7 +32,7 @@ extern uint8_t timing_start;
 extern uint8_t timing_end;
 extern uint8_t current_id;
 extern uint8_t last_id;
-extern uint8_t is_detect_start;
+extern volatile uint8_t is_detect_start;
 extern uint8_t is_process_captured;
 extern struct map_queue map;
 extern struct ProcessQueue process_queue;   // Process queue
@@ -668,6 +668,7 @@ int cpu_exec(CPUState *env1)
 #endif
 
 #ifdef PPI_DEBUG_TOOL
+
                     if (thread_start) {
 #ifdef PPI_PRINT_INFO
                         printf("\tthread start : last tid : %d ; current tid : %d\n", last_id, current_id);
@@ -688,7 +689,7 @@ int cpu_exec(CPUState *env1)
                     }
 
                     // TODO: Necessary to add is_detect_start here?
-                    if (is_detect_start)
+                    if (is_detect_start) {
                         if (last_id != current_id) {
                             trace_mem_buf_clear(&map, last_id);
                             last_id = current_id;
@@ -697,6 +698,7 @@ int cpu_exec(CPUState *env1)
                                 trace_mem_buf_clear(&map, last_id);
                             }
                         }
+                    }
 
                     if (timing_start) {
 
@@ -719,7 +721,7 @@ int cpu_exec(CPUState *env1)
                         printf("\nTime costs : %f (s) ; %f (s)\n", 
                                 (double)(end_time - start_time) / 1000000, difftime(second_time, first_time));
 #endif
-
+                        is_detect_start = 0;
                         timing_end = 0;
                     }
 #endif

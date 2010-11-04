@@ -210,8 +210,9 @@ const uint64_t cond_broad_call[12] = {
     0x400ab8  /* 11 */
 };
 
-extern uint8_t bench_mark_id;
-extern uint8_t is_detect_start;
+extern uint32_t bench_mark_id;
+extern volatile uint8_t is_detect_start;
+extern uint8_t current_id;
 
 #endif
 
@@ -686,7 +687,7 @@ static inline void gen_op_addq_A0_reg_sN(int shift, int reg)
 
 #ifdef PPI_DEBUG_TOOL_GUEST
 static inline void gen_mem_trace(uint8_t type1, uint8_t size1, TCGv addr1) {
-    if (is_detect_start && current_pc < 0x420000 && current_pc > 0x400000) {
+    if (is_detect_start && current_id && current_pc < 0x420000 && current_pc > 0x400000) {
         switch (type1)
         {
             case TRACE_MEM_LOAD:
@@ -6480,12 +6481,8 @@ do_lret:
                     tval = (int16_t)insn_get(s, OT_WORD);
                 next_eip = s->pc - s->cs_base;
                 tval += next_eip;
-                if (s->dflag == 0)
-                    tval &= 0xffff;
-                else if(!CODE64(s))
-                    tval &= 0xffffffff;
 #ifdef PPI_DEBUG_TOOL
-                if (is_detect_start && pc_start < 0x420000 && pc_start > 0x400000) {
+                if (is_detect_start && current_id && pc_start < 0x420000 && pc_start > 0x400000) {
                     if (tval == lock_call[bench_mark_id])
                         gen_helper_syn_lock_trace(tcg_const_tl(pc_start));
                     else if (tval == unlock_call[bench_mark_id])
@@ -6498,6 +6495,10 @@ do_lret:
                         gen_helper_syn_condbroad_trace(tcg_const_tl(pc_start));
                 }
 #endif
+                if (s->dflag == 0)
+                    tval &= 0xffff;
+                else if(!CODE64(s))
+                    tval &= 0xffffffff;
                 gen_movtl_T0_im(next_eip);
                 gen_push_T0(s);
                 gen_jmp(s, tval);
@@ -6523,12 +6524,8 @@ do_lret:
             else
                 tval = (int16_t)insn_get(s, OT_WORD);
             tval += s->pc - s->cs_base;
-            if (s->dflag == 0)
-                tval &= 0xffff;
-            else if(!CODE64(s))
-                tval &= 0xffffffff;
 #ifdef PPI_DEBUG_TOOL
-            if (is_detect_start && pc_start < 0x420000 && pc_start > 0x400000) {
+            if (is_detect_start && current_id && pc_start < 0x420000 && pc_start > 0x400000) {
                 if (tval == lock_call[bench_mark_id])
                     gen_helper_syn_lock_trace(tcg_const_tl(pc_start));
                 else if (tval == unlock_call[bench_mark_id])
@@ -6541,6 +6538,10 @@ do_lret:
                     gen_helper_syn_condbroad_trace(tcg_const_tl(pc_start));
             }
 #endif
+            if (s->dflag == 0)
+                tval &= 0xffff;
+            else if(!CODE64(s))
+                tval &= 0xffffffff;
             gen_jmp(s, tval);
             break;
         case 0xea: /* ljmp im */
