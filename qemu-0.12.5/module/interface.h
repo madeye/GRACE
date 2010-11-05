@@ -68,13 +68,11 @@ typedef struct DEBUGInfo {
 //}
 
 #define trace_mem_collection(type1, size1, pc1, arg1) { \
-    if (current_id) { \
         env->trace_mem_ptr->type = (type1); \
         env->trace_mem_ptr->size = (size1); \
         env->trace_mem_ptr->value.mem.address = (arg1); \
         env->trace_mem_ptr->pc = (pc1); \
         env->trace_mem_ptr++; \
-    } \
 }
 
     //fprintf(stderr, "syn_trace: %d, 0x%llx, 0x%llx \n", type1, arg1, pc1); 

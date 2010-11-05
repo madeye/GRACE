@@ -37,7 +37,6 @@ extern volatile uint8_t is_detect_start;
 extern uint8_t is_process_captured;
 extern struct map_queue map;
 extern struct ProcessQueue process_queue;   // Process queue
-uint8_t is_collect = 0;
 
 #include "module/copy.h"
 #include "module/process.h"

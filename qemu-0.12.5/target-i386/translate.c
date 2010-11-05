@@ -212,8 +212,7 @@ const uint64_t cond_broad_call[12] = {
 
 extern uint32_t bench_mark_id;
 extern volatile uint8_t is_detect_start;
-/*extern uint8_t current_id;*/
-extern uint8_t is_collect;
+uint8_t is_collect = 0;
 
 #endif
 
