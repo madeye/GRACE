@@ -27,13 +27,12 @@
 #include "module/process.h"
 #include <stdlib.h>
 
-#define STACK_MASK 0xffffffffffffc000
+#define STACK_MASK 0xffffc000
 extern FILE *stderr;
 
 extern uint8_t is_collect;
 extern uint8_t is_detect_start;             // Detection started flag
 extern uint8_t is_process_captured;         // Process captured flag
-extern uint8_t just_exec;                   // Exec syscalled flag
 extern uint8_t just_clone;                  // Clone syscalled flag
 extern uint8_t just_exit;                   // Exit syscalled flag
 extern uint8_t thread_start;                // Thread captured flag
@@ -155,6 +154,57 @@ void helper_store_quad_trace(target_ulong pc, target_ulong addr) {
 #endif
 
 #ifdef PPI_DEBUG_TOOL
+
+void helper_process_enqueue(void) {
+    is_detect_start = 1;
+    if (is_detect_start && !is_process_captured) {
+        target_ulong new_cr3 = env->cr[3];
+        int index = process_enqueue(&process_queue, new_cr3, (ESP & STACK_MASK), total_id);
+#ifdef PPI_PROCESS_INFO
+        fprintf(stderr, "Process Enqueue\n");
+        printf("process enqueue : cr3 : 0x%lx ; esp : 0x%lx ; id : %d ; index : %d\n", 
+                new_cr3, (ESP & STACK_MASK), total_id, index);
+#endif
+        if (index >= 0) {
+            current_id = get_thread_id(&process_queue, index);
+            total_id++;
+            is_process_captured = 1;
+            timing_start = 1;
+        }
+#ifdef PPI_PROCESS_INFO
+        else {
+            printf("process enqueue : should not be here!\n");
+        }
+#endif
+    } 
+}
+
+void helper_process_dequeue(void) { 
+    if (is_detect_start) {
+        is_detect_start = 0;
+        int index = process_dequeue(&process_queue, env->cr[3], ESP & STACK_MASK);
+#ifdef PPI_PROCESS_INFO
+        printf("process dequeue : cr3 : 0x%lx ; esp : 0x%lx ; index : %d\n", 
+                env->cr[3], (ESP & STACK_MASK), index);
+#endif
+        if (index >= 0) {
+            current_id = 0;
+            is_process_captured = 0;
+            timing_end = 1;
+        }
+#ifdef PPI_PROCESS_INFO
+        else {
+            printf("process dequeue : should not be here!\n");
+        }
+#endif
+#ifdef PPI_PROCESS_INFO
+        if (is_empty(&process_queue)) {
+            printf("No process is running now.\n");
+        }
+#endif
+    }
+}
+
 void helper_syn_lock_trace(target_ulong pc) {
     trace_syn_collection(TRACE_SYN_LOCK, 1, EDI, 0, pc);
 }
@@ -1131,32 +1181,9 @@ void helper_syscall(int next_eip_addend)
     }
 
 #ifdef PPI_DEBUG_TOOL
-    // TODO: Is kernel statck 8k on x86_64?
     if (is_detect_start) {
         if (is_process_captured) {
             switch (EAX) {
-                case 231: 
-                    index = process_dequeue(&process_queue, env->cr[3], ESP & STACK_MASK);
-#ifdef PPI_PROCESS_INFO
-                    printf("process dequeue : cr3 : 0x%lx ; esp : 0x%lx ; index : %d\n", 
-                            env->cr[3], (ESP & STACK_MASK), index);
-#endif
-                    if (index >= 0) {
-                        current_id = 0;
-                        is_process_captured = 0;
-                        timing_end = 1;
-                    }
-#ifdef PPI_PROCESS_INFO
-                    else {
-                        printf("process dequeue : should not be here!\n");
-                    }
-#endif
-#ifdef PPI_PROCESS_INFO
-                    if (is_empty(&process_queue)) {
-                        printf("No process is running now.\n");
-                    }
-#endif
-                    break;
                 case 56:
                     just_clone++;
 #ifdef PPI_PROCESS_INFO
@@ -1181,11 +1208,6 @@ void helper_syscall(int next_eip_addend)
 #endif
                     break;
             }
-        } else if (EAX == 59) {
-            just_exec = 1;
-#ifdef PPI_PROCESS_INFO
-            printf("exec\n");
-#endif
         }
     }
 #endif 
@@ -1207,32 +1229,6 @@ void helper_sysret(int dflag)
         raise_exception_err(EXCP0D_GPF, 0);
     }
     selector = (env->star >> 48) & 0xffff;
-
-#ifdef PPI_DEBUG_TOOL
-    if (is_detect_start && !is_process_captured) {
-        if (just_exec) {
-            target_ulong new_cr3 = env->cr[3];
-            int index = process_enqueue(&process_queue, new_cr3, (ESP & STACK_MASK), total_id);
-#ifdef PPI_PROCESS_INFO
-            fprintf(stderr, "Process Enqueue\n");
-            printf("process enqueue : cr3 : 0x%lx ; esp : 0x%lx ; id : %d ; index : %d\n", 
-                    new_cr3, (ESP & STACK_MASK), total_id, index);
-#endif
-            if (index >= 0) {
-                current_id = get_thread_id(&process_queue, index);
-                total_id++;
-                is_process_captured = 1;
-                just_exec = 0;
-                timing_start = 1;
-            }
-#ifdef PPI_PROCESS_INFO
-            else {
-                printf("process enqueue : should not be here!\n");
-            }
-#endif
-        } 
-    }
-#endif
 
 #ifdef PPI_DEBUG_TOOL  
     if (is_detect_start && is_process_captured) {
@@ -2922,31 +2918,6 @@ static inline void helper_ret_protected(int shift, int is_iret, int addend)
         load_eflags(new_eflags, eflags_mask);
     }
 
-#ifdef PPI_DEBUG_TOOL
-    if (is_detect_start && is_iret && !is_process_captured && rpl == 3) {
-        if (just_exec) {
-            target_ulong new_cr3 = env->cr[3];
-            int index = process_enqueue(&process_queue, new_cr3, (ESP & STACK_MASK), total_id);
-#ifdef PPI_PROCESS_INFO
-            fprintf(stderr, "Process Enqueue\n");
-            printf("process enqueue : cr3 : 0x%lx ; esp : 0x%lx ; id : %d ; index : %d\n", 
-                    new_cr3, (ESP & STACK_MASK), total_id, index);
-#endif
-            if (index >= 0) {
-                current_id = get_thread_id(&process_queue, index);
-                total_id++;
-                is_process_captured = 1;
-                just_exec = 0;
-                timing_start = 1;
-            }
-#ifdef PPI_PROCESS_INFO
-            else {
-                printf("process enqueue : should not be here!\n");
-            }
-#endif
-        } 
-    }
-#endif
 #ifdef PPI_DEBUG_TOOL
     if (is_detect_start && is_iret && is_process_captured && rpl == 3) {
 

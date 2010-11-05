@@ -28,7 +28,7 @@
 #endif
 
 #define PPI_DEBUG_TOOL
-//#define PPI_DEBUG_TOOL_GUEST
+#define PPI_DEBUG_TOOL_GUEST
 #define PPI_DEBUG_SWITCHER
 
 #ifdef PPI_DEBUG_TOOL
@@ -728,7 +728,7 @@ typedef struct CPUX86State {
 
 #ifdef PPI_DEBUG_TOOL
     DEBUGInfo debug_info;
-    volatile struct trace_content *trace_mem_ptr;
+    struct trace_content *trace_mem_ptr;
 #endif
 
 } CPUX86State;

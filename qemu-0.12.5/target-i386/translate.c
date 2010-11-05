@@ -212,7 +212,8 @@ const uint64_t cond_broad_call[12] = {
 
 extern uint32_t bench_mark_id;
 extern volatile uint8_t is_detect_start;
-extern uint8_t current_id;
+/*extern uint8_t current_id;*/
+extern uint8_t is_collect;
 
 #endif
 
@@ -687,7 +688,7 @@ static inline void gen_op_addq_A0_reg_sN(int shift, int reg)
 
 #ifdef PPI_DEBUG_TOOL_GUEST
 static inline void gen_mem_trace(uint8_t type1, uint8_t size1, TCGv addr1) {
-    if (is_detect_start && current_id && current_pc < 0x420000 && current_pc > 0x400000) {
+    if (is_detect_start  && is_collect) {
         switch (type1)
         {
             case TRACE_MEM_LOAD:
@@ -4307,6 +4308,14 @@ static target_ulong disas_insn(DisasContext *s, target_ulong pc_start)
 
 #ifdef PPI_DEBUG_TOOL_GUEST
     current_pc = pc_start;
+    if (pc_start < 0x420000 
+            && pc_start > 0x400000
+            && s->cpl == 3 ) {
+        is_collect = 1;    	
+    } else {
+        is_collect = 0;
+    }
+
 #endif
     if (unlikely(qemu_loglevel_mask(CPU_LOG_TB_OP)))
         tcg_gen_debug_insn_start(pc_start);
@@ -6482,11 +6491,9 @@ do_lret:
                 next_eip = s->pc - s->cs_base;
                 tval += next_eip;
 #ifdef PPI_DEBUG_TOOL
-                if (is_detect_start && current_id && pc_start < 0x420000 && pc_start > 0x400000) {
-                    if (tval == lock_call[bench_mark_id]) {
-                        printf("syn at: 0x%lx\n", pc_start);
+                if (is_detect_start && is_collect) {
+                    if (tval == lock_call[bench_mark_id])
                         gen_helper_syn_lock_trace(tcg_const_tl(pc_start));
-                    }
                     else if (tval == unlock_call[bench_mark_id])
                         gen_helper_syn_unlock_trace(tcg_const_tl(pc_start));
                     else if (tval == barrier_call[bench_mark_id])
@@ -6527,7 +6534,7 @@ do_lret:
                 tval = (int16_t)insn_get(s, OT_WORD);
             tval += s->pc - s->cs_base;
 #ifdef PPI_DEBUG_TOOL
-            if (is_detect_start && current_id && pc_start < 0x420000 && pc_start > 0x400000) {
+            if (is_detect_start && is_collect) {
                 if (tval == lock_call[bench_mark_id])
                     gen_helper_syn_lock_trace(tcg_const_tl(pc_start));
                 else if (tval == unlock_call[bench_mark_id])
@@ -6952,10 +6959,10 @@ bt_op:
 #ifdef PPI_DEBUG_TOOL
                 if (val == 0x86)
                     if (is_detect_start) {
-                        is_detect_start = 0;
+                        gen_helper_process_dequeue();
                     }
                     else {
-                        is_detect_start = 1;
+                        gen_helper_process_enqueue();
                     }
                 else if (val == 0x88)
                     exit(0);

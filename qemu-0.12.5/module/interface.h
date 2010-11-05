@@ -68,7 +68,7 @@ typedef struct DEBUGInfo {
 //}
 
 #define trace_mem_collection(type1, size1, pc1, arg1) { \
-    if (is_collect) { \
+    if (current_id) { \
         env->trace_mem_ptr->type = (type1); \
         env->trace_mem_ptr->size = (size1); \
         env->trace_mem_ptr->value.mem.address = (arg1); \
@@ -81,14 +81,12 @@ typedef struct DEBUGInfo {
 //}
 
 #define trace_syn_collection(type1, size1, arg1, arg2, pc1) { \
-    if (is_collect) { \
         env->trace_mem_ptr->type = (type1); \
         env->trace_mem_ptr->size = (size1); \
         env->trace_mem_ptr->value.syn.args[0] = (arg1); \
         env->trace_mem_ptr->value.syn.args[1] = (arg2); \
         env->trace_mem_ptr->pc = (pc1); \
         env->trace_mem_ptr++; \
-    } \
 }
 
 void data_race_detector_init(void);

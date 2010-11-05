@@ -26,6 +26,7 @@
 
 #define PPI_DETECTOR_MODULE
 
+extern uint32_t total_id;
 extern uint8_t thread_start;
 extern uint8_t thread_exit;
 extern uint8_t timing_start;
@@ -681,11 +682,11 @@ int cpu_exec(CPUState *env1)
                         thread_exit= 0;
                     }
 
-                    if (is_detect_start && current_id) {
-                        is_collect = 1;    	
-                    } else {
-                        is_collect = 0;
-                    }
+                    /*if (is_detect_start && current_id) {*/
+                        /*is_collect = 1;    	*/
+                    /*} else {*/
+                        /*is_collect = 0;*/
+                    /*}*/
 
                     // TODO: Necessary to add is_detect_start here?
                     if (is_detect_start) {
