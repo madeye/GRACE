@@ -686,45 +686,35 @@ static inline void gen_op_addq_A0_reg_sN(int shift, int reg)
 #endif
 
 #ifdef PPI_DEBUG_TOOL_GUEST
-static inline void gen_mem_trace(uint8_t type1, uint8_t size1, TCGv addr1) {
+
+static void gen_mem_trace(uint8_t type1, uint8_t size1, TCGv addr1) {
     if (is_detect_start  && is_collect) {
-        switch (type1)
-        {
-            case TRACE_MEM_LOAD:
-                switch (size1)
-                {
-                    case TRACE_MEM_SIZE_BYTE:
-                        gen_helper_load_byte_trace(tcg_const_tl(current_pc), addr1);
-                        break;
-                    case TRACE_MEM_SIZE_WORD:
-                        gen_helper_load_word_trace(tcg_const_tl(current_pc), addr1);
-                        break;
-                    case TRACE_MEM_SIZE_LONG:
-                        gen_helper_load_long_trace(tcg_const_tl(current_pc), addr1);
-                        break;
-                    case TRACE_MEM_SIZE_QUAD:
-                        gen_helper_load_quad_trace(tcg_const_tl(current_pc), addr1);
-                        break;
-                }
-                break;
-            case TRACE_MEM_STORE:
-                switch (size1)
-                {
-                    case TRACE_MEM_SIZE_BYTE:
-                        gen_helper_store_byte_trace(tcg_const_tl(current_pc), addr1);
-                        break;
-                    case TRACE_MEM_SIZE_WORD:
-                        gen_helper_store_word_trace(tcg_const_tl(current_pc), addr1);
-                        break;
-                    case TRACE_MEM_SIZE_LONG:
-                        gen_helper_store_long_trace(tcg_const_tl(current_pc), addr1);
-                        break;
-                    case TRACE_MEM_SIZE_QUAD:
-                        gen_helper_store_quad_trace(tcg_const_tl(current_pc), addr1);
-                        break;
-                }
-                break;
-        }
+        TCGv t0, t1;
+        t0 = tcg_temp_new();
+        t1 = tcg_temp_new();
+
+        tcg_gen_movi_tl(t0, (target_ulong)cpu_single_env->trace_mem_ptr);
+        tcg_gen_ld_tl(t1, t0, 0);
+
+        // Type 
+        tcg_gen_movi_tl(t0, type1);
+        tcg_gen_st_tl(t0, t1, offsetof(struct trace_content, type));
+
+        // Size
+        tcg_gen_movi_tl(t0, size1);
+        tcg_gen_st_tl(t0, t1, offsetof(struct trace_content, size));
+
+        // Pc
+        tcg_gen_movi_tl(t0, current_pc);
+        tcg_gen_st_tl(t0, t1, offsetof(struct trace_content, pc));
+
+        // Address
+        tcg_gen_st_tl(addr1, t1, offsetof(struct trace_content, value.mem.address));
+
+        // trace_mem_ptr++ 
+        tcg_gen_movi_tl(t0, (target_ulong)cpu_single_env->trace_mem_ptr);
+        tcg_gen_addi_tl(t1, t1, sizeof(struct trace_content));
+        tcg_gen_st_tl(t1, t0, 0);
     }
 }
 #endif
