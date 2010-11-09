@@ -119,235 +119,158 @@ typedef struct DisasContext {
     int cpuid_ext3_features;
 } DisasContext;
 
+#ifdef PPI_DEBUG_TOOL
+
+const uint64_t lock_call[12] = {
+    0x400d88, /* 0 */
+    0x400d88, /* 1 */
+    0x400a50, /* 2 */
+    0x400af0, /* 3 */
+    0x400d80, /* 4 */
+    0x400ed0, /* 5 */
+    0x400bc0, /* 6 */
+    0x400c08, /* 7 */
+    0x400d40, /* 8 */
+    0x400aa0, /* 9 */
+    0x400b70, /* 10 */
+    0x400a98  /* 11 */
+};
+
+const uint64_t unlock_call[12] = {
+    0x400dc8, /* 0 */
+    0x400dc8, /* 1 */
+    0x400a80, /* 2 */
+    0x400b20, /* 3 */
+    0x400db0, /* 4 */
+    0x400f10, /* 5 */
+    0x400c00, /* 6 */
+    0x400c48, /* 7 */
+    0x400d80, /* 8 */
+    0x400ac0, /* 9 */
+    0x400ba0, /* 10 */
+    0x400ac8  /* 11 */
+};
+
+const uint64_t barrier_call[12] = {
+    0x400c98, /* 0 */
+    0x400cb8, /* 1 */
+    0x4009d0, /* 2 */
+    0x400a50, /* 3 */
+    0x400c70, /* 4 */
+    0x400dd0, /* 5 */
+    0x400b10, /* 6 */
+    0x400b58, /* 7 */
+    0x400c80, /* 8 */
+    0x400a20, /* 9 */
+    0x400ad0, /* 10 */
+    0x4009f8  /* 11 */
+};
+
+const uint64_t cond_wait_call[12] = {
+    -1, /* 0 */
+    -1, /* 1 */
+    -1, /* 2 */
+    -1, /* 3 */
+    -1, /* 4 */
+    -1, /* 5 */
+    -1, /* 6 */
+    -1, /* 7 */
+    -1, /* 8 */
+    -1, /* 9 */
+    -1, /* 10 */
+    0x400a78  /* 11 */
+};
+const uint64_t cond_broad_call[12] = {
+    -1, /* 0 */
+    -1, /* 1 */
+    -1, /* 2 */
+    -1, /* 3 */
+    -1, /* 4 */
+    -1, /* 5 */
+    -1, /* 6 */
+    -1, /* 7 */
+    -1, /* 8 */
+    -1, /* 9 */
+    -1, /* 10 */
+    0x400ab8  /* 11 */
+};
+
+extern uint32_t bench_mark_id;
+extern volatile uint8_t is_detect_start;
+uint8_t is_collect = 0;
+
+#endif
+
 #ifdef PPI_DEBUG_TOOL_GUEST
-
-extern COREMU_THREAD DEBUGInfo debug_info;
-extern uint8_t is_collect;
-
-void tcg_helper_trace(uint64_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4);
-void tcg_helper_trace(uint64_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4) {
-    return;
-}
-
-static inline void trace_mem_collection(uint8_t type1, uint8_t size1, TCGv_i64 addr1, uint64_t pc1) {
-    if (is_collect) {
-        TCGv_ptr fn;
-        TCGArg args[4];
-        /*TCGv_i64 t0, t1, t2;*/
-        /*t0 = tcg_temp_local_new_i64();*/
-        /*t1 = tcg_temp_local_new_i64();*/
-        /*t2 = tcg_temp_local_new_i64();*/
-        fn = tcg_const_ptr((tcg_target_long)tcg_helper_trace);
-        /*tcg_gen_movi_i64(t0, type1); */
-        /*tcg_gen_movi_i64(t1, size1); */
-        /*tcg_gen_movi_i64(t2, pc1); */
-        /*args[0] = GET_TCGV_I64(t0);*/
-        /*args[1] = GET_TCGV_I64(t1);*/
-        args[0] = GET_TCGV_I64(addr1);
-        /*args[3] = GET_TCGV_I64(t2);*/
-        tcg_gen_callN(&tcg_ctx, fn, 0,
-                7, TCG_CALL_DUMMY_ARG, 1, args);
-        tcg_temp_free_ptr(fn);
-        /*tcg_temp_free_i64(t0);*/
-        /*tcg_temp_free_i64(t1);*/
-        /*tcg_temp_free_i64(t2);*/
-    }
-}
-
-/*static inline void trace_mem_collection(uint8_t type1, uint8_t size1, TCGv addr1, uint64_t pc1) {*/
-/*if (is_collect) {*/
-
-/*TCGv_ptr fn;*/
-/*TCGArg args[2];*/
-/*fn = tcg_const_ptr((tcg_target_long)tcg_helper_trace);*/
-/*tcg_target_long val[3];*/
-/*val[0] = type1;*/
-/*val[1] = size1;*/
-/*val[2] = pc1;*/
-/*args[0] = GET_TCGV_I64(addr1); */
-/*args[1] = val;*/
-/*tcg_gen_helperN()*/
-/*[>tcg_gen_callN(&tcg_ctx, fn, 0,<]*/
-/*[>7, TCG_CALL_DUMMY_ARG, 2, args);<]*/
-/*tcg_temp_free_ptr(fn);*/
-
-/*[>uint64_t ptr;<]*/
-/*[>TCGv_i64 t0, t1;<]*/
-/*[>ptr = (uint64_t)&(debug_info.trace_mem_ptr);<]*/
-
-/*[>t0 = tcg_temp_local_new_i64();<]*/
-/*[>t1 = tcg_temp_local_new_i64();<]*/
-
-/*[>[> movi t1, ptr <]<]*/
-/*[>tcg_gen_movi_i64(t0, ptr); <]*/
-/*[>[> ld t1, (t0) <]<]*/
-/*[>tcg_gen_ld_i64(t1, t0, 0);<]*/
-/*[>[> movi t0, type1 <]<]*/
-/*[>tcg_gen_movi_i64(t0, type1);<]*/
-/*[>[> st t0, (t1), offset <]<]*/
-/*[>tcg_gen_st_i64(t0, t1, offsetof(struct trace_content, type));<]*/
-
-/*[>tcg_temp_free_i64(t0);<]*/
-/*[>tcg_temp_free_i64(t1);<]*/
-
-/*[>t0 = tcg_temp_new_i64();<]*/
-/*[>t1 = tcg_temp_new_i64();<]*/
-
-/*[>[> movi t0, ptr <]<]*/
-/*[>tcg_gen_movi_i64(t0, ptr); <]*/
-/*[>[> ld t1, (t0) <]<]*/
-/*[>tcg_gen_ld_i64(t1, t0, 0);<]*/
-
-/*[>[> movi t0, size1 <]<]*/
-/*[>tcg_gen_movi_i64(t0, size1);<]*/
-/*[>[> st t0, (t1), offset <]<]*/
-/*[>tcg_gen_st8_i64(t0, t1, offsetof(struct trace_content, size));<]*/
-
-/*[>tcg_temp_free_i64(t0);<]*/
-/*[>tcg_temp_free_i64(t1);<]*/
-
-/*[>t0 = tcg_temp_new_i64();<]*/
-/*[>t1 = tcg_temp_new_i64();<]*/
-
-/*[>[> movi t0, ptr <]<]*/
-/*[>tcg_gen_movi_i64(t0, ptr); <]*/
-/*[>[> ld t1, (t0) <]<]*/
-/*[>tcg_gen_ld_i64(t1, t0, 0);<]*/
-
-/*[>[> st addr1, (t1), offset <]<]*/
-/*[>tcg_gen_st_i64(addr1, t1, offsetof(struct trace_content, value.mem.address));<]*/
-
-/*[>tcg_temp_free_i64(t0);<]*/
-/*[>tcg_temp_free_i64(t1);<]*/
-
-/*[>t0 = tcg_temp_new_i64();<]*/
-/*[>t1 = tcg_temp_new_i64();<]*/
-
-/*[>[> movi t0, ptr <]<]*/
-/*[>tcg_gen_movi_i64(t0, ptr); <]*/
-/*[>[> ld t1, (t0) <]<]*/
-/*[>tcg_gen_ld_i64(t1, t0, 0);<]*/
-
-/*[>[> movi t0, pc1 <]<]*/
-/*[>tcg_gen_movi_i64(t0, pc1);<]*/
-/*[>[> st t0, (t1), offset <]<]*/
-/*[>tcg_gen_st_i64(t0, t1, offsetof(struct trace_content, pc));<]*/
-
-/*[>tcg_temp_free_i64(t0);<]*/
-/*[>tcg_temp_free_i64(t1);<]*/
-
-/*[>t0 = tcg_temp_new_i64();<]*/
-/*[>t1 = tcg_temp_new_i64();<]*/
-
-/*[>[> movi t0, ptr <]<]*/
-/*[>tcg_gen_movi_i64(t0, ptr); <]*/
-/*[>[> ld t1, (t0) <]<]*/
-/*[>tcg_gen_ld_i64(t1, t0, 0);<]*/
-/*[>[> addi t1, sizeof(struct) <]<]*/
-/*[>tcg_gen_addi_tl(t1, t1, sizeof(struct trace_content));<]*/
-/*[>[> st t0, (t1), offset <]<]*/
-/*[>tcg_gen_st_i64(t1, t0, 0);<]*/
-
-/*[>tcg_temp_free_i64(t0);<]*/
-/*[>tcg_temp_free_i64(t1);<]*/
-/*}*/
-/*}*/
-
-#define trace_syn_collection(type1, size1, arg1, arg2, pc1) { \
-    env->trace_mem_ptr->type = (type1); \
-    env->trace_mem_ptr->size = (size1); \
-    env->trace_mem_ptr->value.syn.args[0] = (arg1); \
-    env->trace_mem_ptr->value.syn.args[1] = (arg2); \
-    env->trace_mem_ptr->pc = (pc1); \
-    env->trace_mem_ptr++; \
-}
-
-static COREMU_THREAD DisasContext *dc;
 
 /*  tricks for recording memory trace  */
 #define tcg_gen_qemu_ld8u(arg, addr, mem_index)                                     \
-{                                                                            \
-    trace_mem_collection(TRACE_MEM_LOAD, TRACE_MEM_SIZE_BYTE, addr, dc->pc);    \
-    (tcg_gen_qemu_ld8u)(arg, addr, mem_index);                                  \
+{                                                                                   \
+    gen_mem_trace(TRACE_MEM_LOAD, TRACE_MEM_SIZE_BYTE, addr);                       \
+    (tcg_gen_qemu_ld8u)(arg, addr, mem_index);                                      \
 }
 
 #define tcg_gen_qemu_ld16u(arg, addr, mem_index)                                    \
-{                                                                            \
-    trace_mem_collection(TRACE_MEM_LOAD, TRACE_MEM_SIZE_WORD, addr, dc->pc);    \
-    (tcg_gen_qemu_ld16u)(arg, addr, mem_index);                                 \
+{                                                                                   \
+    gen_mem_trace(TRACE_MEM_LOAD, TRACE_MEM_SIZE_WORD, addr);                       \
+    (tcg_gen_qemu_ld16u)(arg, addr, mem_index);                                     \
 }
 
 #define tcg_gen_qemu_ld32u(arg, addr, mem_index)                                    \
-{                                                                            \
-    trace_mem_collection(TRACE_MEM_LOAD, TRACE_MEM_SIZE_LONG, addr, dc->pc);    \
-    (tcg_gen_qemu_ld32u)(arg, addr, mem_index);                                 \
+{                                                                                   \
+    gen_mem_trace(TRACE_MEM_LOAD, TRACE_MEM_SIZE_LONG, addr);                       \
+    (tcg_gen_qemu_ld32u)(arg, addr, mem_index);                                     \
 }
 
 #define tcg_gen_qemu_ld8s(arg, addr, mem_index)                                     \
-{                                                                            \
-    trace_mem_collection(TRACE_MEM_LOAD, TRACE_MEM_SIZE_BYTE, addr, dc->pc);    \
-    (tcg_gen_qemu_ld8s)(arg, addr, mem_index);                                  \
+{                                                                                   \
+    gen_mem_trace(TRACE_MEM_LOAD, TRACE_MEM_SIZE_BYTE, addr);                       \
+    (tcg_gen_qemu_ld8s)(arg, addr, mem_index);                                      \
 }
 
 #define tcg_gen_qemu_ld16s(arg, addr, mem_index)                                    \
-{                                                                            \
-    trace_mem_collection(TRACE_MEM_LOAD, TRACE_MEM_SIZE_WORD, addr, dc->pc);    \
-    (tcg_gen_qemu_ld16s)(arg, addr, mem_index);                                 \
+{                                                                                   \
+    gen_mem_trace(TRACE_MEM_LOAD, TRACE_MEM_SIZE_WORD, addr);                       \
+    (tcg_gen_qemu_ld16s)(arg, addr, mem_index);                                     \
 }
 
 #define tcg_gen_qemu_ld32s(arg, addr, mem_index)                                    \
-{                                                                            \
-    trace_mem_collection(TRACE_MEM_LOAD, TRACE_MEM_SIZE_LONG, addr, dc->pc);    \
-    (tcg_gen_qemu_ld32s)(arg, addr, mem_index);                                 \
+{                                                                                   \
+    gen_mem_trace(TRACE_MEM_LOAD, TRACE_MEM_SIZE_LONG, addr);                       \
+    (tcg_gen_qemu_ld32s)(arg, addr, mem_index);                                     \
 }
 
 #define tcg_gen_qemu_ld64(arg, addr, mem_index)                                     \
-{                                                                            \
-    trace_mem_collection(TRACE_MEM_LOAD, TRACE_MEM_SIZE_QUAD, addr, dc->pc);    \
-    (tcg_gen_qemu_ld64)(arg, addr, mem_index);                                  \
+{                                                                                   \
+    gen_mem_trace(TRACE_MEM_LOAD, TRACE_MEM_SIZE_QUAD, addr);                       \
+    (tcg_gen_qemu_ld64)(arg, addr, mem_index);                                      \
 }
 
-#define tcg_gen_qemu_st8u(arg, addr, mem_index)                                     \
-{                                                                            \
-    trace_mem_collection(TRACE_MEM_STORE, TRACE_MEM_SIZE_BYTE, addr, dc->pc);   \
-    (tcg_gen_qemu_st8u)(arg, addr, mem_index);                                  \
+#define tcg_gen_qemu_st8(arg, addr, mem_index)                                     \
+{                                                                                   \
+    gen_mem_trace(TRACE_MEM_STORE, TRACE_MEM_SIZE_BYTE, addr);                      \
+    (tcg_gen_qemu_st8)(arg, addr, mem_index);                                      \
 }
 
-#define tcg_gen_qemu_st16u(arg, addr, mem_index)                                    \
-{                                                                            \
-    trace_mem_collection(TRACE_MEM_STORE, TRACE_MEM_SIZE_WORD, addr, dc->pc);   \
-    (tcg_gen_qemu_st16u)(arg, addr, mem_index);                                 \
+#define tcg_gen_qemu_st16(arg, addr, mem_index)                                    \
+{                                                                                   \
+    gen_mem_trace(TRACE_MEM_STORE, TRACE_MEM_SIZE_WORD, addr);                      \
+    (tcg_gen_qemu_st16)(arg, addr, mem_index);                                     \
 }
 
-#define tcg_gen_qemu_st32u(arg, addr, mem_index)                                    \
-{                                                                            \
-    trace_mem_collection(TRACE_MEM_STORE, TRACE_MEM_SIZE_LONG, addr, dc->pc);   \
-    (tcg_gen_qemu_st32u)(arg, addr, mem_index);                                 \
-}
-
-#define tcg_gen_qemu_st8s(arg, addr, mem_index)                                     \
-{                                                                            \
-    trace_mem_collection(TRACE_MEM_STORE, TRACE_MEM_SIZE_BYTE, addr, dc->pc);   \
-    (tcg_gen_qemu_st8s)(arg, addr, mem_index);                                  \
-}
-
-#define tcg_gen_qemu_st16s(arg, addr, mem_index)                                    \
-{                                                                            \
-    trace_mem_collection(TRACE_MEM_STORE, TRACE_MEM_SIZE_WORD, addr, dc->pc);   \
-    (tcg_gen_qemu_st16s)(arg, addr, mem_index);                                 \
-}
-
-#define tcg_gen_qemu_st32s(arg, addr, mem_index)                                    \
-{                                                                            \
-    trace_mem_collection(TRACE_MEM_STORE, TRACE_MEM_SIZE_LONG, addr, dc->pc);   \
-    (tcg_gen_qemu_st32s)(arg, addr, mem_index);                                 \
+#define tcg_gen_qemu_st32(arg, addr, mem_index)                                    \
+{                                                                                   \
+    gen_mem_trace(TRACE_MEM_STORE, TRACE_MEM_SIZE_LONG, addr);                      \
+    (tcg_gen_qemu_st32)(arg, addr, mem_index);                                     \
 }
 
 #define tcg_gen_qemu_st64(arg, addr, mem_index)                                     \
-{                                                                            \
-    trace_mem_collection(TRACE_MEM_STORE, TRACE_MEM_SIZE_QUAD, addr, dc->pc);   \
-    (tcg_gen_qemu_st64)(arg, addr, mem_index);                                  \
+{                                                                                   \
+    gen_mem_trace(TRACE_MEM_STORE, TRACE_MEM_SIZE_QUAD, addr);                      \
+    (tcg_gen_qemu_st64)(arg, addr, mem_index);                                      \
 }
+
+static target_ulong current_pc = 0;
 
 #endif
 
@@ -744,6 +667,50 @@ static inline void gen_op_addq_A0_reg_sN(int shift, int reg)
     if (shift != 0)
         tcg_gen_shli_tl(cpu_tmp0, cpu_tmp0, shift);
     tcg_gen_add_tl(cpu_A0, cpu_A0, cpu_tmp0);
+}
+#endif
+
+#ifdef PPI_DEBUG_TOOL_GUEST
+static inline void gen_mem_trace(uint8_t type1, uint8_t size1, TCGv addr1) {
+    if (is_detect_start  && is_collect) {
+        switch (type1)
+        {
+            case TRACE_MEM_LOAD:
+                switch (size1)
+                {
+                    case TRACE_MEM_SIZE_BYTE:
+                        gen_helper_load_byte_trace(tcg_const_tl(current_pc), addr1);
+                        break;
+                    case TRACE_MEM_SIZE_WORD:
+                        gen_helper_load_word_trace(tcg_const_tl(current_pc), addr1);
+                        break;
+                    case TRACE_MEM_SIZE_LONG:
+                        gen_helper_load_long_trace(tcg_const_tl(current_pc), addr1);
+                        break;
+                    case TRACE_MEM_SIZE_QUAD:
+                        gen_helper_load_quad_trace(tcg_const_tl(current_pc), addr1);
+                        break;
+                }
+                break;
+            case TRACE_MEM_STORE:
+                switch (size1)
+                {
+                    case TRACE_MEM_SIZE_BYTE:
+                        gen_helper_store_byte_trace(tcg_const_tl(current_pc), addr1);
+                        break;
+                    case TRACE_MEM_SIZE_WORD:
+                        gen_helper_store_word_trace(tcg_const_tl(current_pc), addr1);
+                        break;
+                    case TRACE_MEM_SIZE_LONG:
+                        gen_helper_store_long_trace(tcg_const_tl(current_pc), addr1);
+                        break;
+                    case TRACE_MEM_SIZE_QUAD:
+                        gen_helper_store_quad_trace(tcg_const_tl(current_pc), addr1);
+                        break;
+                }
+                break;
+        }
+    }
 }
 #endif
 
@@ -4376,6 +4343,17 @@ static target_ulong disas_insn(DisasContext *s, target_ulong pc_start)
     target_ulong next_eip, tval;
     int rex_w, rex_r;
 
+#ifdef PPI_DEBUG_TOOL_GUEST
+    current_pc = pc_start;
+    if (pc_start < 0x420000 
+            && pc_start > 0x400000
+            && s->cpl == 3 ) {
+        is_collect = 1;    	
+    } else {
+        is_collect = 0;
+    }
+#endif
+
     if (unlikely(qemu_loglevel_mask(CPU_LOG_TB_OP)))
         tcg_gen_debug_insn_start(pc_start);
     s->pc = pc_start;
@@ -6706,6 +6684,20 @@ do_lret:
                         tval = (int16_t)insn_get(s, OT_WORD);
                     next_eip = s->pc - s->cs_base;
                     tval += next_eip;
+#ifdef PPI_DEBUG_TOOL
+                if (is_detect_start && is_collect) {
+                    if (tval == lock_call[bench_mark_id])
+                        gen_helper_syn_lock_trace(tcg_const_tl(pc_start));
+                    else if (tval == unlock_call[bench_mark_id])
+                        gen_helper_syn_unlock_trace(tcg_const_tl(pc_start));
+                    else if (tval == barrier_call[bench_mark_id])
+                        gen_helper_syn_barrier_trace(tcg_const_tl(pc_start));
+                    else if (tval == cond_wait_call[bench_mark_id])
+                        gen_helper_syn_condwait_trace(tcg_const_tl(pc_start));
+                    else if (tval == cond_broad_call[bench_mark_id])
+                        gen_helper_syn_condbroad_trace(tcg_const_tl(pc_start));
+                }
+#endif
                     if (s->dflag == 0)
                         tval &= 0xffff;
                     else if(!CODE64(s))
@@ -6735,6 +6727,20 @@ do_lret:
                 else
                     tval = (int16_t)insn_get(s, OT_WORD);
                 tval += s->pc - s->cs_base;
+#ifdef PPI_DEBUG_TOOL
+            if (is_detect_start && is_collect) {
+                if (tval == lock_call[bench_mark_id])
+                    gen_helper_syn_lock_trace(tcg_const_tl(pc_start));
+                else if (tval == unlock_call[bench_mark_id])
+                    gen_helper_syn_unlock_trace(tcg_const_tl(pc_start));
+                else if (tval == barrier_call[bench_mark_id])
+                    gen_helper_syn_barrier_trace(tcg_const_tl(pc_start));
+                else if (tval == cond_wait_call[bench_mark_id])
+                    gen_helper_syn_condwait_trace(tcg_const_tl(pc_start));
+                else if (tval == cond_broad_call[bench_mark_id])
+                    gen_helper_syn_condbroad_trace(tcg_const_tl(pc_start));
+            }
+#endif
                 if (s->dflag == 0)
                     tval &= 0xffff;
                 else if(!CODE64(s))
@@ -7166,6 +7172,20 @@ bt_op:
                 if (s->vm86 && s->iopl != 3) {
                     gen_exception(s, EXCP0D_GPF, pc_start - s->cs_base);
                 } else {
+#ifdef PPI_DEBUG_TOOL
+                if (val == 0x86)
+                    if (is_detect_start) {
+                        gen_helper_process_dequeue();
+                    }
+                    else {
+                        gen_helper_process_enqueue();
+                    }
+                else if (val == 0x88)
+                    exit(0);
+                else if (val == 0x8a)
+                    printf("SYNC");
+                else
+#endif
                     gen_interrupt(s, val, pc_start - s->cs_base, s->pc - s->cs_base);
                 }
                 break;
@@ -8219,12 +8239,7 @@ static inline void gen_intermediate_code_internal(CPUState *env,
         TranslationBlock *tb,
         int search_pc)
 {
-#ifdef PPI_DEBUG_TOOL_GUEST
-    DisasContext dc1;
-    dc = &dc1;
-#else
     DisasContext dc1, *dc = &dc1;
-#endif
     target_ulong pc_ptr;
     uint16_t *gen_opc_end;
     CPUBreakpoint *bp;

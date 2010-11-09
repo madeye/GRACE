@@ -24,6 +24,26 @@
 
 //#define DEBUG_PCALL
 
+#ifdef PPI_DEBUG_TOOL
+#include "module/process.h"
+#include <stdlib.h>
+
+#define STACK_MASK 0xffffc000
+extern FILE *stderr;
+
+extern uint8_t is_collect;
+extern uint8_t is_detect_start;             // Detection started flag
+extern uint8_t is_process_captured;         // Process captured flag
+extern uint8_t just_clone;                  // Clone syscalled flag
+extern uint8_t just_exit;                   // Exit syscalled flag
+extern uint8_t thread_start;                // Thread captured flag
+extern uint8_t thread_exit;                 // Thread exited flag
+extern uint8_t timing_start;                // Timing started flag
+extern uint8_t timing_end;                  // Timing ended flag
+extern uint32_t total_id;                   // Thread index
+extern uint32_t current_id;                 // Current thread index
+extern struct ProcessQueue process_queue;   // Process queue
+#endif
 
 #ifdef DEBUG_PCALL
 #  define LOG_PCALL(...) qemu_log_mask(CPU_LOG_PCALL, ## __VA_ARGS__)
@@ -105,6 +125,107 @@ static const CPU86_LDouble f15rk[7] =
     3.32192809488736234781L,  /*l2t*/
 };
 
+#ifdef PPI_DEBUG_TOOL_GUEST
+
+void helper_load_byte_trace(target_ulong pc, target_ulong addr) {
+    trace_mem_collection(TRACE_MEM_LOAD, TRACE_MEM_SIZE_BYTE, pc, addr);
+}
+void helper_load_word_trace(target_ulong pc, target_ulong addr) {
+    trace_mem_collection(TRACE_MEM_LOAD, TRACE_MEM_SIZE_WORD, pc, addr);
+}
+void helper_load_long_trace(target_ulong pc, target_ulong addr) {
+    trace_mem_collection(TRACE_MEM_LOAD, TRACE_MEM_SIZE_LONG, pc, addr);
+}
+void helper_load_quad_trace(target_ulong pc, target_ulong addr) {
+    trace_mem_collection(TRACE_MEM_LOAD, TRACE_MEM_SIZE_QUAD, pc, addr);
+}
+void helper_store_byte_trace(target_ulong pc, target_ulong addr) {
+    trace_mem_collection(TRACE_MEM_STORE, TRACE_MEM_SIZE_BYTE, pc, addr);
+}
+void helper_store_word_trace(target_ulong pc, target_ulong addr) {
+    trace_mem_collection(TRACE_MEM_STORE, TRACE_MEM_SIZE_WORD, pc, addr);
+}
+void helper_store_long_trace(target_ulong pc, target_ulong addr) {
+    trace_mem_collection(TRACE_MEM_STORE, TRACE_MEM_SIZE_LONG, pc, addr);
+}
+void helper_store_quad_trace(target_ulong pc, target_ulong addr) {
+    trace_mem_collection(TRACE_MEM_STORE, TRACE_MEM_SIZE_QUAD, pc, addr);
+}
+
+#endif
+
+#ifdef PPI_DEBUG_TOOL
+
+void helper_process_enqueue(void) {
+    is_detect_start = 1;
+    if (is_detect_start && !is_process_captured) {
+        target_ulong new_cr3 = env->cr[3];
+        int index = process_enqueue(&process_queue, new_cr3, (ESP & STACK_MASK), total_id);
+#ifdef PPI_PROCESS_INFO
+        fprintf(stderr, "Process Enqueue\n");
+        printf("process enqueue : cr3 : 0x%lx ; esp : 0x%lx ; id : %d ; index : %d\n", 
+                new_cr3, (ESP & STACK_MASK), total_id, index);
+#endif
+        if (index >= 0) {
+            current_id = get_thread_id(&process_queue, index);
+            total_id++;
+            is_process_captured = 1;
+            timing_start = 1;
+        }
+#ifdef PPI_PROCESS_INFO
+        else {
+            printf("process enqueue : should not be here!\n");
+        }
+#endif
+    } 
+}
+
+void helper_process_dequeue(void) { 
+    if (is_detect_start) {
+        is_detect_start = 0;
+        int index = process_dequeue(&process_queue, env->cr[3], ESP & STACK_MASK);
+#ifdef PPI_PROCESS_INFO
+        printf("process dequeue : cr3 : 0x%lx ; esp : 0x%lx ; index : %d\n", 
+                env->cr[3], (ESP & STACK_MASK), index);
+#endif
+        if (index >= 0) {
+            current_id = 0;
+            is_process_captured = 0;
+            timing_end = 1;
+        }
+#ifdef PPI_PROCESS_INFO
+        else {
+            printf("process dequeue : should not be here!\n");
+        }
+#endif
+#ifdef PPI_PROCESS_INFO
+        if (is_empty(&process_queue)) {
+            printf("No process is running now.\n");
+        }
+#endif
+    }
+}
+
+void helper_syn_lock_trace(target_ulong pc) {
+    trace_syn_collection(TRACE_SYN_LOCK, 1, EDI, 0, pc);
+}
+
+void helper_syn_unlock_trace(target_ulong pc) {
+    trace_syn_collection(TRACE_SYN_UNLOCK, 1, EDI, 0, pc);
+}
+
+void helper_syn_barrier_trace(target_ulong pc) {
+    trace_syn_collection(TRACE_SYN_BARRIER, 1, EDI, 0, pc);
+}
+
+void helper_syn_condwait_trace(target_ulong pc) {
+    trace_syn_collection(TRACE_SYN_COND_WAIT, 2, EDI, ESI, pc);
+}
+
+void helper_syn_condbroad_trace(target_ulong pc) {
+    trace_syn_collection(TRACE_SYN_COND_BROADCAST, 2, EDI, ESI, pc);
+}
+#endif
 /* broken thread support */
 
 static spinlock_t global_cpu_lock = SPIN_LOCK_UNLOCKED;
@@ -1009,6 +1130,10 @@ void helper_syscall(int next_eip_addend)
 {
     int selector;
 
+#ifdef PPI_DEBUG_TOOL
+    int index;
+#endif
+
     if (!(env->efer & MSR_EFER_SCE)) {
         raise_exception_err(EXCP06_ILLOP, 0);
     }
@@ -1055,6 +1180,38 @@ void helper_syscall(int next_eip_addend)
         env->eflags &= ~(IF_MASK | RF_MASK | VM_MASK);
         env->eip = (uint32_t)env->star;
     }
+
+#ifdef PPI_DEBUG_TOOL
+    if (is_detect_start) {
+        if (is_process_captured) {
+            switch (EAX) {
+                case 56:
+                    just_clone++;
+#ifdef PPI_PROCESS_INFO
+                    printf("clone : %d\n", just_clone);
+#endif
+                    thread_start = 1;
+                    break;
+                case 60:
+                    index = process_dequeue(&process_queue, env->cr[3], ESP & STACK_MASK);
+#ifdef PPI_PROCESS_INFO
+                    printf("thread dequeue : cr3 : 0x%lx ; esp : 0x%lx ; index : %d\n", 
+                            env->cr[3], (ESP & STACK_MASK), index);
+#endif
+                    if (index >= 0) {			   
+                        current_id = 0; // not detected thread
+                        thread_exit = 1; 
+                    }
+#ifdef PPI_PROCESS_INFO
+                    else {
+                        printf("thread dequeue : should not be here!\n");
+                    }
+#endif
+                    break;
+            }
+        }
+    }
+#endif 
 }
 #endif
 #endif
@@ -1072,6 +1229,36 @@ void helper_sysret(int dflag)
         raise_exception_err(EXCP0D_GPF, 0);
     }
     selector = (env->star >> 48) & 0xffff;
+
+#ifdef PPI_DEBUG_TOOL  
+    if (is_detect_start && is_process_captured) {
+        if (just_clone) {
+            if (is_process_in_queue(&process_queue, env->cr[3]) >= 0) {
+                if ((is_thread_in_queue(&process_queue, env->cr[3], (ESP & STACK_MASK)) < 0)) {
+#ifdef PPI_PROCESS_INFO
+                    printf("next cr3 : 0x%lx\n", env->cr[3]);
+                    printf("next esp : 0x%lx\n", ESP & STACK_MASK);
+#endif
+                    int index = process_enqueue(&process_queue,env->cr[3], 
+                            (ESP & STACK_MASK), total_id);
+#ifdef PPI_PROCESS_INFO
+                    printf("thread enqueue : cr3 : 0x%lx ; esp : 0x%lx ; id : %d; index : %d ; is_process_captured : %d\n", 
+                            env->cr[3], (ESP & STACK_MASK), total_id, index, is_process_captured);
+#endif
+                    total_id++;
+                    just_clone--;
+                }
+            }
+        }
+        int index = is_thread_in_queue(&process_queue, env->cr[3], (ESP & STACK_MASK));
+        if (index < 0) {
+            current_id = 0;
+        } else {
+            current_id = get_thread_id(&process_queue, index);
+        }
+    }
+#endif
+
     if (env->hflags & HF_LMA_MASK) {
         if (dflag == 2) {
             cpu_x86_load_seg_cache(env, R_CS, (selector + 16) | 3,

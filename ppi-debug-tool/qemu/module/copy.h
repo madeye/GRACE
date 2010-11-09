@@ -47,23 +47,21 @@ static inline uint8_t trace_thread_id_map(struct map_queue *map, uint8_t id)
 
 static inline void trace_mem_buf_clear(struct map_queue *map, uint8_t id) 
 {
+
 #ifdef PPI_DETECTOR_MODULE
     uint8_t tid;
     uint32_t size;
     struct trace_content *buf;
 
-    if ((id > 0) && ((uint32_t)env->trace_mem_ptr > (uint32_t)env->trace_mem_buf)) {
+    if ((id > 0) && (env->trace_mem_ptr - env->debug_info.trace_mem_buf > 0)) {
         tid = trace_thread_id_map(map, id);
-        size = ((uint32_t)env->trace_mem_ptr - (uint32_t)env->trace_mem_buf) / sizeof(struct trace_content);
-        buf = env->trace_mem_buf;
-
+        size = env->trace_mem_ptr - env->debug_info.trace_mem_buf;
+        buf = env->debug_info.trace_mem_buf;
         data_race_detector(tid, size, buf);
     }
-#else
-    if ((id > 0) && ((uint32_t)debug_info.))
 #endif
 
-    env->trace_mem_ptr = env->trace_mem_buf;
+    env->trace_mem_ptr = env->debug_info.trace_mem_buf;
 }
 #endif
 

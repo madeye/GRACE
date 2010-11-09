@@ -651,125 +651,125 @@ static inline void monitor_syn_info_init(struct monitor_syn_info *syn_info)
 //#define PPI_SYN_JOIN
 //#define PPI_SYN_EXIT
 
-static inline void monitor_syn_info_trace(struct monitor_syn_info *syn_info) 
-{
-    uint32_t pc;
+//static inline void monitor_syn_info_trace(struct monitor_syn_info *syn_info) 
+//{
+    //uint32_t pc;
 
-    pc = EIP;
+    //pc = EIP;
 
-#ifdef PPI_SYN_MUTEX_INIT
-    if (pc == syn_info->mutex_init_addr) {
-#ifdef PPI_SYN_INFO
-        syn_info->mutex_init_count++;
-#endif
-    }
-#endif
+//#ifdef PPI_SYN_MUTEX_INIT
+    //if (pc == syn_info->mutex_init_addr) {
+//#ifdef PPI_SYN_INFO
+        //syn_info->mutex_init_count++;
+//#endif
+    //}
+//#endif
 
-#ifdef PPI_SYN_MUTEX_LOCK
-    if (pc == syn_info->mutex_lock_addr) {
-        trace_syn_collection(TRACE_SYN_LOCK, 1, ldl(ESP + 4), 0, pc);
-#ifdef PPI_SYN_INFO
-        syn_info->mutex_lock_count++;
-#endif
-    }
-#endif
+//#ifdef PPI_SYN_MUTEX_LOCK
+    //if (pc == syn_info->mutex_lock_addr) {
+        //trace_syn_collection(TRACE_SYN_LOCK, 1, ldl(ESP + 4), 0, pc);
+//#ifdef PPI_SYN_INFO
+        //syn_info->mutex_lock_count++;
+//#endif
+    //}
+//#endif
 
-#ifdef PPI_SYN_MUTEX_UNLOCK
-    if (pc == syn_info->mutex_unlock_addr) {
-        trace_syn_collection(TRACE_SYN_UNLOCK, 1, ldl(ESP + 4), 0, pc);
-#ifdef PPI_SYN_INFO
-        syn_info->mutex_unlock_count++;
-#endif
-    }
-#endif
+//#ifdef PPI_SYN_MUTEX_UNLOCK
+    //if (pc == syn_info->mutex_unlock_addr) {
+        //trace_syn_collection(TRACE_SYN_UNLOCK, 1, ldl(ESP + 4), 0, pc);
+//#ifdef PPI_SYN_INFO
+        //syn_info->mutex_unlock_count++;
+//#endif
+    //}
+//#endif
 
-#ifdef PPI_SYN_BARRIER_INIT
-    if (pc == syn_info->barrier_init_addr) {
-#ifdef PPI_SYN_INFO
-        syn_info->barrier_init_count++;
-#endif
-    }
-#endif
+//#ifdef PPI_SYN_BARRIER_INIT
+    //if (pc == syn_info->barrier_init_addr) {
+//#ifdef PPI_SYN_INFO
+        //syn_info->barrier_init_count++;
+//#endif
+    //}
+//#endif
 
-#ifdef PPI_SYN_BARRIER_WAIT
-    if (pc == syn_info->barrier_wait_addr) {
-        trace_syn_collection(TRACE_SYN_BARRIER, 1, ldl(ESP + 4), 0, pc);
-#ifdef PPI_SYN_INFO
-        syn_info->barrier_wait_count++;
-#endif
-    }
-#endif
+//#ifdef PPI_SYN_BARRIER_WAIT
+    //if (pc == syn_info->barrier_wait_addr) {
+        //trace_syn_collection(TRACE_SYN_BARRIER, 1, ldl(ESP + 4), 0, pc);
+//#ifdef PPI_SYN_INFO
+        //syn_info->barrier_wait_count++;
+//#endif
+    //}
+//#endif
 
-#ifdef PPI_SYN_COND_INIT
-    if (pc == syn_info->cond_init_addr) {
-#ifdef PPI_SYN_INFO
-        syn_info->cond_init_count++;
-#endif
-    }
-#endif
+//#ifdef PPI_SYN_COND_INIT
+    //if (pc == syn_info->cond_init_addr) {
+//#ifdef PPI_SYN_INFO
+        //syn_info->cond_init_count++;
+//#endif
+    //}
+//#endif
 
-#ifdef PPI_SYN_COND_WAIT
-    if (pc == syn_info->cond_wait_addr) {
-        trace_syn_collection(TRACE_SYN_COND_WAIT, 2, ldl(ESP + 4), ldl(ESP + 8), pc);
-#ifdef PPI_SYN_INFO
-        syn_info->cond_wait_count++;
-#endif
-    }
-#endif
+//#ifdef PPI_SYN_COND_WAIT
+    //if (pc == syn_info->cond_wait_addr) {
+        //trace_syn_collection(TRACE_SYN_COND_WAIT, 2, ldl(ESP + 4), ldl(ESP + 8), pc);
+//#ifdef PPI_SYN_INFO
+        //syn_info->cond_wait_count++;
+//#endif
+    //}
+//#endif
 
-#ifdef PPI_SYN_COND_BROADCAST
-    if (pc == syn_info->cond_broadcast_addr) {
-        trace_syn_collection(TRACE_SYN_COND_BROADCAST, 1, ldl(ESP + 4), 0, pc);
-#ifdef PPI_SYN_INFO
-        syn_info->cond_broadcast_count++;
-#endif
-    }
-#endif
+//#ifdef PPI_SYN_COND_BROADCAST
+    //if (pc == syn_info->cond_broadcast_addr) {
+        //trace_syn_collection(TRACE_SYN_COND_BROADCAST, 1, ldl(ESP + 4), 0, pc);
+//#ifdef PPI_SYN_INFO
+        //syn_info->cond_broadcast_count++;
+//#endif
+    //}
+//#endif
 
-#ifdef PPI_SYN_CREATE
-    if (pc == syn_info->create_addr) {
-        trace_syn_collection(TRACE_SYN_CREATE, 1, ldl(ESP + 4), 0, pc);
-#ifdef PPI_SYN_INFO
-        //printf("create : %d\n", currentID);
-        syn_info->create_count++;
-#endif
-    }
-#endif
+//#ifdef PPI_SYN_CREATE
+    //if (pc == syn_info->create_addr) {
+        //trace_syn_collection(TRACE_SYN_CREATE, 1, ldl(ESP + 4), 0, pc);
+//#ifdef PPI_SYN_INFO
+        ////printf("create : %d\n", currentID);
+        //syn_info->create_count++;
+//#endif
+    //}
+//#endif
 
-#ifdef PPI_SYN_JOIN
-    if (pc == syn_info->join_addr) {
-        trace_syn_collection(TRACE_SYN_JOIN, 1, ldl(ESP + 4), 0, pc);
-#ifdef PPI_SYN_INFO
-        //printf("join : %d\n", currentID);
-        syn_info->join_count++;
-#endif
-    }
-#endif
-}
+//#ifdef PPI_SYN_JOIN
+    //if (pc == syn_info->join_addr) {
+        //trace_syn_collection(TRACE_SYN_JOIN, 1, ldl(ESP + 4), 0, pc);
+//#ifdef PPI_SYN_INFO
+        ////printf("join : %d\n", currentID);
+        //syn_info->join_count++;
+//#endif
+    //}
+//#endif
+//}
 
-static inline void monitor_syn_info_print(struct monitor_syn_info *syn_info) 
-{
-#if 0
-    printf("mutex init count : %d\n", syn_info->mutex_init_count);
-#endif
-    printf("mutex lock count : %d\n", syn_info->mutex_lock_count);
-    printf("mutex unlock count : %d\n", syn_info->mutex_unlock_count);
-#if 0
-    printf("barrier init count : %d\n", syn_info->barrier_init_count);
-#endif
-    printf("barrier wait count : %d\n", syn_info->barrier_wait_count);
-#if 0
-    printf("create count : %d\n", syn_info->create_count);
-    printf("join count : %d\n", syn_info->join_count);
-    printf("cond init count : %d\n", syn_info->cond_init_count);
-#endif
-    printf("cond wait count : %d\n", syn_info->cond_wait_count);
-#if 0
-    printf("cond timedwait count : %d\n", syn_info->cond_timedwait_count);
-    printf("cond signal count : %d\n", syn_info->cond_signal_count);
-#endif
-    printf("cond broadcast count : %d\n", syn_info->cond_broadcast_count);
-}
+//static inline void monitor_syn_info_print(struct monitor_syn_info *syn_info) 
+//{
+//#if 0
+    //printf("mutex init count : %d\n", syn_info->mutex_init_count);
+//#endif
+    //printf("mutex lock count : %d\n", syn_info->mutex_lock_count);
+    //printf("mutex unlock count : %d\n", syn_info->mutex_unlock_count);
+//#if 0
+    //printf("barrier init count : %d\n", syn_info->barrier_init_count);
+//#endif
+    //printf("barrier wait count : %d\n", syn_info->barrier_wait_count);
+//#if 0
+    //printf("create count : %d\n", syn_info->create_count);
+    //printf("join count : %d\n", syn_info->join_count);
+    //printf("cond init count : %d\n", syn_info->cond_init_count);
+//#endif
+    //printf("cond wait count : %d\n", syn_info->cond_wait_count);
+//#if 0
+    //printf("cond timedwait count : %d\n", syn_info->cond_timedwait_count);
+    //printf("cond signal count : %d\n", syn_info->cond_signal_count);
+//#endif
+    //printf("cond broadcast count : %d\n", syn_info->cond_broadcast_count);
+//}
 #endif
 
 #endif /* MONITOR_H */

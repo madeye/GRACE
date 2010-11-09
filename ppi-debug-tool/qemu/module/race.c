@@ -7,7 +7,7 @@ struct race_entry {
     uint32_t instance;
 };
 
-#define MAX_RACE_NUM (1 << 16)
+#define MAX_RACE_NUM (1 << 19)
 
 struct race_queue {
     struct race_entry entry[MAX_RACE_NUM];
