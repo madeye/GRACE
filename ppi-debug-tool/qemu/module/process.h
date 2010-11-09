@@ -1,6 +1,8 @@
 #ifndef PROCESS_H
 #define PROCESS_H
 
+#define MAX_PROCESS_NUM 16
+
 struct ProcessIdentify {
     unsigned long cr3;
     unsigned long esp;

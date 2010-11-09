@@ -2213,6 +2213,18 @@ Normally QEMU loads a configuration file from @var{sysconfdir}/qemu.conf and
 option will prevent QEMU from loading these configuration files at startup.
 ETEXI
 
+DEF("tnum", HAS_ARG, QEMU_OPTION_threadnum,
+    "-tnum n[Max Thread Num]", QEMU_ARCH_ALL)
+STEXI
+Set the max thread num for trace detection.
+ETEXI
+
+DEF("bench", HAS_ARG, QEMU_OPTION_benchmark,
+    "-bench n[Benchmark Index]", QEMU_ARCH_ALL)
+STEXI
+Set the benchmark id for synchronization information collection.
+ETEXI
+
 HXCOMM This is the last statement. Insert new options before this line!
 STEXI
 @end table

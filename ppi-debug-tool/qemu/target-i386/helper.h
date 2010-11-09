@@ -21,6 +21,27 @@ DEF_HELPER_1(divq_EAX, void, tl)
 DEF_HELPER_1(idivq_EAX, void, tl)
 #endif
 
+#ifdef PPI_DEBUG_TOOL_GUEST
+DEF_HELPER_2(load_byte_trace, void, tl, tl)
+DEF_HELPER_2(load_word_trace, void, tl, tl)
+DEF_HELPER_2(load_long_trace, void, tl, tl)
+DEF_HELPER_2(load_quad_trace, void, tl, tl)
+
+DEF_HELPER_2(store_byte_trace, void, tl, tl)
+DEF_HELPER_2(store_word_trace, void, tl, tl)
+DEF_HELPER_2(store_long_trace, void, tl, tl)
+DEF_HELPER_2(store_quad_trace, void, tl, tl)
+#endif
+#ifdef PPI_DEBUG_TOOL
+DEF_HELPER_0(process_enqueue, void)
+DEF_HELPER_0(process_dequeue, void)
+DEF_HELPER_1(syn_lock_trace, void, tl)
+DEF_HELPER_1(syn_unlock_trace, void, tl)
+DEF_HELPER_1(syn_barrier_trace, void, tl)
+DEF_HELPER_1(syn_condwait_trace, void, tl)
+DEF_HELPER_1(syn_condbroad_trace, void, tl)
+#endif
+
 DEF_HELPER_1(aam, void, int)
 DEF_HELPER_1(aad, void, int)
 DEF_HELPER_0(aaa, void)

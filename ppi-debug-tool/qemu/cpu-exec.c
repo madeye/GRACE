@@ -22,21 +22,44 @@
 #include "tcg.h"
 #include "kvm.h"
 
-
-#include "coremu-config.h"
-#include "coremu-intr.h"
-
 #ifdef PPI_DEBUG_TOOL
+
+#define PPI_DETECTOR_MODULE
+
+extern uint32_t total_id;
+extern uint8_t thread_start;
+extern uint8_t thread_exit;
+extern uint8_t timing_start;
+extern uint8_t timing_end;
+extern uint8_t current_id;
+extern uint8_t last_id;
+extern volatile uint8_t is_detect_start;
+extern uint8_t is_process_captured;
+extern struct map_queue map;
+extern struct ProcessQueue process_queue;   // Process queue
+
+#include "module/process.h"
+#include "module/copy.h"
+
+#ifdef PPI_PRINT_INFO
+#include <time.h>
+
+clock_t start_time;
+clock_t end_time;
+
+time_t first_time;
+time_t second_time;
+#endif
 
 #include <assert.h>
 #include <stdlib.h>
 
 extern FILE *stderr;
 
-COREMU_THREAD struct trace_content *trace_mem_ptr;
-uint8_t is_collect = 0;
-
 #endif
+
+#include "coremu-config.h"
+#include "coremu-intr.h"
 
 #if !defined(CONFIG_SOFTMMU)
 #undef EAX
@@ -128,6 +151,62 @@ static void cpu_exec_nocache(int max_cycles, TranslationBlock *orig_tb)
     env->current_tb = tb;
     /* execute the generated code */
     next_tb = tcg_qemu_tb_exec(tb->tc_ptr);
+#ifdef PPI_DEBUG_TOOL
+
+                    if (thread_start) {
+#ifdef PPI_PRINT_INFO
+                        printf("\tthread start : last tid : %d ; current tid : %d\n", last_id, current_id);
+#endif
+
+                        trace_syn_collection(TRACE_SYN_CREATE, 0, 0, 0, EIP);      
+
+                        thread_start = 0;
+                    }
+                    if (thread_exit) {
+#ifdef PPI_PRINT_INFO
+                        printf("\tthread exit : last tid : %d ; current tid : %d\n", last_id, current_id);
+#endif
+
+                        trace_syn_collection(TRACE_SYN_JOIN, 0, 0, 0, EIP);
+
+                        thread_exit= 0;
+                    }
+
+                    // TODO: Necessary to add is_detect_start here?
+                    if (is_detect_start) {
+                        if (last_id != current_id) {
+                            trace_mem_buf_clear(&map, last_id);
+                            last_id = current_id;
+                        } else {	
+                            if (env->trace_mem_ptr - env->debug_info.trace_mem_buf > TRACE_BUF_SIZE) {
+                                trace_mem_buf_clear(&map, last_id);
+                            }
+                        }
+                    }
+
+                    if (timing_start) {
+#ifdef PPI_PRINT_INFO
+                        start_time= clock();
+                        first_time = time(NULL);
+                        printf("\ttiming start!\n");
+#endif
+                        timing_start = 0;
+                    }
+
+                    if (timing_end) {
+                        data_race_detector_report();
+#ifdef PPI_PRINT_INFO
+                        end_time = clock();
+                        second_time = time(NULL);
+                        printf("\ttiming end!\n");
+                        printf("\nTime costs : %f (s) ; %f (s)\n", 
+                                (double)(end_time - start_time) / 1000000, difftime(second_time, first_time));
+#endif
+                        is_detect_start = 0;
+                        timing_end = 0;
+                    }
+#endif
+
     env->current_tb = NULL;
 
     if ((next_tb & 3) == 2) {
@@ -236,10 +315,6 @@ int cpu_exec(CPUState *env1)
     TranslationBlock *tb;
     uint8_t *tc_ptr;
     unsigned long next_tb;
-
-#ifdef PPI_DEBUG_TOOL
-    volatile struct trace_content *trace_ptr;
-#endif
 
     if (cpu_halted(env1) == EXCP_HALTED)
         return EXCP_HALTED;
@@ -677,20 +752,6 @@ int cpu_exec(CPUState *env1)
                 }
                 /* reset soft MMU for next block (it can currently
                    only be set by a memory fault) */
-#ifdef PPI_DEBUG_TOOL
-    if (is_collect && trace_mem_ptr && 
-            (uint64_t)(trace_mem_ptr - env->debug_info.trace_mem_buf) > TRACE_BUF_SIZE) 
-    {
-        for(trace_ptr = env->debug_info.trace_mem_buf; 
-                trace_ptr != trace_mem_ptr; trace_ptr++)
-        {
-            fprintf(stderr, "PPI_DEBUG_TOOL: type: %ld, size: %ld, pc: 0x%lx, address: 0x%lx \n",
-                    trace_ptr->type, trace_ptr->size, 
-                    trace_ptr->pc, trace_ptr->value.mem.address);
-        }
-        trace_mem_ptr = env->debug_info.trace_mem_buf;
-    }
-#endif
             } /* for(;;) */
         }
     } /* for(;;) */
@@ -716,16 +777,6 @@ int cpu_exec(CPUState *env1)
     /* XXXXX */
 #else
 #error unsupported target CPU
-#endif
-
-#ifdef PPI_DEBUG_TOOL
-    if (!trace_mem_ptr) {
-        trace_mem_ptr = env->debug_info.trace_mem_buf;
-#ifdef PPI_PRINT_INFO
-        printf("\ntrace content size : 0x%lx\n", sizeof(struct trace_content));
-        printf("trace memory buffer size : 0x%lx\n", sizeof(env->debug_info.trace_mem_buf));
-#endif
-    }
 #endif
 
     /* restore global registers */

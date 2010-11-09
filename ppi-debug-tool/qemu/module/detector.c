@@ -11,24 +11,28 @@ typedef unsigned long uint64_t;
 #define DETECTOR_INFO_PRINT
 #define DETECTOR_STATISTICS_PRINT
 
+#include "process.h"
+
+extern uint32_t max_thread_num;
+
 #include "interface.h"
 
-#include "race.c"
+#include "race.h"
 
-#include "info.c"
+#include "info.h"
 
-#include "timestamp.c"
+#include "timestamp.h"
 
 #define MOD_HISTORY
 #define MOD_MATCH
 
-#include "history.c"
+#include "history.h"
 
 #define MOD_FILTER
 
-#include "filter.c"
+#include "filter.h"
 
-#include "handler.c"
+#include "handler.h"
 
 /* interface */
 

@@ -182,6 +182,33 @@ int main(int argc, char **argv)
 
 #define MAX_VIRTIO_CONSOLES 1
 
+#define PPI_DEBUG_TOOL
+#ifdef PPI_DEBUG_TOOL
+#define PPI_PROCESS_INIT
+#define PPI_MONITOR_INIT
+#define PPI_COPY_INIT
+
+#include "module/process.h"
+#include "module/copy.h"
+
+uint32_t max_thread_num = 2;
+uint32_t bench_mark_id = 0;
+volatile uint8_t is_detect_start = 0;
+uint8_t is_process_captured = 0;
+uint8_t just_exec = 0;
+uint8_t just_clone = 0;
+uint8_t just_exit = 0;
+uint8_t thread_start = 0;
+uint8_t thread_exit = 0;
+uint8_t timing_start = 0;
+uint8_t timing_end = 0;
+uint32_t total_id = 1;
+uint32_t current_id = 0;
+uint8_t last_id = 0;
+struct ProcessQueue process_queue;
+struct map_queue map;
+#endif
+
 static const char *data_dir;
 const char *bios_name = NULL;
 /* Note: drives_table[MAX_DRIVES] is a dummy block driver if none available
@@ -2656,6 +2683,12 @@ int main(int argc, char **argv, char **envp)
     int show_vnc_port = 0;
     int defconfig = 1;
 
+#ifdef PPI_DEBUG_TOOL
+    data_race_detector_init();
+    process_queue_init(&process_queue);
+    map_queue_init(&map);
+#endif
+
     error_set_progname(argv[0]);
 
     init_clocks();
@@ -2793,6 +2826,16 @@ int main(int argc, char **argv, char **envp)
             case QEMU_OPTION_initrd:
                 initrd_filename = optarg;
                 break;
+#ifdef PPI_DEBUG_TOOL
+            case QEMU_OPTION_benchmark:
+                bench_mark_id = atoi(optarg);
+                printf("bench mark: %d\n", bench_mark_id);
+                break;
+            case QEMU_OPTION_threadnum:
+                max_thread_num = atoi(optarg);
+                printf("max thread num: %d\n", max_thread_num);
+                break;
+#endif
             case QEMU_OPTION_hda:
                 if (cyls == 0)
                     hda_opts = drive_add(optarg, HD_ALIAS, 0);

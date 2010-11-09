@@ -23,6 +23,7 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -77,6 +78,10 @@ void *cm_cpu_loop(void *args)
     /* Must initialize cpu_single_env before initializing core thread. */
     assert(args);
     cpu_single_env = (CPUState *)args;
+
+#ifdef PPI_DEBUG_TOOL
+    cpu_single_env->trace_mem_ptr = cpu_single_env->debug_info.trace_mem_buf;
+#endif
 
     /* Setup dynamic translator */
     cm_cpu_exec_init_core();

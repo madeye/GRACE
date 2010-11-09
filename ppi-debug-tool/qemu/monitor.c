@@ -478,15 +478,15 @@ static int do_qmp_capabilities(Monitor *mon, const QDict *params,
 
 #ifdef PPI_DEBUG_SWITCHER
 
-extern uint8_t is_collect; 
+extern volatile uint8_t is_detect_start; 
 
 static void do_marker(Monitor *mon, QObject **ret_data)
 {
-    if (is_collect) {
-        is_collect = 0;
+    if (is_detect_start) {
+        is_detect_start = 0;
         printf("set the marker to 0\n");
     } else {
-        is_collect = 1;
+        is_detect_start = 1;
         printf("set the marker to 1\n");
     }
 }

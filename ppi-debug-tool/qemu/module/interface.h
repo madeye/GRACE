@@ -5,7 +5,7 @@
 #define PPI_PROCESS_INFO
 #define PPI_SYN_INFO
 
-#define TRACE_PRIVATE_BUF_SIZE (16 * 1024 * 1024)
+#define TRACE_PRIVATE_BUF_SIZE (16 * 16 * 1024)
 
 #define TRACE_MEM_INT
 #define TRACE_MEM_FLOAT
@@ -13,8 +13,6 @@
 #define TRACE_PC_BASE 0x8000000
 #define TRACE_PC_LIMIT 0x10000000
 
-#define MAX_PROCESS_NUM 16
-#define MAX_THREAD_NUM 2
 
 #define TRACE_BUF_SIZE (1 * 1024)
 
@@ -39,7 +37,6 @@ enum {
     TRACE_MEM_SIZE_LONG = 4,
     TRACE_MEM_SIZE_QUAD = 8,
 };
-
 
 struct trace_content {
     uint8_t tid;

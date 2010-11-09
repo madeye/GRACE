@@ -438,6 +438,14 @@
 #define EXCP_SYSCALL    0x100 /* only happens in user only emulation
                                  for syscall instruction */
 
+#define PPI_DEBUG_TOOL
+#define PPI_DEBUG_TOOL_GUEST
+#define PPI_DEBUG_SWITCHER
+
+#ifdef PPI_DEBUG_TOOL
+#include "../module/interface.h"
+#endif
+
 enum {
     CC_OP_DYNAMIC, /* must use dynamic code to get cc_op */
     CC_OP_EFLAGS,  /* all cc are explicitly computed, CC_SRC = flags */
@@ -581,13 +589,6 @@ typedef struct {
 
 #define NB_MMU_MODES 2
 
-#define PPI_DEBUG_TOOL
-#define PPI_DEBUG_SWITCHER
-
-#ifdef PPI_DEBUG_TOOL
-#include "../module/interface.h"
-#endif
-
 typedef struct CPUX86State {
     /* standard registers *//*{{{*/
     target_ulong regs[CPU_NB_REGS];
@@ -727,7 +728,8 @@ typedef struct CPUX86State {
     uint16_t fpregs_format_vmstate;
 
 #ifdef PPI_DEBUG_TOOL
-    DEBUGInfo debug_info;    
+    DEBUGInfo debug_info;
+    struct trace_content *trace_mem_ptr;
 #endif
 
 } CPUX86State;/*}}}*/

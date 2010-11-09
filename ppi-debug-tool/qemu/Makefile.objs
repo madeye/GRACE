@@ -44,6 +44,7 @@ fsdev-obj-$(CONFIG_LINUX) += $(addprefix fsdev/, $(fsdev-nested-y))
 # system emulation, i.e. a single QEMU executable should support all
 # CPUs and machines.
 
+
 common-obj-y = $(block-obj-y)
 common-obj-y += $(net-obj-y)
 common-obj-y += $(qobject-obj-y)
@@ -83,6 +84,9 @@ common-obj-y += block-migration.o
 
 common-obj-$(CONFIG_BRLAPI) += baum.o
 common-obj-$(CONFIG_POSIX) += migration-exec.o migration-unix.o migration-fd.o
+
+# FRES related object
+common-obj-y += module/detector.o
 
 audio-obj-y = audio.o noaudio.o wavaudio.o mixeng.o
 audio-obj-$(CONFIG_SDL) += sdlaudio.o

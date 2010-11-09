@@ -96,6 +96,8 @@ audio/audio.o audio/fmodaudio.o: QEMU_CFLAGS += $(FMOD_CFLAGS)
 
 QEMU_CFLAGS+=$(CURL_CFLAGS)
 
+detector.o: detector.c
+
 cocoa.o: cocoa.m
 
 keymaps.o: keymaps.c keymaps.h
