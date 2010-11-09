@@ -59,7 +59,7 @@ static inline void module_race_filter(struct race_queue *remain, struct race_ent
 
         remain->count++;
         if (remain->count >= MAX_RACE_NUM) {
-            printf("race queue overflow!\n");
+            fprintf(stderr, "race queue overflow!\n");
             assert(0);
         }
     } 
@@ -76,17 +76,17 @@ static inline void module_race_print()
     }
 
     for (i = 0; i < race.remain.count; i++) {
-        printf("No. %d : address : 0x%x ; same count : %d\n", 
+        fprintf(stderr, "No. %d : address : 0x%x ; same count : %d\n", 
                 i, race.remain.entry[i].content2.value.mem.address, race.remain.entry[i].instance);
-        printf("tid1 : %d ; type1 : %d ; size1 : %d ; pc1 : 0x%x\n", 
+        fprintf(stderr, "tid1 : %d ; type1 : %d ; size1 : %d ; pc1 : 0x%x\n", 
                 race.remain.entry[i].content1.tid, race.remain.entry[i].content1.type, 
                 race.remain.entry[i].content1.size, race.remain.entry[i].content1.pc);
-        printf("tid2 : %d ; type2 : %d ; size2 : %d ; pc2 : 0x%x\n\n", 
+        fprintf(stderr, "tid2 : %d ; type2 : %d ; size2 : %d ; pc2 : 0x%x\n\n", 
                 race.remain.entry[i].content2.tid, race.remain.entry[i].content2.type, 
                 race.remain.entry[i].content2.size, race.remain.entry[i].content2.pc);
     }
 
-    printf("race remain count : %d\n\n", race.remain.count);
+    fprintf(stderr, "race remain count : %d\n\n", race.remain.count);
 }
 
 static inline uint8_t module_race_content_equal(struct trace_content *content1, struct trace_content *content2)
@@ -125,7 +125,7 @@ static inline void module_race_collection(struct trace_content *content1, struct
 
         temp_queue->count++;
         if (temp_queue->count >= MAX_RACE_NUM) {
-            printf("race queue overflow!\n");
+            fprintf(stderr, "race queue overflow!\n");
             assert(0);
         }
     }

@@ -94,7 +94,7 @@ static inline void module_history_store_record(struct trace_content *content)
 
 /* match */
 
-void module_match_with_load(struct trace_content *content, uint8_t other_tid) 
+static inline void module_match_with_load(struct trace_content *content, uint8_t other_tid) 
 {
 #ifdef MOD_MATCH
     uint8_t tid;
@@ -139,9 +139,11 @@ void module_match_with_load(struct trace_content *content, uint8_t other_tid)
         other_address = temp_entry->content.value.mem.address;
 
         if (address == other_address) {
-            /*if ((address % content->size) != 0) {*/
-                /*content->size = address % content->size;*/
-            /*}*/
+#if 0
+            if ((address % content->size) != 0) {
+                content->size = address % content->size;
+            }
+#endif
 
             module_race_collection(&temp_entry->content, content);
 
@@ -151,7 +153,7 @@ void module_match_with_load(struct trace_content *content, uint8_t other_tid)
 #endif
 }
 
-void module_match_with_store(struct trace_content *content, uint8_t other_tid) 
+static inline void module_match_with_store(struct trace_content *content, uint8_t other_tid) 
 {
 #ifdef MOD_MATCH
     uint8_t tid;
@@ -196,9 +198,11 @@ void module_match_with_store(struct trace_content *content, uint8_t other_tid)
         other_address = temp_entry->content.value.mem.address;
 
         if (address == other_address) {
-            /*if ((address % content->size) != 0) {*/
-                /*content->size = address % content->size;*/
-            /*}*/
+#if 0
+            if ((address % content->size) != 0) {
+                content->size = address % content->size;
+            }
+#endif
 
             module_race_collection(&temp_entry->content, content);
 
