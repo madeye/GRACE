@@ -1,0 +1,94 @@
+                                     COREMU
+
+COREMU is a scalable and portable parallel full system emulator built on Qemu. Currently, COREMU
+supports X86_64 and ARM (MPcore).
+
+COREMU is able to boot 255 emulated cores running Linux on our testing machine which has only 4 physical
+cores (Intel Core(TM)2 Quad CPU Q6600, with 2G memory).
+
+Quickstart
+----------
+
+What you need:
+
+  1. Patch Qemu source code
+  2. Download COREMU source code
+  3. Install libtopology (we used version 0.9). You can download it from:
+     http://www.open-mpi.org/software/hwloc/v0.9/downloads/libtopology-0.9.tar.gz 
+
+Compile and install. (Run 'configure --help' for more options.)
+
+  cd <coremu source dir>
+  ./configure --target=x86_64 --prefix=<install dir> <path to qemu source code>
+  make
+  make install
+
+You can now use COREMU to start a Linux system. We provide several scripts to do
+this. Note that COREMU needs to be run as root, because we change thread
+priority during the execution.
+
+  cd scripts
+  sudo ./x86_64-linux.sh <path to coremu> <path to image> <number of emulated cores>
+
+For example:
+
+  sudo ./x86_64-linux.sh ../bin/bin/qemu-system-x86_64 debian.img 255
+
+The system may take a while to start booting, please be patient.
+
+We also provide two system images which can be used directly:
+
+  - x86_64 debian Linux image. Use root to login, no password is required.
+    There is a wordcount MapReduce program from Phoenix-2.0 benchmark under /root
+    directory.
+  - A ramdisk for ARM Linux based on the image provided by ARM Ltd.
+    http://www.arm.com/community/software-enablement/linux.php
+
+Notes
+-----
+
+IMPORTANT: COREMU rely on accurate nanosleep, so the host system's Linux kernel
+must have the option ""High Resolution Timer" enabled.
+
+You can check this by looking at the output of 'cat /proc/timer_list'. If the
+resolution is 1 nsecs, it should be OK.
+
+COREMU currently does not support Mac OS X. It should be easy to port it to run on
+Mac OS X. We will provide such support soon.
+
+We put COREMU in a separate directory and build it as library, because we want
+to:
+
+  a. Make modification to Qemu as little as possible
+  b. Abstract what need to be done to build a parallel emulator by using a
+     sequential one
+
+The Qemu source code we used are checked out from the official Qemu git
+repository. Since the stable branch does not support Cortex A9 very well, we
+started the development on the master branch. More specifically, we started from
+the commit: 54d7cf136f040713095cbc064f62d753bff6f9d2
+
+Other notes:
+
+  1. It would be better to use recent version of Linux kernel (e.g. 2.6.33) in order to
+     emulate more than 64 cores. (We encounter kernel crash using Linux 2.6.26
+     during the development.)
+  2. We modified seabios in order to start 255 cores. But you can't use
+     graphical interface using this bios.
+  3. We suggest not using qemu's graphic interface, it's much slower than serial
+     mode. (Please refer to the provided scripts.)
+
+Contact
+-------
+
+For more information, please visit our project web site.
+
+http://ppi.fudan.edu.cn/coremu
+
+You can also take a look at our research group, maybe you will be interested in
+our other projects.
+
+http://ppi.fudan.edu.cn/system_research_group
+
+Feel free to contact us if you have any problem.
+

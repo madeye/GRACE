@@ -13,12 +13,12 @@ struct map_queue {
 };
 
 #ifdef PPI_COPY_INIT
-static inline void map_queue_init(struct map_queue *map)
+static inline void map_queue_init(volatile struct map_queue *map)
 {
     memset(map, 0, sizeof(struct map_queue));
 }
 #else
-static inline uint8_t trace_thread_id_map(struct map_queue *map, uint8_t id)
+static inline uint8_t trace_thread_id_map(volatile struct map_queue *map, uint8_t id)
 {
     uint8_t i;
 
@@ -45,7 +45,7 @@ static inline uint8_t trace_thread_id_map(struct map_queue *map, uint8_t id)
     return i;
 }
 
-static inline void trace_mem_buf_clear(struct map_queue *map, uint8_t id) 
+static inline void trace_mem_buf_clear(volatile struct map_queue *map, uint8_t id) 
 {
 
 #ifdef PPI_DETECTOR_MODULE

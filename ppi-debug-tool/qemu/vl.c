@@ -182,7 +182,8 @@ int main(int argc, char **argv)
 
 #define MAX_VIRTIO_CONSOLES 1
 
-#define PPI_DEBUG_TOOL
+/*#define PPI_DEBUG_TOOL*/
+volatile uint32_t max_thread_num = 2;
 #ifdef PPI_DEBUG_TOOL
 #define PPI_PROCESS_INIT
 #define PPI_MONITOR_INIT
@@ -191,22 +192,21 @@ int main(int argc, char **argv)
 #include "module/process.h"
 #include "module/copy.h"
 
-uint32_t max_thread_num = 2;
-uint32_t bench_mark_id = 0;
+volatile uint32_t bench_mark_id = 0;
 volatile uint8_t is_detect_start = 0;
-uint8_t is_process_captured = 0;
-uint8_t just_exec = 0;
-uint8_t just_clone = 0;
-uint8_t just_exit = 0;
-uint8_t thread_start = 0;
-uint8_t thread_exit = 0;
-uint8_t timing_start = 0;
-uint8_t timing_end = 0;
-uint32_t total_id = 1;
-uint32_t current_id = 0;
-uint8_t last_id = 0;
-struct ProcessQueue process_queue;
-struct map_queue map;
+volatile uint8_t is_process_captured = 0;
+volatile uint8_t just_exec = 0;
+volatile uint8_t just_clone = 0;
+volatile uint8_t just_exit = 0;
+volatile uint8_t thread_start = 0;
+volatile uint8_t thread_exit = 0;
+volatile uint8_t timing_start = 0;
+volatile uint8_t timing_end = 0;
+volatile uint32_t total_id = 1;
+volatile uint32_t current_id = 0;
+volatile uint8_t last_id = 0;
+volatile struct ProcessQueue process_queue;
+volatile struct map_queue map;
 #endif
 
 static const char *data_dir;

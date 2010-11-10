@@ -23,6 +23,7 @@ STEXI
 Show the help for all commands or just for command @var{cmd}.
 ETEXI
 
+#ifdef PPI_DEBUG_TOOL
 STEXI
 @table @option
 ETEXI
@@ -40,6 +41,7 @@ STEXI
 @findex ppidebug
 Switch to PPI DEBUG TOOL @var{cmd}.
 ETEXI
+#endif
 
     {
         .name       = "commit",

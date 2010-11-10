@@ -1,0 +1,78 @@
+COREMU utility functions
+------------------------
+
+1.) Instrumentation function
+
+COREMU provides several instrumentation functions to get the information about
+the emulated system. These functions are declared in "cm-instrument.h".
+(All the header files are in INSTALL_DIR/include)
+Here's a list of all the functions (Note that these
+functions can only be called in VCPU thread to get information for that VCPU):
+
+Get current EIP:
+    uint64_t cm_get_cpu_eip(void);
+
+Get CPU's index:
+    int cm_get_cpu_idx(void);
+
+Get the current stack page address:
+    uint64_t cm_get_stack_page_addr(void);
+
+To get stack trace, use "cm_dump_stack". This function writes backtrace to a log
+buffer, the function to write the log entry is "cm_record_dumpstack". For more
+details, consult section 3.) Log buffer.
+    void cm_record_dumpstack(FILE *logfile, void *paddr);
+    void cm_dump_stack(int level, CMLogbuf *buf);
+
+2.) Watch util
+
+COREMU provides some util functions to register trigger function or print the
+access infomation. 
+  
+Register a trigger function: 
+    void cm_register_wtrigger_func(CMTriggerID id, CMWatch_Trigger tfunc);
+
+   Associate the trigger function with an id which is used to specify the
+function. The trigger function must be the define like below:
+void trigger_func_name(void *opaque);
+
+Print the access infomation passed by COREMU:
+    void print_wpara(CMWParams *wpara)
+
+3.) Log buffer
+
+The instrumentaion util provided by COREMU may generate lots of information
+which needs to be written to log files. Directly writting to file may hurt
+performance, so we provide a log buffer.
+
+The interfaces for log buffer are in "cm-instrument.h".
+
+To create a new log buffer, use:
+
+    CMLogbuf *cm_logbuf_new(int n, int ele_size, cm_log_func func, FILE *file);
+
+Each log entry should have "ele_size" bytes. When the buffer is full, a new
+buffer with "n" entry will be allocated. "func" is a function pointer which
+will be called when the log writing thread want to write log entry to "file".
+
+cm_log_func is defined as:
+
+    typedef void (*cm_log_func)(FILE *f, void *logentry);
+
+To put an entry into the log buffer, use either "CM_LOGBUF_LOG" macro or
+"cm_logbuf_log" function. 
+
+    #define CM_LOGBUF_LOG(buf, pos, {
+        struct logentry *p = (struct logentry *)p;
+        p->x = 1;
+    });
+
+    void cm_logbuf_log(CMLogbuf *buf, void *cont);
+
+The "CM_LOGBUF_LOG" macro is designed to avoid calling memcpy to copy log entry.
+
+"cm_logbuf_flush" flush the buffer content to the log writing thread.
+
+When all the log are put into the log buffer, call "cm_logbuf_wait_flush" to
+ensure all the log entry are written to the file.
+

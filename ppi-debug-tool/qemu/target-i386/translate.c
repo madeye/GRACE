@@ -195,9 +195,9 @@ const uint64_t cond_broad_call[12] = {
     0x400ab8  /* 11 */
 };
 
-extern uint32_t bench_mark_id;
+extern volatile uint32_t bench_mark_id;
 extern volatile uint8_t is_detect_start;
-uint8_t is_collect = 0;
+static COREMU_THREAD uint8_t is_collect = 0;
 
 #endif
 

@@ -1,0 +1,134 @@
+#!/bin/sh
+
+usage() {
+    cat <<EOF
+Usage: ./configure [options] <qemusrc>
+
+Options:
+    --prefix=<path>    Install location, default is ./bin
+    --cross-mod-code   Support cross modifying code
+    --use-lockfree     Use lock free concurrent queue instead of lock based version
+    --use-debug        Enable debug support for guest
+    --use-cachesim     Enable cache simulation support for guest
+    --target=<target>  Targets will be built, supports x86_64 and arm. x86_64 is default
+                       This option can be used for more than one time to build
+                       more than one target
+EOF
+}
+
+lockfree="false"
+crosscode="false"
+usedebug="false"
+usecachesim="false"
+# parse options
+for opt do
+  optarg=`expr "x$opt" : 'x[^=]*=\(.*\)'`
+  case "$opt" in
+    --prefix=*) prefix="$optarg"
+    ;;
+    --qemusrc=*) qemusrc="$optarg"
+    ;;
+    --use-lockfree) lockfree="true"
+    ;;
+    --cross-mod-code) corsscode="true"
+    ;;
+    --use-debug) usedebug="true"
+    ;;
+    --use-cachesim) usecachesim="true"
+    ;;
+    --target=*)
+    if [ -z $target ]; then
+      target="$optarg-softmmu"
+    else
+      target=$target",$optarg-softmmu"
+    fi
+    ;;
+    --help)
+    usage
+    exit 0
+    ;;
+    *)
+    qemusrc=$opt
+    if [ ! -d $qemusrc ]; then
+      echo "Directory: $qemusrc does not exist"
+    fi
+    ;;
+  esac
+done
+
+if [ -z $qemusrc ]; then
+  usage
+  exit 1
+fi
+
+if [ -z $target ]; then
+  target="x86_64-softmmu"
+fi
+
+if [ -z $prefix ]; then
+  prefix=`pwd`/bin
+fi
+
+coremuroot=`pwd`
+# absolute path to qemu src
+qemusrc=`cd $qemusrc; pwd`
+
+echo '***** [QEMU-git for COREMU build] *****'
+echo "target:     $target"
+echo "prefix:     $prefix"
+echo "qemusrc:    $qemusrc"
+echo "lockfree:   $lockfree"
+echo "usedebug:   $usedebug"
+echo "usecachesim: $usecachesim"
+echo "crosscode:  $crosscode"
+
+cd $coremuroot
+if [ -d $coremuroot/obj ]; then
+  rm -rf $coremuroot/obj
+fi
+mkdir -p $coremuroot/obj/qemu
+mkdir -p $coremuroot/obj/qemu/module
+
+echo "PREFIXDIR := ${prefix}" > coremu.mk
+echo "COREMU_LIB = ${coremuroot}/obj/libcoremu.a" > ${qemusrc}/coremu.mk
+
+configfile=$coremuroot/incl/coremu-config.h
+
+if [ $lockfree = "true" ]; then
+  sed -i -e 's,^//\(#define COREMU_LOCKFREE\),\1,g' $configfile
+  sed -i -e 's/lock-queue/ms-queue/' $coremuroot/Makefile
+else
+  sed -i -e 's,^\(#define COREMU_LOCKFREE\),//\1,g' $configfile
+  sed -i -e 's/ms-queue/lock-queue/' $coremuroot/Makefile
+fi
+
+# enable or disable corss modifying code in incl/coremu/config.h
+if [[ $corsscode = "true" ]]; then
+  sed -i -e 's,^//\(#define COREMU_CMC_SUPPORT\),\1,g' $configfile
+else
+  sed -i -e 's,^\(#define COREMU_CMC_SUPPORT\),//\1,g' $configfile
+fi
+
+# enable or disable debug support in incl/coremu/config.h
+if [[ $usedebug = "true" ]]; then
+  sed -i -e 's,^//\(#define COREMU_DEBUG_MODE\),\1,g' $configfile
+else
+  sed -i -e 's,^\(#define COREMU_DEBUG_MODE\),//\1,g' $configfile
+fi
+
+# enable or disable cache simulation support in incl/coremu/config.h
+if [[ $usecachesim = "true" ]]; then
+  sed -i -e 's,^//\(#define COREMU_CACHESIM_MODE\),\1,g' $configfile
+else
+  sed -i -e 's,^\(#define COREMU_CACHESIM_MODE\),//\1,g' $configfile
+fi
+
+#exit 1
+
+cd $coremuroot/obj/qemu
+${qemusrc}/configure --prefix=${prefix} \
+    --disable-kvm \
+    --disable-docs \
+    --extra-cflags="-I${coremuroot}/incl -g" \
+    --target-list="${target}" \
+    --disable-werror \

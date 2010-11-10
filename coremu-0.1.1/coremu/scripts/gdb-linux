@@ -1,0 +1,51 @@
+#!/usr/bin/expect -f
+
+# send user the usage
+send_user "(usage) gdb-corey path2qemu path2img"
+
+# parse the arguments
+set qemu  [lindex $argv 0]
+set img [lindex $argv 1]
+
+# start a gdb
+spawn cgdb
+
+expect "(gdb)"
+send "file $qemu\r"
+
+expect "(gdb)"
+
+send "handle SIG35 nostop noprint\r"
+expect "(gdb)"
+
+send "handle SIG36 nostop noprint\r"
+expect "(gdb)"
+
+send "handle SIG37 nostop noprint\r"
+expect "(gdb)"
+send "handle SIG38 nostop noprint\r"
+expect "(gdb)"
+#send "handle SIGINT pass\r"
+
+#expect "Are you sure you want to change it? (y or n) "
+#send "y\r"
+send "b pc_init1\r"
+expect "(gdb)"
+send "r -net none \
+        -smp 2 \
+        -hda $img \
+	-nographic \
+        -m 1024 \r"
+
+
+#send "r -pidfile gdb_linux.pid \
+#	-nographic \
+#	-net none \
+#        -smp 4 \
+#        -hda $img \
+#	-serial stdio \
+#	-net none \
+#        -m 512 \r"
+
+# give back the control to user
+interact

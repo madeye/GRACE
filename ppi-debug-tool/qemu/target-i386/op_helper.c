@@ -31,18 +31,18 @@
 #define STACK_MASK 0xffffc000
 extern FILE *stderr;
 
-extern uint8_t is_collect;
-extern uint8_t is_detect_start;             // Detection started flag
-extern uint8_t is_process_captured;         // Process captured flag
-extern uint8_t just_clone;                  // Clone syscalled flag
-extern uint8_t just_exit;                   // Exit syscalled flag
-extern uint8_t thread_start;                // Thread captured flag
-extern uint8_t thread_exit;                 // Thread exited flag
-extern uint8_t timing_start;                // Timing started flag
-extern uint8_t timing_end;                  // Timing ended flag
-extern uint32_t total_id;                   // Thread index
-extern uint32_t current_id;                 // Current thread index
-extern struct ProcessQueue process_queue;   // Process queue
+extern volatile uint8_t is_collect;
+extern volatile uint8_t is_detect_start;             // Detection started flag
+extern volatile uint8_t is_process_captured;         // Process captured flag
+extern volatile uint8_t just_clone;                  // Clone syscalled flag
+extern volatile uint8_t just_exit;                   // Exit syscalled flag
+extern volatile uint8_t thread_start;                // Thread captured flag
+extern volatile uint8_t thread_exit;                 // Thread exited flag
+extern volatile uint8_t timing_start;                // Timing started flag
+extern volatile uint8_t timing_end;                  // Timing ended flag
+extern volatile uint32_t total_id;                   // Thread index
+extern volatile uint32_t current_id;                 // Current thread index
+extern volatile struct ProcessQueue process_queue;   // Process queue
 #endif
 
 #ifdef DEBUG_PCALL
@@ -2921,6 +2921,36 @@ static inline void helper_ret_protected(int shift, int is_iret, int addend)
             eflags_mask &= 0xffff;
         load_eflags(new_eflags, eflags_mask);
     }
+#ifdef PPI_DEBUG_TOOL
+    if (is_detect_start && is_iret && is_process_captured && rpl == 3) {
+
+        if (just_clone) {
+            if (is_process_in_queue(&process_queue, env->cr[3]) >= 0) {
+                if ((is_thread_in_queue(&process_queue, env->cr[3], (ESP & STACK_MASK)) < 0)) {
+#ifdef PPI_PROCESS_INFO
+                    printf("next cr3 : 0x%lx\n", env->cr[3]);
+                    printf("next esp : 0x%lx\n", ESP & STACK_MASK);
+#endif
+                    int index = process_enqueue(&process_queue,env->cr[3], 
+                            (ESP & STACK_MASK), total_id);
+#ifdef PPI_PROCESS_INFO
+                    printf("thread enqueue : cr3 : 0x%lx ; esp : 0x%lx ; id : %d; index : %d ; is_process_captured : %d\n", 
+                            env->cr[3], (ESP & STACK_MASK), total_id, index, is_process_captured);
+#endif
+                    total_id++;
+                    just_clone--;
+                }
+            }
+        }
+
+        int index = is_thread_in_queue(&process_queue, env->cr[3], (ESP & STACK_MASK));
+        if (index < 0) {
+            current_id = 0;
+        } else {
+            current_id = get_thread_id(&process_queue, index);
+        }
+    }
+#endif
     return;
 
  return_to_vm86:

@@ -1,0 +1,196 @@
+DEBUG WITH COREMU
+=================
+
+1.) Overview
+
+  To assist programmers to find memory-related bugs effectively, COREMU is
+integrated with a smart watchpoint mechanism that can constantly monitor the
+accesses to a range of not only virtual addresses but also physical addresses.
+
+  Programmers can also associate a callback function which will be triggered
+when a specific type of accesses to that watched address occur. A set of utility
+function is also provided to be invoked by the callback function, including
+dumping the callstack, showing the execution context, showing the content of the
+stack, which helps programmers to understand the execution context. Programmers
+could control the execution of the monitoring by specifying the condition that
+trigger the monitoring, which could save the associated overhead.
+
+
+2.) Configuration
+
+  Configure COREMU with the "--use-debug" option. Compile it and install.
+
+
+3.) Debug API
+  
+  COREMU provides highly-flexible and low-overhead dynamic execution monitoring
+on memory location.
+  
+  It provides five system calls to help programmer control the monitor. These
+calls need to be inserted in programs manually.
+
+The following is the interfaces:
+
+  cm_start_watch(void);
+  This interface is used to start the debug mode. If any program makes such a
+call, COREMU will begin to monitor the memory location access specified by
+program.
+
+  cm_stop_watch(void);
+  This interface is used to stop the debug mode for current program. If a
+program makes such a call, COREMU will stop to monitor the memory location
+access specified by the current program.
+
+  cm_stop_all_watch(void);
+  This interface is used to stop the debug mode for all programs. If a program
+makes such a call, COREMU will stop to monitor all the memory location accesses
+specified by all programs.
+
+  cm_insert_watch_point(CMWatchID id, unsigned long addr, unsigned long len);
+  This interface is used to associate a trigger function which is specified by
+the trigger function id with a memory region of len bytes starting at addr.  
+  id is used to specify the trigger function. How to associate the trigger
+function with an id will be introduced in the following sessions. 
+  addr specifys the start address of the watched memory region.
+  len specifys the size of the watched memory region. Because there is no
+limitation on the size of the memory location, you can specify as long as you
+want.
+
+  cm_remove_watch_point(CMWatchID id, unsigned long addr, unsigned long len);
+  This interface is used to remove a watch point. The watch memory region must be
+specified by current program, start at addr with len bytes. 
+
+  The interfaces are defined in the watch-client.h in the util directory. To use
+these interfaces, the header file needs to be included in the buggy program manually.
+
+  A simple monitor control tool is also provided. Programmer can also use this
+tool to start/stop the debug mode. The source code of the simple tool is
+included in the file watch-control.c in the directory util. The binary of the
+control tool will be found in the INSTALL_DIR/util named watch-control.
+The binary file need to be copied to the image, then programmer can start/stop
+debug mode through this simple tool. 
+
+
+4.) Trigger Function Writing
+
+  Trigger function needs to be specified with a trigger function ID by
+programmer. COREMU will trigger the corresponding function when the watched memory
+region is accessed.
+
+4.1.) Specification
+
+4.1.1) Trigger Function
+  Trigger function prototype should be:
+
+  void trigger_function_name(void *opaque);
+
+  opaque is an object with the type of CMWParams. It includes the memory access
+information. If any memory location of the watched region is accessed, the
+trigger function will be called and the object opaque will be passed by COREMU.
+
+The concrete definition of CMWParams is in the cm-watch-util.h (installed in
+INSTALL_DIR/bin):
+
+typedef struct CMWParams {
+    uint64_t paddr;
+    uint64_t vaddr;
+    uint64_t value;
+    uint64_t len;
+    int is_write;
+} CMWParams;
+  
+  paddr is the start physical address of the accessed memory location. vaddr is
+the start virtual address of the accessed memory location. value is the value
+will be written or read by the application. len is the number of bytes to be
+read or written. is_write specifies if this access is read or write. (0
+indicates read access ,while 1 indicates write access).
+
+4.1.2.) Initialization
+  
+  Some initialization functions need to be defined, which will be invoked by
+COREMU.
+ 
+  void trigger_init(void);
+  This function does some basic initialization for the library. For example,
+register the trigger function with a trigger function ID.
+  
+  To register the trigger function, you should use:
+
+  void cm_register_wtrigger_func(CMTriggerID id, CMWatch_Trigger tfunc);
+
+which is declared in the cm-watch-util.h. The description of this interface can
+be found in the manual of the COREMU library.
+
+  If you use the log buffer provided in the COREMU library. Two another
+initialization functions need to be provided.
+
+  void log_buffer_init(void);
+  Per VCPU's log buffer need to be initialized in this function. A log buffer
+needs to be given a name, associates with a log file and a record function.
+To initialize a log buffer, the interface cm_logbuf_new need to be invoked which
+is included in the cm-logbuffer.h.
+
+  void log_buffer_flush(void);
+  This is the buffer flush function and will be called by COREMU when the debug
+mode is turned off. Some buffer flush interface provided by COREMU library may
+be used here(For example, cm_logbuf_flush and cm_logbuf_wait_flush). They are
+all declared in cm-logbuffer.h. For more details on using log buffer, refer to
+lib-manual.txt in the doc directory.
+
+  The template has been provided in the directory coremu/examples/trigger-examples/
+named template.c. A template of Makefile also provided in the same directory.
+
+4.2.) Compile and Installation
+  
+The trigger function should be built as a shared library using the following
+command:
+
+    gcc -shared -fPIC trigger_file_name.c -o usertrigger.so -IINSTALL_DIR/include INSTALL_DIR/lib/libcm-util.a
+
+  libcm-util.a contains various utility functions for debugging.
+INSTALL_DIR/include contains head files for these utility functions. Consult
+another document for details of the provided utility functions.
+
+  To use the generated shared library, just put it in the directory where you
+start COREMU. Note that it must be name "usertrigger.so".
+
+5.) Examples
+
+  Two examples of trigger function writing are provided in the directory
+coremu/examples/trigger-examples/.
+
+  We use one kernel bug and one user bug to demonstrate how COREMU could be used
+for debugging. The kernel bug is a NULL pointer dereference bug caused by
+incorrect concurrent updates to the  inode->i_pipe variable in Linux kernel
+version 2.6.21(https://bugzilla.kernel.org/show_bug.cgi?id=14416). After one
+thread has freed inode->i_pipe and set it to NULL, another thread tries to
+deference it. 
+  To detect this bug, we insert a watchpoint when a pipe was created.
+The inserted code is like below:
+
+static struct inode * get_pipe_inode(void)
+{
+    ... ...
+
+    pipe = alloc_pipe_info(inode);
+ 
+    if (!pipe)
+      goto fail_iput;
+ 
+    inode->i_pipe = pipe;
+ 
+    cm_insert_watch_point(0, &inode->i_pipe, 8); // insert a watch point manually
+
+    ... ...
+}
+
+  The memory region starts at &inode->i_pipe with 8 bytes length will be
+watched by COREMU. Trigger function with id 0 will be called when the
+watched memory is accessed. The file kerneltrigger.c in the
+coremu/examples/trigger-examples/ includes the definitions of the trigger
+function and other necessary functions. The trigger function will log the
+access that write or read a NULL value with a global order.
+
+  Another user application bug is also provided in the example directory.
+The trigger function is similar with the former, so we don't describe here.:-)
+

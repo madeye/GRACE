@@ -79,12 +79,18 @@ void *cm_cpu_loop(void *args)
     assert(args);
     cpu_single_env = (CPUState *)args;
 
-#ifdef PPI_DEBUG_TOOL
-    cpu_single_env->trace_mem_ptr = cpu_single_env->debug_info.trace_mem_buf;
-#endif
-
     /* Setup dynamic translator */
     cm_cpu_exec_init_core();
+
+#ifdef PPI_DEBUG_TOOL
+    if (!cpu_single_env->trace_mem_ptr) {
+        cpu_single_env->debug_info.trace_mem_buf 
+            = (struct trace_content *) qemu_malloc (sizeof(struct trace_content) * TRACE_PRIVATE_BUF_SIZE);
+        cpu_single_env->trace_mem_ptr = cpu_single_env->debug_info.trace_mem_buf;
+        assert(cpu_single_env);
+        printf("buffer init: %d\n", sizeof(cpu_single_env->debug_info.trace_mem_buf));
+    }
+#endif
 
     for (;;) {
         ret = cm_tcg_cpu_exec();
@@ -95,6 +101,13 @@ void *cm_cpu_loop(void *args)
         break;
     }
     cm_stop_local_timer();
+#ifdef PPI_DEBUG_TOOL
+    if (cpu_single_env->trace_mem_ptr) {
+        free(cpu_single_env->debug_info.trace_mem_buf);
+        cpu_single_env->trace_mem_ptr = NULL;
+        printf("buffer freed\n");
+    }
+#endif
     coremu_core_exit(NULL);
     assert(0);
 }

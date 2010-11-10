@@ -438,9 +438,9 @@
 #define EXCP_SYSCALL    0x100 /* only happens in user only emulation
                                  for syscall instruction */
 
-#define PPI_DEBUG_TOOL
-#define PPI_DEBUG_TOOL_GUEST
-#define PPI_DEBUG_SWITCHER
+//#define PPI_DEBUG_TOOL
+//#define PPI_DEBUG_TOOL_GUEST
+//#define PPI_DEBUG_SWITCHER
 
 #ifdef PPI_DEBUG_TOOL
 #include "../module/interface.h"

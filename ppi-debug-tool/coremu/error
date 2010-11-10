@@ -1,0 +1,92 @@
+In file included from /root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/detector.h:21,
+                 from /root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/detector.c:2:
+/root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/race.h:25: warning: function declaration isn’t a prototype
+/root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/race.h: In function ‘module_race_init’:
+/root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/race.h:24: warning: old-style function definition
+In file included from /root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/detector.h:21,
+                 from /root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/detector.c:2:
+/root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/race.h: At top level:
+/root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/race.h:69: warning: function declaration isn’t a prototype
+/root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/race.h: In function ‘module_race_print’:
+/root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/race.h:68: warning: old-style function definition
+/root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/race.h:80: warning: format ‘%x’ expects type ‘unsigned int’, but argument 3 has type ‘uint64_t’
+/root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/race.h:83: warning: format ‘%x’ expects type ‘unsigned int’, but argument 5 has type ‘uint64_t’
+/root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/race.h:86: warning: format ‘%x’ expects type ‘unsigned int’, but argument 5 has type ‘uint64_t’
+In file included from /root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/detector.h:23,
+                 from /root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/detector.c:2:
+/root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/info.h: At top level:
+/root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/info.h:12: warning: function declaration isn’t a prototype
+/root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/info.h: In function ‘module_info_init’:
+/root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/info.h:11: warning: old-style function definition
+In file included from /root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/detector.h:25,
+                 from /root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/detector.c:2:
+/root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/timestamp.h: At top level:
+/root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/timestamp.h:24: warning: function declaration isn’t a prototype
+/root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/timestamp.h: In function ‘module_timestamp_init’:
+/root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/timestamp.h:23: warning: old-style function definition
+/root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/timestamp.h: At top level:
+/root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/timestamp.h:39: warning: function declaration isn’t a prototype
+/root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/timestamp.h: In function ‘module_timestamp_print’:
+/root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/timestamp.h:38: warning: old-style function definition
+In file included from /root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/detector.h:30,
+                 from /root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/detector.c:2:
+/root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/history.h: At top level:
+/root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/history.h:32: warning: function declaration isn’t a prototype
+/root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/history.h: In function ‘module_history_init’:
+/root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/history.h:31: warning: old-style function definition
+/root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/history.h: At top level:
+/root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/history.h:97: warning: no previous prototype for ‘module_match_with_load’
+/root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/history.h:154: warning: no previous prototype for ‘module_match_with_store’
+In file included from /root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/detector.h:34,
+                 from /root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/detector.c:2:
+/root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/filter.h:24: warning: function declaration isn’t a prototype
+/root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/filter.h: In function ‘module_filter_init’:
+/root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/filter.h:23: warning: old-style function definition
+In file included from /root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/detector.h:36,
+                 from /root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/detector.c:2:
+/root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/handler.h: At top level:
+/root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/handler.h:65: warning: function declaration isn’t a prototype
+/root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/handler.h: In function ‘module_syn_init’:
+/root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/handler.h:64: warning: old-style function definition
+/root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/handler.h: At top level:
+/root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/handler.h:70: warning: function declaration isn’t a prototype
+/root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/handler.h: In function ‘module_syn_print’:
+/root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/handler.h:69: warning: old-style function definition
+/root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/handler.h: At top level:
+/root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/handler.h:90: warning: function declaration isn’t a prototype
+/root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/handler.h: In function ‘module_syn_statistics_init’:
+/root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/handler.h:89: warning: old-style function definition
+/root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/handler.h: At top level:
+/root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/handler.h:95: warning: function declaration isn’t a prototype
+/root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/handler.h: In function ‘module_syn_statistics_print’:
+/root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/handler.h:94: warning: old-style function definition
+/root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/handler.h: At top level:
+/root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/handler.h:134: warning: no previous prototype for ‘module_syn_lock_handler’
+In file included from /root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/detector.h:36,
+                 from /root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/detector.c:2:
+/root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/handler.h:197: warning: no previous prototype for ‘module_syn_unlock_handler’
+In file included from /root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/detector.h:36,
+                 from /root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/detector.c:2:
+/root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/handler.h:247: warning: no previous prototype for ‘module_syn_barrier_handler’
+/root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/handler.h: In function ‘module_syn_barrier_handler’:
+/root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/handler.h:269: error: ‘max_thread_num’ undeclared (first use in this function)
+/root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/handler.h:269: error: (Each undeclared identifier is reported only once
+/root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/handler.h:269: error: for each function it appears in.)
+In file included from /root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/detector.h:36,
+                 from /root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/detector.c:2:
+/root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/handler.h: At top level:
+/root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/handler.h:313: warning: no previous prototype for ‘module_syn_create_handler’
+/root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/handler.h:337: warning: no previous prototype for ‘module_syn_join_handler’
+/root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/handler.h:365: warning: no previous prototype for ‘module_syn_cond_wait_handler’
+/root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/handler.h:422: warning: no previous prototype for ‘module_syn_cond_broadcast_handler’
+In file included from /root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/detector.h:36,
+                 from /root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/detector.c:2:
+/root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/handler.h:479: warning: function declaration isn’t a prototype
+/root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/handler.h: In function ‘module_handler_init’:
+/root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/handler.h:478: warning: old-style function definition
+/root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/detector.c: In function ‘data_race_detector_init’:
+/root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/detector.c:5: warning: old-style function definition
+/root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/detector.c: In function ‘data_race_detector_report’:
+/root/projects/repo-ppi-debug/ppi-debug-tool/qemu/module/detector.c:47: warning: old-style function definition
+make[1]: *** [module/detector.o] Error 1
+make: *** [qemu] Error 2

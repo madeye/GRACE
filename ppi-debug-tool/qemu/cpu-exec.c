@@ -26,17 +26,17 @@
 
 #define PPI_DETECTOR_MODULE
 
-extern uint32_t total_id;
-extern uint8_t thread_start;
-extern uint8_t thread_exit;
-extern uint8_t timing_start;
-extern uint8_t timing_end;
-extern uint8_t current_id;
-extern uint8_t last_id;
+extern volatile uint32_t total_id;
+extern volatile uint8_t thread_start;
+extern volatile uint8_t thread_exit;
+extern volatile uint8_t timing_start;
+extern volatile uint8_t timing_end;
+extern volatile uint8_t current_id;
+extern volatile uint8_t last_id;
 extern volatile uint8_t is_detect_start;
-extern uint8_t is_process_captured;
-extern struct map_queue map;
-extern struct ProcessQueue process_queue;   // Process queue
+extern volatile uint8_t is_process_captured;
+extern volatile struct map_queue map;
+extern volatile struct ProcessQueue process_queue;   // Process queue
 
 #include "module/process.h"
 #include "module/copy.h"
@@ -787,6 +787,7 @@ int cpu_exec(CPUState *env1)
     /* fail safe : never use cpu_single_env outside cpu_exec() */
     cpu_single_env = NULL;
 #endif
+
 
     return ret;
 }/*}}}*/

@@ -1,0 +1,2 @@
+usertrigger.so: usertrigger.c
+	gcc -fPIC -shared usertrigger.c -o $@ -I../../bin/include ../../bin/lib/libcm-util.a
