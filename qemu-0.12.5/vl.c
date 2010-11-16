@@ -4920,16 +4920,6 @@ int main(int argc, char **argv, char **envp)
 
     init_clocks();
 
-#ifdef PPI_DEBUG_TOOL
-    data_race_detector_init();
-    process_queue_init(&process_queue);
-    map_queue_init(&map);
-    
-    module_timestamp_init(&ts);
-    module_syn_init(&syn);
-    module_syn_statistics_init(&stat_syn);
-#endif
-
     qemu_errors_to_file(stderr);
     qemu_cache_utils_init(envp);
 
@@ -6190,6 +6180,16 @@ int main(int argc, char **argv, char **envp)
 
         close(fd);
     }
+#endif
+
+#ifdef PPI_DEBUG_TOOL
+    data_race_detector_init();
+    process_queue_init(&process_queue);
+    map_queue_init(&map);
+    
+    module_timestamp_init(&ts);
+    module_syn_init(&syn);
+    module_syn_statistics_init(&stat_syn);
 #endif
 
     main_loop();
