@@ -51,12 +51,6 @@ void data_race_detector(uint8_t tid, uint32_t size, struct trace_content *buf)
             info.max_tid_num = (tid + 1);
         }
 
-#if 0
-        module_timestamp_merge_two(0, 
-                &ts.thread[0]->entry[syn.thread.create_ts_index], 
-                tid, &ts.current_ts[tid]);
-#endif
-
         info.exist[tid] = 1;
     }
 
@@ -65,7 +59,6 @@ void data_race_detector(uint8_t tid, uint32_t size, struct trace_content *buf)
 
         content->tid = tid;
 
-        // (*fun_handler[content->type])(content);
         if (content->type == TRACE_MEM_LOAD) {
             module_history_load_record(content);
             module_filter_load(content);

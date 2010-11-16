@@ -121,6 +121,36 @@ typedef struct DisasContext {
 
 #ifdef PPI_DEBUG_TOOL
 
+const uint64_t create_call[12] = {
+    0x400cc8, /* 0 */
+    0x400ce8, /* 1 */
+    0x4009f0, /* 2 */
+    0x400a90, /* 3 */
+    0x400ce0, /* 4 */
+    0x400e00, /* 5 */
+    0x400b30, /* 6 */
+    0x400b78, /* 7 */
+    0x400cd0, /* 8 */
+    0x400a50, /* 9 */
+    0x400b00, /* 10 */
+    0x400a18  /* 11 */
+};
+
+const uint64_t join_call[12] = {
+    0x400cf8, /* 0 */
+    0x400d08, /* 1 */
+    0x400a10, /* 2 */
+    0x400aa0, /* 3 */
+    0x400cf0, /* 4 */
+    0x400e30, /* 5 */
+    0x400b40, /* 6 */
+    0x400b88, /* 7 */
+    0x400d00, /* 8 */
+    0x400a70, /* 9 */
+    0x400b20, /* 10 */
+    0x400a48  /* 11 */
+};
+
 const uint64_t lock_call[12] = {
     0x400d88, /* 0 */
     0x400d88, /* 1 */
@@ -6698,6 +6728,10 @@ static target_ulong disas_insn(DisasContext *s, target_ulong pc_start)
                     gen_helper_syn_condwait_trace(tcg_const_tl(pc_start));
                 else if (tval == cond_broad_call[bench_mark_id])
                     gen_helper_syn_condbroad_trace(tcg_const_tl(pc_start));
+                else if (tval == create_call[bench_mark_id])
+                    gen_helper_syn_create_trace();
+                else if (tval == join_call[bench_mark_id])
+                    gen_helper_syn_join_trace();
             }
 #endif
             if (s->dflag == 0)
@@ -6741,6 +6775,10 @@ static target_ulong disas_insn(DisasContext *s, target_ulong pc_start)
                 gen_helper_syn_condwait_trace(tcg_const_tl(pc_start));
             else if (tval == cond_broad_call[bench_mark_id])
                 gen_helper_syn_condbroad_trace(tcg_const_tl(pc_start));
+            else if (tval == create_call[bench_mark_id])
+                gen_helper_syn_create_trace();
+            else if (tval == join_call[bench_mark_id])
+                gen_helper_syn_join_trace();
         }
 #endif
         if (s->dflag == 0)

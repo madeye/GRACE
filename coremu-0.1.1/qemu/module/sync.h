@@ -72,9 +72,9 @@ static inline void module_syn_init(struct global_syn_info *syn)
 #else
 static inline void module_syn_print(struct global_syn_info *syn)
 {
-    fprintf(stderr, "mutex count : %d\n", syn->mutex.count);
-    fprintf(stderr, "barrier count : %d\n", syn->barrier.count);
-    fprintf(stderr, "cond count : %d\n\n", syn->cond.count);    
+    printf("mutex count : %d\n", syn->mutex.count);
+    printf("barrier count : %d\n", syn->barrier.count);
+    printf("cond count : %d\n\n", syn->cond.count);    
 }
 #endif
 
@@ -98,15 +98,15 @@ static inline void module_syn_statistics_init(struct statistics_syn_info *stat_s
 #else
 static inline void module_syn_statistics_print(struct statistics_syn_info *stat_syn) 
 {
-    fprintf(stderr, "lock count : %d\n", stat_syn->lock_count);
-    fprintf(stderr, "unlock count : %d\n", stat_syn->unlock_count);
-    fprintf(stderr, "barrier count : %d\n", stat_syn->barrier_count);
-    fprintf(stderr, "create count : %d\n", stat_syn->create_count);
-    fprintf(stderr, "join count : %d\n", stat_syn->join_count);
-    fprintf(stderr, "clone count : %d\n", stat_syn->clone_count);
-    fprintf(stderr, "exit count : %d\n", stat_syn->exit_count);
-    fprintf(stderr, "cond wait count : %d\n", stat_syn->cond_wait_count);
-    fprintf(stderr, "cond broadcast count : %d\n\n", stat_syn->cond_broadcast_count);
+    printf("lock count : %d\n", stat_syn->lock_count);
+    printf("unlock count : %d\n", stat_syn->unlock_count);
+    printf("barrier count : %d\n", stat_syn->barrier_count);
+    printf("create count : %d\n", stat_syn->create_count);
+    printf("join count : %d\n", stat_syn->join_count);
+    printf("clone count : %d\n", stat_syn->clone_count);
+    printf("exit count : %d\n", stat_syn->exit_count);
+    printf("cond wait count : %d\n", stat_syn->cond_wait_count);
+    printf("cond broadcast count : %d\n\n", stat_syn->cond_broadcast_count);
 }
 #endif
 

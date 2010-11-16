@@ -63,6 +63,14 @@ time_t second_time;
 
 extern FILE *stderr;
 
+#include "module/timestamp.h"
+#include "module/sync.h"
+#include <assert.h>
+#include <string.h>
+
+extern struct global_timestamp_queue ts;
+extern struct global_syn_info syn;
+extern struct statistics_syn_info stat_syn;
 #endif
 
 #if !defined(CONFIG_SOFTMMU)
@@ -678,6 +686,9 @@ int cpu_exec(CPUState *env1)
 
                     if (timing_end) {
                         timing_end = 0;
+                        module_syn_print(&syn);
+                        module_syn_statistics_print(&stat_syn);
+                        module_timestamp_print(&ts);
                         data_race_detector_report();
 #ifdef PPI_PRINT_INFO
                         clock_gettime(CLOCK_REALTIME, &end_time);

@@ -123,43 +123,6 @@ static const CPU86_LDouble f15rk[7] =
     3.32192809488736234781L,  /*l2t*/
 };
 
-#ifdef PPI_DEBUG_TOOL_GUEST
-
-#define trace_mem_collection(type1, size1, pc1, arg1) { \
-        env->trace_mem_ptr->type = (type1); \
-        env->trace_mem_ptr->size = (size1); \
-        env->trace_mem_ptr->value.mem.address = (arg1); \
-        env->trace_mem_ptr->pc = (pc1); \
-        env->trace_mem_ptr++; \
-}
-
-void helper_load_byte_trace(target_ulong pc, target_ulong addr) {
-    trace_mem_collection(TRACE_MEM_LOAD, TRACE_MEM_SIZE_BYTE, pc, addr);
-}
-void helper_load_word_trace(target_ulong pc, target_ulong addr) {
-    trace_mem_collection(TRACE_MEM_LOAD, TRACE_MEM_SIZE_WORD, pc, addr);
-}
-void helper_load_long_trace(target_ulong pc, target_ulong addr) {
-    trace_mem_collection(TRACE_MEM_LOAD, TRACE_MEM_SIZE_LONG, pc, addr);
-}
-void helper_load_quad_trace(target_ulong pc, target_ulong addr) {
-    trace_mem_collection(TRACE_MEM_LOAD, TRACE_MEM_SIZE_QUAD, pc, addr);
-}
-void helper_store_byte_trace(target_ulong pc, target_ulong addr) {
-    trace_mem_collection(TRACE_MEM_STORE, TRACE_MEM_SIZE_BYTE, pc, addr);
-}
-void helper_store_word_trace(target_ulong pc, target_ulong addr) {
-    trace_mem_collection(TRACE_MEM_STORE, TRACE_MEM_SIZE_WORD, pc, addr);
-}
-void helper_store_long_trace(target_ulong pc, target_ulong addr) {
-    trace_mem_collection(TRACE_MEM_STORE, TRACE_MEM_SIZE_LONG, pc, addr);
-}
-void helper_store_quad_trace(target_ulong pc, target_ulong addr) {
-    trace_mem_collection(TRACE_MEM_STORE, TRACE_MEM_SIZE_QUAD, pc, addr);
-}
-
-#endif
-
 #ifdef PPI_DEBUG_TOOL
 
 void helper_process_enqueue(void) {
@@ -489,7 +452,7 @@ void helper_syn_create_trace() {
     index = ts.current_ts_index[tid];
 
 #if 1
-    fprintf(stderr, "create : tid : %d ; index : %d\n", tid, index);
+    printf("create : tid : %d ; index : %d\n", tid, index);
 #endif
 
     syn.thread.create_ts_tid = tid;
@@ -511,7 +474,7 @@ void helper_syn_join_trace() {
     index = ts.current_ts_index[tid];
 
 #if 1
-    fprintf(stderr, "join : tid : %d ; index : %d\n", tid, index);
+    printf("join : tid : %d ; index : %d\n", tid, index);
 #endif
 
     stat_syn.join_count++;
@@ -527,7 +490,7 @@ static inline void helper_syn_clone_trace() {
     index = ts.current_ts_index[tid];
 
 #if 1
-    fprintf(stderr, "clone : tid : %d ; index : %d\n", tid, index);
+    printf("clone : tid : %d ; index : %d\n", tid, index);
 #endif
 
     parent_tid = syn.thread.create_ts_tid;
@@ -548,7 +511,7 @@ static inline void helper_syn_exit_trace() {
     index = ts.current_ts_index[tid];
 
 #if 1
-    fprintf(stderr, "exit : tid : %d ; index : %d\n", tid, index);
+    printf("exit : tid : %d ; index : %d\n", tid, index);
 #endif
 
     syn.thread.exit_ts_index[tid] = index;
@@ -614,7 +577,7 @@ void helper_syn_condwait_trace(target_ulong pc) {
 
         syn.cond.count++;
         if (syn.cond.count >= MAX_COND_NUM) {
-            fprintf(stderr, "cond queue overflow!\n");
+            printf("cond queue overflow!\n");
             assert(0);
         }
     }
@@ -679,6 +642,45 @@ void helper_syn_condbroad_trace(target_ulong pc) {
     spin_unlock(&syn_lock);
 }
 #endif
+
+#ifdef PPI_DEBUG_TOOL_GUEST
+
+#define trace_mem_collection(type1, size1, pc1, arg1) { \
+        env->trace_mem_ptr->type = (type1); \
+        env->trace_mem_ptr->size = (size1); \
+        env->trace_mem_ptr->value.mem.address = (arg1); \
+        env->trace_mem_ptr->pc = (pc1); \
+        env->trace_mem_ptr->value.mem.index = ts.current_ts_index[current_id]; \
+        env->trace_mem_ptr++; \
+}
+
+void helper_load_byte_trace(target_ulong pc, target_ulong addr) {
+    trace_mem_collection(TRACE_MEM_LOAD, TRACE_MEM_SIZE_BYTE, pc, addr);
+}
+void helper_load_word_trace(target_ulong pc, target_ulong addr) {
+    trace_mem_collection(TRACE_MEM_LOAD, TRACE_MEM_SIZE_WORD, pc, addr);
+}
+void helper_load_long_trace(target_ulong pc, target_ulong addr) {
+    trace_mem_collection(TRACE_MEM_LOAD, TRACE_MEM_SIZE_LONG, pc, addr);
+}
+void helper_load_quad_trace(target_ulong pc, target_ulong addr) {
+    trace_mem_collection(TRACE_MEM_LOAD, TRACE_MEM_SIZE_QUAD, pc, addr);
+}
+void helper_store_byte_trace(target_ulong pc, target_ulong addr) {
+    trace_mem_collection(TRACE_MEM_STORE, TRACE_MEM_SIZE_BYTE, pc, addr);
+}
+void helper_store_word_trace(target_ulong pc, target_ulong addr) {
+    trace_mem_collection(TRACE_MEM_STORE, TRACE_MEM_SIZE_WORD, pc, addr);
+}
+void helper_store_long_trace(target_ulong pc, target_ulong addr) {
+    trace_mem_collection(TRACE_MEM_STORE, TRACE_MEM_SIZE_LONG, pc, addr);
+}
+void helper_store_quad_trace(target_ulong pc, target_ulong addr) {
+    trace_mem_collection(TRACE_MEM_STORE, TRACE_MEM_SIZE_QUAD, pc, addr);
+}
+
+#endif
+
 /* broken thread support */
 
 static spinlock_t global_cpu_lock = SPIN_LOCK_UNLOCKED;
