@@ -1,0 +1,36 @@
+#!/usr/bin/expect -f
+
+# send user the usage
+# send_user "(usage) path2qemu path2img"
+
+# parse the arguments
+set timeout -1
+set bench  [lindex $argv 0]
+set thread [lindex $argv 1]
+
+# start a gdb
+spawn ./run.qemu.sh $bench $thread
+
+expect "root@ubuntu:/#"
+send "cd /home/splash2\r"
+
+expect "root@ubuntu:/home/splash2#"
+if {$bench == 0}  {send "./BARNES < inputs/input.$thread.BARNES\r"}
+if {$bench == 1}  {send "./FMM < inputs/input.$thread.2048\r"}
+if {$bench == 2}  {send "./OCEAN -n1026 -p$thread\r"}
+if {$bench == 3}  {send "./RADIOSITY -p $thread -batch -room\r"}
+if {$bench == 4}  {send "./RAYTRACE -p$thread -m128 inputs/teapot.env\r"}
+if {$bench == 5}  {send "./VOLREND $thread inputs/head\r"}
+if {$bench == 6}  {send "./WATER-NSQUARED < inputs/input.$thread.WATER-NSQUARED\r"}
+if {$bench == 7}  {send "./WATER-SPATIAL < inputs/input.$thread.WATER-SPATIAL\r"}
+if {$bench == 8}  {send "./CHOLESKY -p$thread inputs/tk29.O\r"}
+if {$bench == 9}  {send "./FFT -m16 -p$thread\r"}
+if {$bench == 10}  {send "./LU -p$thread\r"}
+if {$bench == 11}  {send "./RADIX -p$thread\r"}
+
+expect "root@ubuntu:/home/splash2#"
+send "shutdown -h 0\r"
+
+
+# give back the control to user
+interact

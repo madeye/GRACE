@@ -190,7 +190,6 @@ volatile uint32_t max_thread_num = 2;
 #define PPI_COPY_INIT
 
 #include "module/process.h"
-#include "module/copy.h"
 
 volatile uint32_t bench_mark_id = 0;
 volatile uint8_t is_detect_start = 0;
@@ -198,15 +197,24 @@ volatile uint8_t is_process_captured = 0;
 volatile uint8_t just_exec = 0;
 volatile uint8_t just_clone = 0;
 volatile uint8_t just_exit = 0;
-volatile uint8_t thread_start = 0;
-volatile uint8_t thread_exit = 0;
 volatile uint8_t timing_start = 0;
 volatile uint8_t timing_end = 0;
 volatile uint32_t total_id = 1;
 COREMU_THREAD uint32_t current_id = 0;
 COREMU_THREAD uint32_t last_id = 0;
 volatile struct ProcessQueue process_queue;
-volatile struct map_queue map;
+
+#define PPI_TIMESTAMP_INIT
+#define PPI_SYNC_INIT
+
+#include "module/timestamp.h"
+#include "module/sync.h"
+#include <assert.h>
+#include <string.h>
+
+volatile struct global_timestamp_queue ts;
+volatile struct global_syn_info syn;
+volatile struct statistics_syn_info stat_syn;
 #endif
 
 static const char *data_dir;
@@ -2685,7 +2693,10 @@ int main(int argc, char **argv, char **envp)
 #ifdef PPI_DEBUG_TOOL
     data_race_detector_init();
     process_queue_init(&process_queue);
-    map_queue_init(&map);
+
+    module_timestamp_init(&ts);
+    module_syn_init(&syn);
+    module_syn_statistics_init(&stat_syn);
 #endif
 
     error_set_progname(argv[0]);

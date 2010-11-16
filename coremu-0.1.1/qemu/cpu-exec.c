@@ -30,15 +30,12 @@
 #define PPI_DETECTOR_MODULE
 
 extern volatile uint32_t total_id;
-extern volatile uint8_t thread_start;
-extern volatile uint8_t thread_exit;
 extern volatile uint8_t timing_start;
 extern volatile uint8_t timing_end;
 extern COREMU_THREAD uint32_t current_id;
 extern COREMU_THREAD uint32_t last_id;
 extern volatile uint8_t is_detect_start;
 extern volatile uint8_t is_process_captured;
-extern volatile struct map_queue map;
 extern volatile struct ProcessQueue process_queue;   // Process queue
 
 #include "module/process.h"
@@ -658,47 +655,29 @@ int cpu_exec(CPUState *env1)
                     next_tb = tcg_qemu_tb_exec(tc_ptr);
 #ifdef PPI_DEBUG_TOOL
 
-                    if (thread_start) {
-#ifdef PPI_PRINT_INFO
-                        printf("\tthread start : last tid : %d ; current tid : %d\n", last_id, current_id);
-#endif
-
-                        trace_syn_collection(TRACE_SYN_CREATE, 0, 0, 0, EIP);      
-
-                        thread_start = 0;
-                    }
-                    if (thread_exit) {
-#ifdef PPI_PRINT_INFO
-                        printf("\tthread exit : last tid : %d ; current tid : %d\n", last_id, current_id);
-#endif
-
-                        trace_syn_collection(TRACE_SYN_JOIN, 0, 0, 0, EIP);
-
-                        thread_exit= 0;
-                    }
-
                     // TODO: Necessary to add is_detect_start here?
                     if (is_detect_start) {
                         if (last_id != current_id) {
-                            trace_mem_buf_clear(&map, last_id);
+                            trace_mem_buf_clear(last_id);
                             last_id = current_id;
                         } else {	
                             if (env->trace_mem_ptr - env->debug_info.trace_mem_buf > TRACE_BUF_SIZE) {
-                                trace_mem_buf_clear(&map, last_id);
+                                trace_mem_buf_clear(last_id);
                             }
                         }
                     }
 
                     if (timing_start) {
+                        timing_start = 0;
 #ifdef PPI_PRINT_INFO
                         clock_gettime(CLOCK_REALTIME, &start_time);
                         first_time = time(NULL);
                         printf("\ttiming start!\n");
 #endif
-                        timing_start = 0;
                     }
 
                     if (timing_end) {
+                        timing_end = 0;
                         data_race_detector_report();
 #ifdef PPI_PRINT_INFO
                         clock_gettime(CLOCK_REALTIME, &end_time);
@@ -708,7 +687,6 @@ int cpu_exec(CPUState *env1)
                                 diff(start_time, end_time), difftime(second_time, first_time));
 #endif
                         is_detect_start = 0;
-                        timing_end = 0;
                     }
 #endif
 
