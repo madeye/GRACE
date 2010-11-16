@@ -47,8 +47,15 @@ extern volatile struct ProcessQueue process_queue;   // Process queue
 #ifdef PPI_PRINT_INFO
 #include <time.h>
 
-clock_t start_time;
-clock_t end_time;
+double diff(struct timespec start, struct timespec end);
+double diff(struct timespec start, struct timespec end) {
+    double time = (( end.tv_sec - start.tv_sec ) * 1000000000L
+        + ( end.tv_nsec - start.tv_nsec )) / (double)1000000000L;
+    return time;
+}
+
+struct timespec start_time;
+struct timespec end_time;
 
 time_t first_time;
 time_t second_time;
@@ -684,7 +691,7 @@ int cpu_exec(CPUState *env1)
 
                     if (timing_start) {
 #ifdef PPI_PRINT_INFO
-                        start_time= clock();
+                        clock_gettime(CLOCK_REALTIME, &start_time);
                         first_time = time(NULL);
                         printf("\ttiming start!\n");
 #endif
@@ -694,11 +701,11 @@ int cpu_exec(CPUState *env1)
                     if (timing_end) {
                         data_race_detector_report();
 #ifdef PPI_PRINT_INFO
-                        end_time = clock();
+                        clock_gettime(CLOCK_REALTIME, &end_time);
                         second_time = time(NULL);
                         printf("\ttiming end!\n");
                         printf("\nTime costs : %f (s) ; %f (s)\n", 
-                                (double)(end_time - start_time) / 1000000, difftime(second_time, first_time));
+                                diff(start_time, end_time), difftime(second_time, first_time));
 #endif
                         is_detect_start = 0;
                         timing_end = 0;
