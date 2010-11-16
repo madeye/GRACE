@@ -35,6 +35,7 @@ DEF_HELPER_2(store_quad_trace, void, tl, tl)
 #ifdef PPI_DEBUG_TOOL
 DEF_HELPER_0(process_enqueue, void)
 DEF_HELPER_0(process_dequeue, void)
+//DEF_HELPER_0(flush_buffer, void)
 DEF_HELPER_1(syn_lock_trace, void, tl)
 DEF_HELPER_1(syn_unlock_trace, void, tl)
 DEF_HELPER_1(syn_barrier_trace, void, tl)

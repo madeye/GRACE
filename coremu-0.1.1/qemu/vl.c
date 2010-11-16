@@ -183,6 +183,7 @@ int main(int argc, char **argv)
 #define MAX_VIRTIO_CONSOLES 1
 
 #define PPI_DEBUG_TOOL
+volatile uint32_t max_thread_num = 2;
 #ifdef PPI_DEBUG_TOOL
 #define PPI_PROCESS_INIT
 #define PPI_MONITOR_INIT
@@ -191,7 +192,6 @@ int main(int argc, char **argv)
 #include "module/process.h"
 #include "module/copy.h"
 
-volatile uint32_t max_thread_num = 2;
 volatile uint32_t bench_mark_id = 0;
 volatile uint8_t is_detect_start = 0;
 volatile uint8_t is_process_captured = 0;
@@ -203,8 +203,8 @@ volatile uint8_t thread_exit = 0;
 volatile uint8_t timing_start = 0;
 volatile uint8_t timing_end = 0;
 volatile uint32_t total_id = 1;
-volatile uint32_t current_id = 0;
-volatile uint8_t last_id = 0;
+COREMU_THREAD uint32_t current_id = 0;
+COREMU_THREAD uint32_t last_id = 0;
 volatile struct ProcessQueue process_queue;
 volatile struct map_queue map;
 #endif

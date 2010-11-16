@@ -195,6 +195,8 @@ const uint64_t cond_broad_call[12] = {
     0x400ab8  /* 11 */
 };
 
+/*#define FLUSH_RATE 1000*/
+
 extern volatile uint32_t bench_mark_id;
 extern volatile uint8_t is_detect_start;
 static COREMU_THREAD uint8_t is_collect = 0;
@@ -270,7 +272,7 @@ static COREMU_THREAD uint8_t is_collect = 0;
     (tcg_gen_qemu_st64)(arg, addr, mem_index);                                      \
 }
 
-static target_ulong current_pc = 0;
+static COREMU_THREAD target_ulong current_pc = 0;
 
 #endif
 
@@ -7178,6 +7180,7 @@ static target_ulong disas_insn(DisasContext *s, target_ulong pc_start)
                         gen_helper_process_dequeue();
                     }
                     else {
+                        tb_flush(cpu_single_env);
                         gen_helper_process_enqueue();
                     }
                 else if (val == 0x88)

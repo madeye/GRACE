@@ -31,7 +31,6 @@
 #define STACK_MASK 0xffffc000
 extern FILE *stderr;
 
-extern volatile uint8_t is_collect;
 extern volatile uint8_t is_detect_start;             // Detection started flag
 extern volatile uint8_t is_process_captured;         // Process captured flag
 extern volatile uint8_t just_clone;                  // Clone syscalled flag
@@ -41,7 +40,7 @@ extern volatile uint8_t thread_exit;                 // Thread exited flag
 extern volatile uint8_t timing_start;                // Timing started flag
 extern volatile uint8_t timing_end;                  // Timing ended flag
 extern volatile uint32_t total_id;                   // Thread index
-extern volatile uint32_t current_id;                 // Current thread index
+extern COREMU_THREAD uint32_t current_id;                 // Current thread index
 extern volatile struct ProcessQueue process_queue;   // Process queue
 #endif
 

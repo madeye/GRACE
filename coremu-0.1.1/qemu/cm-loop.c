@@ -83,7 +83,7 @@ void *cm_cpu_loop(void *args)
         cpu_single_env->debug_info.trace_mem_buf 
             = (struct trace_content *) qemu_malloc (sizeof(struct trace_content) * TRACE_PRIVATE_BUF_SIZE);
         cpu_single_env->trace_mem_ptr = cpu_single_env->debug_info.trace_mem_buf;
-        assert(cpu_single_env);
+        assert(cpu_single_env->debug_info.trace_mem_buf);
         printf("buffer init: %d\n", sizeof(struct trace_content));
     }
 #endif

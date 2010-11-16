@@ -25,6 +25,7 @@
 
 #ifdef PPI_DEBUG_TOOL
 #include "module/process.h"
+#include "module/copy.h"
 #include <stdlib.h>
 
 #define STACK_MASK 0xffffc000
@@ -150,7 +151,6 @@ void helper_store_long_trace(target_ulong pc, target_ulong addr) {
 void helper_store_quad_trace(target_ulong pc, target_ulong addr) {
     trace_mem_collection(TRACE_MEM_STORE, TRACE_MEM_SIZE_QUAD, pc, addr);
 }
-
 #endif
 
 #ifdef PPI_DEBUG_TOOL
