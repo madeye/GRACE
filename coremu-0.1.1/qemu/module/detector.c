@@ -35,14 +35,8 @@ void data_race_detector_init()
 {
     module_race_init();
     module_info_init();
-    // module_syn_init();
-#ifdef DETECTOR_STATISTICS_PRINT
-    // module_syn_statistics_init(); 
-#endif
-    // module_timestamp_init();
     module_filter_init();
     module_history_init();
-    // module_handler_init();
 }
 
 void data_race_detector(uint8_t tid, uint32_t size, struct trace_content *buf) 
