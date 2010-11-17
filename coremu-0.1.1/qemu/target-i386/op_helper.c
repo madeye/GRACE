@@ -179,10 +179,12 @@ void helper_process_dequeue(void) {
 #include "../module/sync.h"
 #include <assert.h>
 #include <string.h>
+#include <pthread.h>
 
-extern volatile struct global_timestamp_queue ts;
-extern volatile struct global_syn_info syn;
-extern volatile struct statistics_syn_info stat_syn;
+extern struct global_timestamp_queue ts;
+extern struct global_syn_info syn;
+extern struct statistics_syn_info stat_syn;
+
 static spinlock_t syn_lock = SPIN_LOCK_UNLOCKED;
 
 static inline void module_timestamp_save(uint8_t tid)
@@ -589,7 +591,6 @@ void helper_syn_condwait_trace(target_ulong pc) {
 void helper_syn_condbroad_trace(target_ulong pc) {
     // trace_syn_collection(TRACE_SYN_COND_BROADCAST, 2, EDI, ESI, pc);
    
-    spin_lock(&syn_lock);
     uint32_t i, k;
     uint8_t tid;
     uint64_t cond_id;
@@ -646,14 +647,12 @@ void helper_syn_condbroad_trace(target_ulong pc) {
 #ifdef PPI_DEBUG_TOOL_GUEST
 
 #define trace_mem_collection(type1, size1, pc1, arg1) { \
-    spin_lock(&syn_lock); \
         env->trace_mem_ptr->type = (type1); \
         env->trace_mem_ptr->size = (size1); \
         env->trace_mem_ptr->value.mem.address = (arg1); \
         env->trace_mem_ptr->pc = (pc1); \
         env->trace_mem_ptr->value.mem.index = ts.current_ts_index[current_id]; \
         env->trace_mem_ptr++; \
-    spin_unlock(&syn_lock); \
 }
 
 void helper_load_byte_trace(target_ulong pc, target_ulong addr) {
@@ -3392,6 +3391,9 @@ static inline void helper_ret_protected(int shift, int is_iret, int addend)
                     printf("thread enqueue : cr3 : 0x%lx ; esp : 0x%lx ; id : %d; index : %d ; is_process_captured : %d\n", 
                             env->cr[3], (ESP & STACK_MASK), total_id, index, is_process_captured);
 #endif
+                    current_id = get_thread_id(&process_queue, index);
+                    helper_syn_clone_trace();
+
                     total_id++;
                     just_clone--;
                 }

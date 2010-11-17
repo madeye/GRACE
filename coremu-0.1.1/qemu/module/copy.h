@@ -2,7 +2,7 @@
 #define COPY_H
 
 #include <assert.h>
-static spinlock_t detect_lock = SPIN_LOCK_UNLOCKED;
+//static spinlock_t detect_lock = SPIN_LOCK_UNLOCKED;
 static inline void trace_mem_buf_clear(uint8_t id) 
 {
 #ifdef PPI_DETECTOR_MODULE
@@ -14,9 +14,9 @@ static inline void trace_mem_buf_clear(uint8_t id)
         tid = id;
         size = env->trace_mem_ptr - env->debug_info.trace_mem_buf;
         buf = env->debug_info.trace_mem_buf;
-        spin_lock(&detect_lock);
+        //spin_lock(&detect_lock);
         data_race_detector(tid, size, buf);
-        spin_unlock(&detect_lock);
+        //spin_unlock(&detect_lock);
     }
 #endif
 
