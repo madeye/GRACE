@@ -6497,7 +6497,7 @@ do_lret:
                     tval = (int16_t)insn_get(s, OT_WORD);
                 next_eip = s->pc - s->cs_base;
                 tval += next_eip;
-#ifdef PPI_DEBUG_TOOL
+#ifdef PPI_DEBUG_TOOL_SYN
                 if (is_detect_start && is_collect) {
                     if (tval == lock_call[bench_mark_id])
                         gen_helper_syn_lock_trace(tcg_const_tl(pc_start));
@@ -6540,7 +6540,7 @@ do_lret:
             else
                 tval = (int16_t)insn_get(s, OT_WORD);
             tval += s->pc - s->cs_base;
-#ifdef PPI_DEBUG_TOOL
+#ifdef PPI_DEBUG_TOOL_SYN
             if (is_detect_start && is_collect) {
                 if (tval == lock_call[bench_mark_id])
                     gen_helper_syn_lock_trace(tcg_const_tl(pc_start));

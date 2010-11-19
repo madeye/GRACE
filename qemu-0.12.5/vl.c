@@ -181,6 +181,7 @@ int main(int argc, char **argv)
 #include "module/process.h"
 #include "module/copy.h"
 
+uint32_t max_thread_num = 2;
 uint32_t bench_mark_id = 0;
 volatile uint8_t is_detect_start = 0;
 uint8_t is_process_captured = 0;
@@ -5042,6 +5043,10 @@ int main(int argc, char **argv, char **envp)
             case QEMU_OPTION_benchmark:
                 bench_mark_id = atoi(optarg);
                 printf("bench mark: %d\n", bench_mark_id);
+                break;
+            case QEMU_OPTION_threadnum:
+                max_thread_num = atoi(optarg);
+                printf("max thread num: %d\n", max_thread_num);
                 break;
 #endif
             case QEMU_OPTION_hda:

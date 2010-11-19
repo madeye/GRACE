@@ -76,6 +76,12 @@ Use @var{file} as floppy disk 0/1 image (@pxref{disk_images}). You can
 use the host floppy by using @file{/dev/fd0} as filename (@pxref{host_drives}).
 ETEXI
 
+DEF("tnum", HAS_ARG, QEMU_OPTION_threadnum,
+    "-tnum n[Max Thread Num]")
+STEXI
+Set the max thread num for trace detection.
+ETEXI
+
 DEF("bench", HAS_ARG, QEMU_OPTION_benchmark,
     "-bench n[Benchmark Index]")
 STEXI

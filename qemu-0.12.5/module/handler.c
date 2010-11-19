@@ -266,7 +266,7 @@ void module_syn_barrier_handler(struct trace_content *content)
             syn.barrier.entry[i].last_barrier_ts_index[tid] = index;
             syn.barrier.entry[i].is_barrier++;	     
 
-            if (syn.barrier.entry[i].is_barrier >= MAX_THREAD_NUM) {
+            if (syn.barrier.entry[i].is_barrier >= max_thread_num) {
 #if 0
                 printf("%d threads have reached barriers!\n", syn.barrier.entry[i].is_barrier);
 #endif

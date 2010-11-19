@@ -681,12 +681,6 @@ int cpu_exec(CPUState *env1)
                         thread_exit= 0;
                     }
 
-                    /*if (is_detect_start && current_id) {*/
-                        /*is_collect = 1;    	*/
-                    /*} else {*/
-                        /*is_collect = 0;*/
-                    /*}*/
-
                     // TODO: Necessary to add is_detect_start here?
                     if (is_detect_start) {
                         if (last_id != current_id) {

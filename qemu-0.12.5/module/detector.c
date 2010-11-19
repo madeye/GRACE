@@ -28,7 +28,9 @@ typedef unsigned long uint64_t;
 
 #include "filter.c"
 
+extern uint32_t max_thread_num;
 #include "handler.c"
+
 
 /* interface */
 
