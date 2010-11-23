@@ -37,6 +37,7 @@ extern volatile uint8_t is_detect_start;
 extern uint8_t is_process_captured;
 extern struct map_queue map;
 extern struct ProcessQueue process_queue;   // Process queue
+/*uint8_t is_thread_enqueue = 0;*/
 
 #include "module/copy.h"
 #include "module/process.h"
@@ -666,9 +667,13 @@ int cpu_exec(CPUState *env1)
 #ifdef PPI_PRINT_INFO
                         printf("\tthread start : last tid : %d ; current tid : %d\n", last_id, current_id);
 #endif
-
+                        
                         trace_syn_collection(TRACE_SYN_CREATE, 0, 0, 0, EIP);      
-
+                       
+                        /*if (!is_thread_enqueue) {*/
+                          /*is_thread_enqueue = 1;*/
+                          /*tb_flush(env);*/
+                        /*}*/
                         thread_start = 0;
                     }
                     if (thread_exit) {
@@ -715,6 +720,7 @@ int cpu_exec(CPUState *env1)
                                 (double)(end_time - start_time) / 1000000, difftime(second_time, first_time));
 #endif
                         is_detect_start = 0;
+                        /*is_thread_enqueue = 0;*/
                         timing_end = 0;
                     }
 #endif

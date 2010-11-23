@@ -30,6 +30,7 @@
 #define PPI_DEBUG_TOOL
 #define PPI_DEBUG_TOOL_GUEST
 #define PPI_DEBUG_SWITCHER
+#define PPI_DEBUG_TOOL_SYN
 
 #ifdef PPI_DEBUG_TOOL
 #include "../module/interface.h"

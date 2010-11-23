@@ -19,12 +19,12 @@ typedef unsigned long uint64_t;
 
 #include "timestamp.c"
 
-#define MOD_HISTORY
-#define MOD_MATCH
+/*#define MOD_HISTORY*/
+/*#define MOD_MATCH*/
 
 #include "history.c"
 
-#define MOD_FILTER
+/*#define MOD_FILTER*/
 
 #include "filter.c"
 

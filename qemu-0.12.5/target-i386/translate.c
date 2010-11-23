@@ -210,12 +210,11 @@ const uint64_t cond_broad_call[12] = {
     0x400ab8  /* 11 */
 };
 
-/*#define FLUSH_RATE 100*/
 
 extern uint32_t bench_mark_id;
 extern volatile uint8_t is_detect_start;
 uint8_t is_collect = 0;
-/*static uint64_t flush_counter = 0;*/
+/*extern uint8_t is_thread_enqueue;*/
 
 #endif
 
@@ -691,11 +690,6 @@ static inline void gen_op_addq_A0_reg_sN(int shift, int reg)
 #ifdef PPI_DEBUG_TOOL_GUEST
 static inline void gen_mem_trace(uint8_t type1, uint8_t size1, TCGv addr1) {
     if (is_detect_start  && is_collect) {
-        /*if (flush_counter >= FLUSH_RATE) {*/
-            /*gen_helper_flush_buffer();*/
-            /*flush_counter = 0;*/
-        /*}*/
-        /*flush_counter++;*/
         switch (type1)
         {
             case TRACE_MEM_LOAD:
