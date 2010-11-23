@@ -1,1 +1,0 @@
-PREFIXDIR := /root/qemu
