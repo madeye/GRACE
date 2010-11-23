@@ -5,7 +5,7 @@
 #define PPI_PROCESS_INFO
 #define PPI_SYN_INFO
 
-#define TRACE_PRIVATE_BUF_SIZE (16 * 1024 * 1024)
+#define TRACE_PRIVATE_BUF_SIZE (32 * 1024 * 1024)
 
 #define TRACE_MEM_INT
 #define TRACE_MEM_FLOAT
@@ -17,7 +17,7 @@
 #define TRACE_BUF_SIZE (1 * 1024)
 
 enum {
-    TRACE_TYPE_BASE,
+    TRACE_MEM_BASE,
     TRACE_MEM_LOAD,
     TRACE_MEM_STORE,
     TRACE_SYN_LOCK,
@@ -31,26 +31,20 @@ enum {
 };
 
 enum {
-    TRACE_MEM_SIZE_BYTE = 1,
-    TRACE_MEM_SIZE_WORD = 2,
-    TRACE_MEM_SIZE_LONG = 4,
-    TRACE_MEM_SIZE_QUAD = 8,
+    TRACE_MEM_SIZE_BYTE = 0,
+    TRACE_MEM_SIZE_WORD = 1,
+    TRACE_MEM_SIZE_LONG = 2,
+    TRACE_MEM_SIZE_QUAD = 3,
 };
 
 struct trace_content {
-    uint8_t tid;
-    uint8_t type;
-    uint8_t size;
+    uint32_t tid:8, type:2, size:2, index:20;
+    //uint8_t tid;
+    //uint8_t type;
+    //uint8_t size;
+    //uint32_t index;
     uint32_t pc;
-    union {
-        struct {	
-            uint64_t address;
-            uint64_t index;
-        } mem;
-        struct {
-            uint64_t args[2];
-        } syn;
-    } value;
+    uint32_t address;
 };
 
 typedef struct DEBUGInfo {

@@ -10,17 +10,17 @@ static inline void trace_mem_buf_clear(uint8_t id)
     uint32_t size;
     struct trace_content *buf;
 
+        //spin_lock(&detect_lock);
     if ((id > 0) && (env->trace_mem_ptr - env->debug_info.trace_mem_buf > 0)) {
         tid = id;
         size = env->trace_mem_ptr - env->debug_info.trace_mem_buf;
         buf = env->debug_info.trace_mem_buf;
-        //spin_lock(&detect_lock);
         data_race_detector(tid, size, buf);
-        //spin_unlock(&detect_lock);
     }
 #endif
 
     env->trace_mem_ptr = env->debug_info.trace_mem_buf;
+        //spin_unlock(&detect_lock);
 }
 
 #endif /* COPY_H */
