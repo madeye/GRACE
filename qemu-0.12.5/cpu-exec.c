@@ -699,11 +699,6 @@ int cpu_exec(CPUState *env1)
                     }
 
                     if (timing_end) {
-                        data_race_detector_report();
-                        module_syn_print(&syn);
-                        module_syn_statistics_print(&stat_syn);
-                        module_timestamp_print(&ts);
-
 #ifdef PPI_PRINT_INFO
                         end_time = clock();
                         second_time = time(NULL);
@@ -715,6 +710,11 @@ int cpu_exec(CPUState *env1)
                                 (difftime(time2.tv_sec, time1.tv_sec) * 1000000000
                                 + (double)(time2.tv_nsec - time1.tv_nsec)) / 1000000000);
 #endif
+                        data_race_detector_report();
+                        module_syn_print(&syn);
+                        module_syn_statistics_print(&stat_syn);
+                        module_timestamp_print(&ts);
+
 
                         is_detect_start = 0;
                         timing_end = 0;

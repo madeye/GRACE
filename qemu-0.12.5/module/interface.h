@@ -14,7 +14,7 @@
 // #define TRACE_PC_LIMIT 0x10000000
 
 #define MAX_PROCESS_NUM 16
-#define MAX_THREAD_NUM 2
+#define MAX_THREAD_NUM 4
 
 #define TRACE_BUF_SIZE (1 * 1024)
 
@@ -43,16 +43,16 @@ struct trace_content {
     uint8_t tid;
     uint8_t type;
     uint8_t size;
+    uint32_t pc;
     union {
         struct {	
-            uint64_t address;
-            uint64_t index;
+            uint32_t address;
+            uint32_t index;
         } mem;
         struct {
-            uint64_t args[2];
+            uint32_t args[2];
         } syn;
     } value;
-    uint64_t pc;
 };
 
 typedef struct DEBUGInfo {

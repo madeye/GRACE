@@ -126,7 +126,7 @@ void *data_race_detector_pthread(void *args)
     volatile uint32_t size;
     struct shared_trace_chunk *temp_chunk;
 
-    i = ((int *)args)[0];
+    i = (int)args;
     fprintf(stderr, "core %d start!\n", i);
 
     info.core_id = i;
@@ -167,7 +167,7 @@ static inline void data_race_detector_stage()
     ppi_set_cpu_thread(STAGE_ONE_BASE_CPU_ID);
 
     for (i = 0; i < MAX_CORE_NUM; i++) {
-        pthread_create(&pid[i], NULL, data_race_detector_pthread, (void *)&i);
+        pthread_create(&pid[i], NULL, data_race_detector_pthread, (void *)i);
     }
 }
 #endif
@@ -189,16 +189,20 @@ void data_race_detector(uint8_t tid, uint32_t size, struct trace_content *buf)
 {
 #ifdef MOD_PROFILER
 #ifdef PPI_TWO_STAGE
+    struct trace_content *buf_ptr = buf;
     while (size > TRACE_SHARED_BUF_SIZE) {
-        printf("\twarning : trace is too long! size : 0x%x\n", size);
+        /*printf("\twarning : trace is too long! size : 0x%x\n", size);*/
 
-        module_shared_buf_copy(tid, TRACE_SHARED_BUF_SIZE, buf);
+        module_shared_buf_copy(tid, TRACE_SHARED_BUF_SIZE, buf_ptr);
 
         size -= TRACE_SHARED_BUF_SIZE;
-        memcpy(buf, (buf + TRACE_SHARED_BUF_SIZE), size * sizeof(struct trace_content));
+
+        buf_ptr += TRACE_SHARED_BUF_SIZE;
+
+        /*memcpy(buf, (buf + TRACE_SHARED_BUF_SIZE), size * sizeof(struct trace_content));*/
     }
 
-    module_shared_buf_copy(tid, size, buf);
+    module_shared_buf_copy(tid, size, buf_ptr);
 #else
     module_detector_start(tid, size, buf);
 #endif
