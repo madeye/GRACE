@@ -128,7 +128,7 @@ obj-y = $(block-obj-y)
 obj-y += $(net-obj-y)
 obj-y += $(qobject-obj-y)
 obj-y += readline.o console.o
-obj-y += detector.o
+obj-y += detector.o # module
 
 obj-y += tcg-runtime.o host-utils.o
 obj-y += irq.o ioport.o

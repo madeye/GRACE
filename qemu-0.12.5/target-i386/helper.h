@@ -75,6 +75,8 @@ DEF_HELPER_0(process_dequeue, void)
 DEF_HELPER_1(syn_lock_trace, void, tl)
 DEF_HELPER_1(syn_unlock_trace, void, tl)
 DEF_HELPER_1(syn_barrier_trace, void, tl)
+DEF_HELPER_0(syn_create_trace, void)
+DEF_HELPER_0(syn_join_trace, void)
 DEF_HELPER_1(syn_condwait_trace, void, tl)
 DEF_HELPER_1(syn_condbroad_trace, void, tl)
 #endif
