@@ -114,7 +114,7 @@ static inline void module_race_collection(struct trace_content *content1, struct
     int i;
     struct race_queue *temp_queue;
 
-#ifdef PPI_TWO_STAGE
+#ifdef PPI_THREE_STAGE
     temp_queue = race->thread[info.core_id];
 #else
     temp_queue = race->thread[content2->tid];

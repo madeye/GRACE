@@ -4,14 +4,14 @@
 struct global_info {
     uint8_t max_tid_num;
     uint8_t exist[MAX_PROCESS_NUM];
-#ifdef PPI_TWO_STAGE
+#ifdef PPI_THREE_STAGE
     uint8_t core_id;
-    uint8_t analysis_id;
     uint8_t chunk_id;
+    uint8_t last_tid;
 #endif
 };
 
-#ifdef PPI_TWO_STAGE
+#ifdef PPI_THREE_STAGE
 __thread struct global_info info;
 #else
 struct global_info info;
@@ -22,21 +22,21 @@ static inline void module_info_init()
     memset(&info, 0, sizeof(struct global_info));
 }
 
-#ifdef PPI_TWO_STAGE
+#ifdef PPI_THREE_STAGE
 #define STAGE_ONE_BASE_CPU_ID 0
 #define STAGE_TWO_BASE_CPU_ID 2
+#define STAGE_THREE_BASE_CPU_ID 3
 
-#define MAX_STAGE_NUM 1
+#define MAX_STAGE_NUM 2
 #define MAX_CORE_NUM 1
-#define MAX_CHUNK_NUM 1
-#define TRACE_SHARED_BUF_SIZE TRACE_BUF_SIZE
+#define MAX_CHUNK_NUM 4
+#define TRACE_SHARED_BUF_SIZE (TRACE_BUF_SIZE)
 
 struct trace_info {
     volatile uint32_t buf_size;
     volatile uint8_t thread_id;
-    volatile uint8_t analysis_id;
     volatile uint8_t is_buf_full;
-    volatile uint8_t is_exit;
+    // volatile uint8_t is_exit;
 };
 
 struct shared_trace_chunk {
@@ -58,7 +58,6 @@ struct global_shared_trace_buf {
 
 struct global_shared_trace_buf shared_buf;
 
-
 static inline void module_shared_buf_init()
 {
     uint8_t i, j, k;
@@ -68,10 +67,12 @@ static inline void module_shared_buf_init()
     for (i = 0; i < MAX_STAGE_NUM; i++) {
         for (j = 0; j < MAX_CORE_NUM; j++) {
             for (k = 0; k < MAX_CHUNK_NUM; k++) {
-                shared_buf.stage[i].core[j].chunk[k].buf = (struct trace_content *)malloc(TRACE_SHARED_BUF_SIZE * sizeof(struct trace_content));
+                shared_buf.stage[i].core[j].chunk[k].buf = 
+                    (struct trace_content *)malloc(TRACE_SHARED_BUF_SIZE * sizeof(struct trace_content));
                 memset(shared_buf.stage[i].core[j].chunk[k].buf, 0, 
                         TRACE_SHARED_BUF_SIZE * sizeof(struct trace_content));
-                shared_buf.stage[i].core[j].chunk[k].info = (struct trace_info *)malloc(sizeof(struct trace_info));
+                shared_buf.stage[i].core[j].chunk[k].info = 
+                    (struct trace_info *)malloc(sizeof(struct trace_info));
                 memset(shared_buf.stage[i].core[j].chunk[k].info, 0, 
                         sizeof(struct trace_info));
             }
@@ -97,26 +98,21 @@ static inline void module_shared_buf_all_empty()
     }
 }
 
-static inline void module_shared_buf_copy(uint8_t tid, 
-        uint32_t size, struct trace_content *buf) {
-    int i;
+static inline void module_shared_buf_copy(uint8_t sid, uint8_t cid, uint8_t kid,
+                uint8_t tid, uint32_t size, struct trace_content *buf)
+{
     struct shared_trace_chunk *temp_chunk;
 
-    for (i = 0; i < MAX_CORE_NUM; i++) {
-        temp_chunk = &shared_buf.stage[0].core[i].chunk[info.chunk_id];
-		
-        while (temp_chunk->info->is_buf_full);
+    temp_chunk = &shared_buf.stage[sid].core[cid].chunk[kid];
 
-        memcpy(temp_chunk->buf, buf, size * sizeof(struct trace_content));
+    while (temp_chunk->info->is_buf_full);
 
-        temp_chunk->info->buf_size = size;
-        temp_chunk->info->thread_id = tid;
-        temp_chunk->info->analysis_id = info.analysis_id;
-        temp_chunk->info->is_buf_full = 1;
-    }
+    memcpy(temp_chunk->buf, buf, size * sizeof(struct trace_content));
 
-    info.chunk_id = (info.chunk_id + 1) % MAX_CHUNK_NUM;
-    info.analysis_id = (info.analysis_id + 1) % MAX_CORE_NUM;
+    temp_chunk->info->buf_size = size;
+    temp_chunk->info->thread_id = tid;
+
+    temp_chunk->info->is_buf_full = 1;
 }
 #endif
 

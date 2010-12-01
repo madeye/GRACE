@@ -17,11 +17,7 @@ struct global_page_filter {
     struct page_filter *thread[MAX_PROCESS_NUM];
 };
 
-#ifdef PPI_TWO_STAGE
-__thread struct global_page_filter *pfilter;
-#else
 struct global_page_filter *pfilter;
-#endif
 
 static inline void module_filter_init()
 {

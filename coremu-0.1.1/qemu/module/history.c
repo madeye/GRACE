@@ -26,11 +26,7 @@ struct global_history_queue {
     struct history_hash_queue *thread[MAX_PROCESS_NUM];
 };
 
-#ifdef PPI_TWO_STAGE
-__thread struct global_history_queue *history;
-#else
 struct global_history_queue *history;
-#endif
 
 static inline void module_history_init()
 {

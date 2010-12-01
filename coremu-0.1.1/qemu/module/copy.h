@@ -53,8 +53,7 @@ static inline void trace_mem_buf_clear(uint8_t id)
     uint32_t size;
     struct trace_content *buf;
 
-        spin_lock(&buf_lock);
-
+    spin_lock(&buf_lock);
     if ((id > 0) && (env->trace_mem_ptr - env->debug_info.trace_mem_buf > 0)) {
         tid = id;
         size = env->trace_mem_ptr - env->debug_info.trace_mem_buf;
@@ -63,8 +62,7 @@ static inline void trace_mem_buf_clear(uint8_t id)
     }
 
     env->trace_mem_ptr = env->debug_info.trace_mem_buf;
-
-        spin_unlock(&buf_lock);
+    spin_unlock(&buf_lock);
 }
 #endif
 
