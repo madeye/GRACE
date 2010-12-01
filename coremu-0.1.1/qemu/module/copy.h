@@ -45,7 +45,8 @@ static inline uint8_t trace_thread_id_map(struct map_queue *map, uint8_t id)
     return i;
 }
 
-spinlock_t buf_lock = SPIN_LOCK_UNLOCKED;
+#include <pthread.h> 
+pthread_mutex_t buf_lock = PTHREAD_MUTEX_INITIALIZER;
 
 static inline void trace_mem_buf_clear(uint8_t id) 
 {
@@ -53,7 +54,7 @@ static inline void trace_mem_buf_clear(uint8_t id)
     uint32_t size;
     struct trace_content *buf;
 
-    spin_lock(&buf_lock);
+    pthread_mutex_lock(&buf_lock);
     if ((id > 0) && (env->trace_mem_ptr - env->debug_info.trace_mem_buf > 0)) {
         tid = id;
         size = env->trace_mem_ptr - env->debug_info.trace_mem_buf;
@@ -62,7 +63,7 @@ static inline void trace_mem_buf_clear(uint8_t id)
     }
 
     env->trace_mem_ptr = env->debug_info.trace_mem_buf;
-    spin_unlock(&buf_lock);
+    pthread_mutex_unlock(&buf_lock);
 }
 #endif
 

@@ -30,7 +30,7 @@ static inline void module_info_init()
 #define MAX_STAGE_NUM 2
 #define MAX_CORE_NUM 1
 #define MAX_CHUNK_NUM 4
-#define TRACE_SHARED_BUF_SIZE (TRACE_BUF_SIZE)
+#define TRACE_SHARED_BUF_SIZE TRACE_BUF_SIZE
 
 struct trace_info {
     volatile uint32_t buf_size;
