@@ -6,8 +6,7 @@
 #define FILTER_ENTRY_MASK 0xfffff
 
 struct filter_entry {
-    uint8_t load_access;
-    uint8_t store_access;
+    uint8_t load:1, store:1;
 };
 
 struct page_filter {
@@ -18,38 +17,57 @@ struct global_page_filter {
     struct page_filter *thread[MAX_PROCESS_NUM];
 };
 
-struct global_page_filter filter;
+#ifdef PPI_TWO_STAGE
+__thread struct global_page_filter *pfilter;
+#else
+struct global_page_filter *pfilter;
+#endif
 
 static inline void module_filter_init()
 {
-    uint32_t i;
+    int i;
 
-    memset(&filter, 0, sizeof(struct global_page_filter));
+    pfilter = (struct global_page_filter *)malloc(sizeof(struct global_page_filter));
+    memset(pfilter, 0, sizeof(struct global_page_filter));
 
     for (i = 0; i < MAX_PROCESS_NUM; i++) {
-        filter.thread[i] = (struct page_filter *)malloc(sizeof(struct page_filter));	
-        memset(filter.thread[i], 0, sizeof(struct page_filter));
+        pfilter->thread[i] = (struct page_filter *)malloc(sizeof(struct page_filter));	
+        memset(pfilter->thread[i], 0, sizeof(struct page_filter));
     }
 }
 
-static inline void module_filter_load(struct trace_content *content) 
+static inline void module_filter_load_record(struct trace_content *content) 
+{
+#ifdef MOD_FILTER
+    uint8_t tid;
+    uint64_t address;
+    uint32_t index;
+
+    tid = content->tid;
+    address = content->address;
+
+    index = (address >> FILTER_BASE_BIT) & FILTER_ENTRY_MASK;
+
+    pfilter->thread[tid]->entry[index].load = 1;
+#endif
+}
+
+static inline void module_filter_load_match(struct trace_content *content) 
 {
 #ifdef MOD_FILTER
     uint8_t i;
     uint8_t tid;
     uint64_t address;
-    uint32_t temp_index;
+    uint32_t index;
 
     tid = content->tid;
     address = content->address;
 
-    temp_index = (address >> FILTER_BASE_BIT) & FILTER_ENTRY_MASK;
-
-    filter.thread[tid]->entry[temp_index].load_access = 1;
+    index = (address >> FILTER_BASE_BIT) & FILTER_ENTRY_MASK;
 
     for (i = 0; i < info.max_tid_num; i++) {
         if (i != tid) {
-            if (filter.thread[i]->entry[temp_index].store_access) {
+            if (pfilter->thread[i]->entry[index].store) {
                 module_match_with_store(content, i);
             }
         }
@@ -57,28 +75,42 @@ static inline void module_filter_load(struct trace_content *content)
 #endif
 }
 
-static inline void module_filter_store(struct trace_content *content) 
+static inline void module_filter_store_record(struct trace_content *content) 
+{
+#ifdef MOD_FILTER
+    uint8_t tid;
+    uint64_t address;
+    uint32_t index;
+
+    tid = content->tid;
+    address = content->address;
+
+    index = (address >> FILTER_BASE_BIT) & FILTER_ENTRY_MASK;
+
+    pfilter->thread[tid]->entry[index].store = 1;
+#endif
+}
+
+static inline void module_filter_store_match(struct trace_content *content) 
 {
 #ifdef MOD_FILTER
     uint8_t i;
     uint8_t tid;
     uint64_t address;
-    uint32_t temp_index;
+    uint32_t index;
 
     tid = content->tid;
     address = content->address;
 
-    temp_index = (address >> FILTER_BASE_BIT) & FILTER_ENTRY_MASK;
-
-    filter.thread[tid]->entry[temp_index].store_access = 1;
+    index = (address >> FILTER_BASE_BIT) & FILTER_ENTRY_MASK;
 
     for (i = 0; i < info.max_tid_num; i++) {
         if (i != tid) {
-            if (filter.thread[i]->entry[temp_index].load_access) {
+            if (pfilter->thread[i]->entry[index].load) {
                 module_match_with_load(content, i);
             }
-			
-            if (filter.thread[i]->entry[temp_index].store_access) {
+
+            if (pfilter->thread[i]->entry[index].store) {
                 module_match_with_store(content, i);
             }
         }
