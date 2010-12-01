@@ -6,13 +6,13 @@ struct global_info {
     uint8_t exist[MAX_PROCESS_NUM];
 #ifdef PPI_THREE_STAGE
     uint8_t core_id;
-    uint8_t chunk_id;
-    uint8_t last_tid;
 #endif
 };
 
 #ifdef PPI_THREE_STAGE
 __thread struct global_info info;
+volatile uint8_t chunk_id = 0;
+volatile uint8_t last_tid = 0;
 #else
 struct global_info info;
 #endif
@@ -29,7 +29,7 @@ static inline void module_info_init()
 
 #define MAX_STAGE_NUM 2
 #define MAX_CORE_NUM 1
-#define MAX_CHUNK_NUM 1
+#define MAX_CHUNK_NUM 4
 #define TRACE_SHARED_BUF_SIZE (TRACE_BUF_SIZE)
 
 struct trace_info {

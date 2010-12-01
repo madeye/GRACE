@@ -274,10 +274,10 @@ void data_race_detector(uint8_t tid, uint32_t size, struct trace_content *buf)
     struct trace_content *buf_ptr;
 
 #if 1
-    if (info.last_tid != tid) {
+    if (last_tid != tid) {
         module_shared_buf_all_empty();
 
-        info.last_tid = tid;
+        last_tid = tid;
     }
 #endif
 
@@ -286,15 +286,15 @@ void data_race_detector(uint8_t tid, uint32_t size, struct trace_content *buf)
     while (size > TRACE_SHARED_BUF_SIZE) {
         // printf("\twarning : trace is too long! size : 0x%x\n", size);
 
-        module_shared_buf_copy(0, 0, info.chunk_id, tid, TRACE_SHARED_BUF_SIZE, buf_ptr);
-        info.chunk_id = (info.chunk_id + 1) % MAX_CHUNK_NUM;
+        module_shared_buf_copy(0, 0, chunk_id, tid, TRACE_SHARED_BUF_SIZE, buf_ptr);
+        chunk_id = (chunk_id + 1) % MAX_CHUNK_NUM;
 
         size -= TRACE_SHARED_BUF_SIZE;
         buf_ptr += TRACE_SHARED_BUF_SIZE;
     }
 
-    module_shared_buf_copy(0, 0, info.chunk_id, tid, size, buf_ptr);
-    info.chunk_id = (info.chunk_id + 1) % MAX_CHUNK_NUM;
+    module_shared_buf_copy(0, 0, chunk_id, tid, size, buf_ptr);
+    chunk_id = (chunk_id + 1) % MAX_CHUNK_NUM;
 #else
     module_detector_start(tid, size, buf);
 #endif

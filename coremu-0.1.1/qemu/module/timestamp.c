@@ -13,8 +13,10 @@ static inline int module_timestamp_order(uint8_t tid1, uint32_t index1,
     ts1 = &ts.thread[tid1]->entry[index1];
     ts2 = &ts.thread[tid2]->entry[index2];
 
-    if ((ts1->scalar[tid1] < ts2->scalar[tid1]) 
-            && (ts1->scalar[tid2] < ts2->scalar[tid2])) {
+    if ( ( (ts1->scalar[tid1] < ts2->scalar[tid1])
+        && (ts1->scalar[tid2] < ts2->scalar[tid2]) )
+        || (   (ts1->scalar[tid1] > ts2->scalar[tid1])
+            && (ts1->scalar[tid2] > ts2->scalar[tid2]) ) ) {
         return 1;
     }
 
