@@ -10,6 +10,12 @@
 #include <pthread.h>
 #include <sys/syscall.h>
 
+/*pthread_mutex_t stage2_lock = PTHREAD_MUTEX_INITIALIZER;*/
+/*pthread_cond_t  stage2_cond = PTHREAD_COND_INITIALIZER;*/
+pthread_mutex_t det_lock = PTHREAD_MUTEX_INITIALIZER;
+pthread_cond_t  det_cond = PTHREAD_COND_INITIALIZER;
+extern volatile uint8_t is_detect_start;
+
 static inline void ppi_set_cpu_thread(int cpu_no)
 {
     unsigned long int cpumask;
@@ -133,6 +139,12 @@ void *module_pthread_stage_two(void *args)
     j = 0;
 
     while(1) {
+
+        pthread_mutex_lock(&det_lock);
+        if (!is_detect_start)
+            pthread_cond_wait(&det_cond, &det_lock);
+        pthread_mutex_unlock(&det_lock);
+
         temp_chunk = &shared_buf.stage[0].core[i].chunk[j];
 
         if (temp_chunk->info->is_buf_full) {
@@ -175,6 +187,12 @@ void *module_pthread_stage_three(void *args)
     j = 0;
 
     while(1) {
+
+        pthread_mutex_lock(&det_lock);
+        if (!is_detect_start)
+            pthread_cond_wait(&det_cond, &det_lock);
+        pthread_mutex_unlock(&det_lock);
+
         temp_chunk = &shared_buf.stage[1].core[i].chunk[j];
 
         if (temp_chunk->info->is_buf_full) {
@@ -273,7 +291,7 @@ void data_race_detector(uint8_t tid, uint32_t size, struct trace_content *buf)
 #ifdef PPI_THREE_STAGE
     struct trace_content *buf_ptr;
 
-#if 1
+#if 0
     if (last_tid != tid) {
         module_shared_buf_all_empty();
 

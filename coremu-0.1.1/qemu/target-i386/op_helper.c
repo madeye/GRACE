@@ -41,6 +41,8 @@ extern volatile uint8_t timing_end;                  // Timing ended flag
 extern volatile uint32_t total_id;                   // Thread index
 extern COREMU_THREAD uint32_t current_id;            // Current thread index
 extern volatile struct ProcessQueue process_queue;   // Process queue
+extern pthread_mutex_t det_lock;
+extern pthread_cond_t  det_cond;
 #endif
 
 #ifdef DEBUG_PCALL
@@ -126,8 +128,13 @@ static const CPU86_LDouble f15rk[7] =
 #ifdef PPI_DEBUG_TOOL
 
 void helper_process_enqueue(void) {
+
+    pthread_mutex_lock(&det_lock);
     is_detect_start = 1;
-    if (is_detect_start && !is_process_captured) {
+    pthread_cond_broadcast(&det_cond);
+    pthread_mutex_unlock(&det_lock);
+    
+    if (!is_process_captured) {
         target_ulong new_cr3 = env->cr[3];
         int index = process_enqueue(&process_queue, new_cr3, (ESP & STACK_MASK), total_id);
 #ifdef PPI_PROCESS_INFO
@@ -151,7 +158,6 @@ void helper_process_enqueue(void) {
 
 void helper_process_dequeue(void) { 
     if (is_detect_start) {
-        is_detect_start = 0;
         int index = process_dequeue(&process_queue, env->cr[3], ESP & STACK_MASK);
 #ifdef PPI_PROCESS_INFO
         printf("process dequeue : cr3 : 0x%lx ; esp : 0x%lx ; index : %d\n", 
@@ -647,6 +653,7 @@ void helper_syn_condbroad_trace(target_ulong pc) {
 #ifdef PPI_DEBUG_TOOL_GUEST
 
 #define trace_mem_collection(type1, size1, pc1, arg1) { \
+        env->trace_mem_ptr->tid = current_id; \
         env->trace_mem_ptr->type = (type1); \
         env->trace_mem_ptr->size = (size1); \
         env->trace_mem_ptr->address = (arg1); \
