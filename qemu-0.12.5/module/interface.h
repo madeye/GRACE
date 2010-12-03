@@ -40,19 +40,13 @@ enum {
 };
 
 struct trace_content {
-    uint8_t tid;
-    uint8_t type;
-    uint8_t size;
+    uint32_t tid:8, type:2, size:2, index:20;
+    //uint8_t tid;
+    //uint8_t type;
+    //uint8_t size;
+    //uint32_t index;
     uint32_t pc;
-    union {
-        struct {	
-            uint32_t address;
-            uint32_t index;
-        } mem;
-        struct {
-            uint32_t args[2];
-        } syn;
-    } value;
+    uint64_t address;
 };
 
 typedef struct DEBUGInfo {

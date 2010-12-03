@@ -44,7 +44,7 @@ static inline void module_filter_load_record(struct trace_content *content)
     uint32_t index;
 
     tid = content->tid;
-    address = content->value.mem.address;
+    address = content->address;
 
     index = (address >> FILTER_BASE_BIT) & FILTER_ENTRY_MASK;
 
@@ -61,7 +61,7 @@ static inline void module_filter_load_match(struct trace_content *content)
     uint32_t index;
 
     tid = content->tid;
-    address = content->value.mem.address;
+    address = content->address;
 
     index = (address >> FILTER_BASE_BIT) & FILTER_ENTRY_MASK;
 
@@ -83,7 +83,7 @@ static inline void module_filter_store_record(struct trace_content *content)
     uint32_t index;
 
     tid = content->tid;
-    address = content->value.mem.address;
+    address = content->address;
 
     index = (address >> FILTER_BASE_BIT) & FILTER_ENTRY_MASK;
 
@@ -100,7 +100,7 @@ static inline void module_filter_store_match(struct trace_content *content)
     uint32_t index;
 
     tid = content->tid;
-    address = content->value.mem.address;
+    address = content->address;
 
     index = (address >> FILTER_BASE_BIT) & FILTER_ENTRY_MASK;
 
