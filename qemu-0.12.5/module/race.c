@@ -84,7 +84,7 @@ static inline void module_race_print()
 
     for (i = 0; i < remain->count; i++) {
         fprintf(stderr, "No. %d : address : 0x%lx ; same count : %d\n", 
-                i, remain->entry[i].content2.value.mem.address, remain->entry[i].instance);
+                i, remain->entry[i].content2.address, remain->entry[i].instance);
         fprintf(stderr, "tid1 : %d ; type1 : %d ; size1 : %d ; pc1 : 0x%lx\n", 
                 remain->entry[i].content1.tid, remain->entry[i].content1.type, 
                 remain->entry[i].content1.size, remain->entry[i].content1.pc);
@@ -101,7 +101,7 @@ static inline int module_race_content_equal(struct trace_content *content1, stru
     if ((content1->tid == content2->tid) 
             && (content1->type == content2->type) 
             && (content1->size == content2->size) 
-            && (content1->value.mem.address == content2->value.mem.address) 
+            && (content1->address == content2->address) 
             && (content1->pc == content2->pc)) {
         return 1;
     }

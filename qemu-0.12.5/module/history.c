@@ -51,7 +51,7 @@ static inline void module_history_load_record(struct trace_content *content)
     struct history_entry *temp_entry;
 
     tid = content->tid;
-    address = content->value.mem.address;
+    address = content->address;
 
     temp_queue = &history->thread[tid]->hash[(address >> HASH_BASE_BIT) % MAX_HASH_NUM];
 
@@ -62,8 +62,8 @@ static inline void module_history_load_record(struct trace_content *content)
     temp_entry->content.tid = content->tid;
     temp_entry->content.type = content->type;
     temp_entry->content.size = content->size;
-    temp_entry->content.value.mem.address = content->value.mem.address;
-    temp_entry->content.value.mem.index = content->value.mem.index;
+    temp_entry->content.address = content->address;
+    temp_entry->content.index = content->index;
     temp_entry->content.pc = content->pc;
 
     //tail++;
@@ -85,7 +85,7 @@ static inline void module_history_store_record(struct trace_content *content)
     struct history_entry *temp_entry;
 
     tid = content->tid;
-    address = content->value.mem.address;
+    address = content->address;
 
     temp_queue = &history->thread[tid]->hash[(address >> HASH_BASE_BIT) % MAX_HASH_NUM];
 
@@ -96,8 +96,8 @@ static inline void module_history_store_record(struct trace_content *content)
     temp_entry->content.tid = content->tid;
     temp_entry->content.type = content->type;
     temp_entry->content.size = content->size;
-    temp_entry->content.value.mem.address = content->value.mem.address;
-    temp_entry->content.value.mem.index = content->value.mem.index;
+    temp_entry->content.address = content->address;
+    temp_entry->content.index = content->index;
     temp_entry->content.pc = content->pc;
 
     //tail++;
@@ -122,8 +122,8 @@ static inline void module_match_with_load(struct trace_content *content, uint8_t
     struct history_entry *temp_entry;
 
     tid = content->tid;
-    address = content->value.mem.address;
-    index = content->value.mem.index;
+    address = content->address;
+    index = content->index;
 
     temp_queue = &history->thread[other_tid]->hash[(address >> HASH_BASE_BIT) % MAX_HASH_NUM];
 
@@ -143,7 +143,7 @@ static inline void module_match_with_load(struct trace_content *content, uint8_t
 
         temp_entry= &temp_queue->load_entry[tail];
 
-        other_index = temp_entry->content.value.mem.index;
+        other_index = temp_entry->content.index;
 
         if (last_index != other_index) {
             if (module_timestamp_order(other_tid, other_index, tid, index)) {
@@ -153,7 +153,7 @@ static inline void module_match_with_load(struct trace_content *content, uint8_t
             last_index = other_index;
         }
 
-        other_address = temp_entry->content.value.mem.address;
+        other_address = temp_entry->content.address;
 
         if (address == other_address) {
             module_race_collection(&temp_entry->content, content);
@@ -175,8 +175,8 @@ static inline void module_match_with_store(struct trace_content *content, uint8_
     struct history_entry *temp_entry;
 
     tid = content->tid;
-    address = content->value.mem.address;
-    index = content->value.mem.index;
+    address = content->address;
+    index = content->index;
 
     temp_queue = &history->thread[other_tid]->hash[(address >> HASH_BASE_BIT) % MAX_HASH_NUM];
 
@@ -196,7 +196,7 @@ static inline void module_match_with_store(struct trace_content *content, uint8_
 
         temp_entry = &temp_queue->store_entry[tail];
 
-        other_index = temp_entry->content.value.mem.index;  
+        other_index = temp_entry->content.index;  
 
         if (last_index != other_index) {
             if (module_timestamp_order(other_tid, other_index, tid, index)) {   
@@ -206,7 +206,7 @@ static inline void module_match_with_store(struct trace_content *content, uint8_
             last_index = other_index;
         }
 
-        other_address = temp_entry->content.value.mem.address;
+        other_address = temp_entry->content.address;
 
         if (address == other_address) {
             module_race_collection(&temp_entry->content, content);

@@ -111,7 +111,7 @@ static inline void module_mem_load_handler(struct trace_content *content)
 
     tid = content->tid;
 
-    content->value.mem.index = ts.current_ts_index[tid];
+    content->index = ts.current_ts_index[tid];
 
     module_history_load_record(content);
 
@@ -124,7 +124,7 @@ static inline void module_mem_store_handler(struct trace_content *content)
 
     tid = content->tid;
 
-    content->value.mem.index = ts.current_ts_index[tid];
+    content->index = ts.current_ts_index[tid];
 
     module_history_store_record(content);
 
