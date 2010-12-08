@@ -28,7 +28,7 @@ static inline void module_info_init()
 #define STAGE_THREE_BASE_CPU_ID 2
 
 #define MAX_STAGE_NUM 2
-#define MAX_CORE_NUM 4
+#define MAX_CORE_NUM 2
 #define MAX_CHUNK_NUM 4
 #define TRACE_SHARED_BUF_SIZE (TRACE_BUF_SIZE)
 
