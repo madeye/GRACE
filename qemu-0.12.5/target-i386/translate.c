@@ -327,7 +327,7 @@ const uint64_t cond_wait_call[12] = {
     -1, /* 8 */
     -1, /* 9 */
     -1, /* 10 */
-    0x400a78  /* 11 */
+    0x400ae8  /* 11 */
 };
 const uint64_t cond_broad_call[12] = {
     -1, /* 0 */
@@ -341,7 +341,7 @@ const uint64_t cond_broad_call[12] = {
     -1, /* 8 */
     -1, /* 9 */
     -1, /* 10 */
-    0x400ab8  /* 11 */
+    0x400b28  /* 11 */
 };
 extern uint32_t bench_mark_id;
 extern volatile uint8_t is_detect_start;
