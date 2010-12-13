@@ -64,7 +64,7 @@ static inline void module_history_load_record(struct trace_content *content)
     temp_entry->content.size = content->size;
     temp_entry->content.address = content->address;
     temp_entry->content.index = content->index;
-    temp_entry->content.pc = content->pc;
+    /*temp_entry->content.pc = content->pc;*/
 
     //tail++;
     //if (tail >= MAX_LOAD_QUEUE_SIZE) {
@@ -98,7 +98,7 @@ static inline void module_history_store_record(struct trace_content *content)
     temp_entry->content.size = content->size;
     temp_entry->content.address = content->address;
     temp_entry->content.index = content->index;
-    temp_entry->content.pc = content->pc;
+    /*temp_entry->content.pc = content->pc;*/
 
     //tail++;
     //if (tail >= MAX_STORE_QUEUE_SIZE) {

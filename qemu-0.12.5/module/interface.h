@@ -33,20 +33,20 @@ enum {
 };
 
 enum {
-    TRACE_MEM_SIZE_BYTE = 1,
-    TRACE_MEM_SIZE_WORD = 2,
-    TRACE_MEM_SIZE_LONG = 4,
-    TRACE_MEM_SIZE_QUAD = 8,
+    TRACE_MEM_SIZE_BYTE = 0,
+    TRACE_MEM_SIZE_WORD = 1,
+    TRACE_MEM_SIZE_LONG = 2,
+    TRACE_MEM_SIZE_QUAD = 3,
 };
 
 struct trace_content {
-    //uint32_t tid:8, type:2, size:2, index:20;
-    uint8_t tid;
-    uint8_t type;
-    uint8_t size;
-    uint32_t index;
-    uint32_t pc;
-    uint64_t address;
+    uint32_t tid:8, type:2, size:2, index:20;
+    //uint8_t tid;
+    //uint8_t type;
+    //uint8_t size;
+    //uint32_t index;
+    //uint32_t pc;
+    uint32_t address;
 };
 
 typedef struct DEBUGInfo {

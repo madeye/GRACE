@@ -637,47 +637,46 @@ void helper_syn_condbroad_trace(target_ulong pc) {
 
 #ifdef PPI_DEBUG_TOOL_GUEST
 
-#define trace_mem_collection(tid1, type1, size1, pc1, arg1, index1) { \
+#define trace_mem_collection(tid1, type1, size1, arg1, index1) { \
     env->trace_mem_ptr->tid = (tid1); \
     env->trace_mem_ptr->type = (type1); \
     env->trace_mem_ptr->size = (size1); \
     env->trace_mem_ptr->address = (arg1); \
     env->trace_mem_ptr->index = (index1); \
-    env->trace_mem_ptr->pc = (pc1); \
     env->trace_mem_ptr++; \
 }
 
 void helper_load_byte_trace(target_ulong pc, target_ulong addr) {
     trace_mem_collection(current_id, TRACE_MEM_LOAD, TRACE_MEM_SIZE_BYTE, 
-            pc, addr, ts.current_ts_index[current_id]);
+            addr, ts.current_ts_index[current_id]);
 }
 void helper_load_word_trace(target_ulong pc, target_ulong addr) {
     trace_mem_collection(current_id, TRACE_MEM_LOAD, TRACE_MEM_SIZE_WORD, 
-            pc, addr, ts.current_ts_index[current_id]);
+            addr, ts.current_ts_index[current_id]);
 }
 void helper_load_long_trace(target_ulong pc, target_ulong addr) {
     trace_mem_collection(current_id, TRACE_MEM_LOAD, TRACE_MEM_SIZE_LONG, 
-            pc, addr, ts.current_ts_index[current_id]);
+            addr, ts.current_ts_index[current_id]);
 }
 void helper_load_quad_trace(target_ulong pc, target_ulong addr) {
     trace_mem_collection(current_id, TRACE_MEM_LOAD, TRACE_MEM_SIZE_QUAD, 
-            pc, addr, ts.current_ts_index[current_id]);
+            addr, ts.current_ts_index[current_id]);
 }
 void helper_store_byte_trace(target_ulong pc, target_ulong addr) {
     trace_mem_collection(current_id, TRACE_MEM_STORE, TRACE_MEM_SIZE_BYTE, 
-            pc, addr, ts.current_ts_index[current_id]);
+            addr, ts.current_ts_index[current_id]);
 }
 void helper_store_word_trace(target_ulong pc, target_ulong addr) {
     trace_mem_collection(current_id, TRACE_MEM_STORE, TRACE_MEM_SIZE_WORD, 
-            pc, addr, ts.current_ts_index[current_id]);
+            addr, ts.current_ts_index[current_id]);
 }
 void helper_store_long_trace(target_ulong pc, target_ulong addr) {
     trace_mem_collection(current_id, TRACE_MEM_STORE, TRACE_MEM_SIZE_LONG, 
-            pc, addr, ts.current_ts_index[current_id]);
+            addr, ts.current_ts_index[current_id]);
 }
 void helper_store_quad_trace(target_ulong pc, target_ulong addr) {
     trace_mem_collection(current_id, TRACE_MEM_STORE, TRACE_MEM_SIZE_QUAD, 
-            pc, addr, ts.current_ts_index[current_id]);
+            addr, ts.current_ts_index[current_id]);
 }
 
 #endif

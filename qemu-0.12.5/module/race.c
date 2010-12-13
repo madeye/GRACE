@@ -41,7 +41,8 @@ static inline int module_race_equal(struct race_entry *race1, struct race_entry 
 {
     if ((race1->content2.type == race2->content2.type)
             && (race1->content2.size == race2->content2.size)
-            && (race1->content2.pc == race2->content2.pc)) {
+            /*&& (race1->content2.pc == race2->content2.pc)) {*/
+        ) {
         return 1;
     }
 
@@ -85,12 +86,18 @@ static inline void module_race_print()
     for (i = 0; i < remain->count; i++) {
         fprintf(stderr, "No. %d : address : 0x%lx ; same count : %d\n", 
                 i, remain->entry[i].content2.address, remain->entry[i].instance);
-        fprintf(stderr, "tid1 : %d ; type1 : %d ; size1 : %d ; pc1 : 0x%lx\n", 
+        fprintf(stderr, "tid1 : %d ; type1 : %d ; size1 : %d\n", 
                 remain->entry[i].content1.tid, remain->entry[i].content1.type, 
-                remain->entry[i].content1.size, remain->entry[i].content1.pc);
-        fprintf(stderr, "tid2 : %d ; type2 : %d ; size2 : %d ; pc2 : 0x%lx\n\n", 
+                remain->entry[i].content1.size);
+        fprintf(stderr, "tid2 : %d ; type2 : %d ; size2 : %d\n\n", 
                 remain->entry[i].content2.tid, remain->entry[i].content2.type, 
-                remain->entry[i].content2.size, remain->entry[i].content2.pc);
+                remain->entry[i].content2.size);
+        /*fprintf(stderr, "tid1 : %d ; type1 : %d ; size1 : %d ; pc1 : 0x%lx\n", */
+                /*remain->entry[i].content1.tid, remain->entry[i].content1.type, */
+                /*remain->entry[i].content1.size, remain->entry[i].content1.pc);*/
+        /*fprintf(stderr, "tid2 : %d ; type2 : %d ; size2 : %d ; pc2 : 0x%lx\n\n", */
+                /*remain->entry[i].content2.tid, remain->entry[i].content2.type, */
+                /*remain->entry[i].content2.size, remain->entry[i].content2.pc);*/
     }
 
     fprintf(stderr, "race remain count : %d\n\n", remain->count);
@@ -102,7 +109,8 @@ static inline int module_race_content_equal(struct trace_content *content1, stru
             && (content1->type == content2->type) 
             && (content1->size == content2->size) 
             && (content1->address == content2->address) 
-            && (content1->pc == content2->pc)) {
+            /*&& (content1->pc == content2->pc)) {*/
+        ){
         return 1;
     }
 
