@@ -32,6 +32,8 @@ __thread struct global_history_queue *history;
 struct global_history_queue *history;
 #endif
 
+long long int match_count[MAX_CORE_NUM] = {0};
+
 static inline void module_history_init()
 {
     int i;
@@ -68,7 +70,7 @@ static inline void module_history_load_record(struct trace_content *content)
     temp_entry->content.size = content->size;
     temp_entry->content.address = content->address;
     temp_entry->content.index = content->index;
-    temp_entry->content.pc = content->pc;
+    /*temp_entry->content.pc = content->pc;*/
 
     //tail++;
     //if (tail >= MAX_LOAD_QUEUE_SIZE) {
@@ -102,7 +104,7 @@ static inline void module_history_store_record(struct trace_content *content)
     temp_entry->content.size = content->size;
     temp_entry->content.address = content->address;
     temp_entry->content.index = content->index;
-    temp_entry->content.pc = content->pc;
+    /*temp_entry->content.pc = content->pc;*/
 
     //tail++;
     //if (tail >= MAX_STORE_QUEUE_SIZE) {
@@ -144,6 +146,8 @@ static inline void module_match_with_load(struct trace_content *content, uint8_t
             tail = MAX_LOAD_QUEUE_SIZE;
         }
         tail--;
+
+        match_count[info.core_id]++;
 
         temp_entry= &temp_queue->load_entry[tail];
 
@@ -197,6 +201,8 @@ static inline void module_match_with_store(struct trace_content *content, uint8_
             tail = MAX_STORE_QUEUE_SIZE;
         }
         tail--;
+
+        match_count[info.core_id]++;
 
         temp_entry = &temp_queue->store_entry[tail];
 

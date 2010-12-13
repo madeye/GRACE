@@ -19,6 +19,7 @@ static inline void ppi_set_cpu_thread(int cpu_no)
     sched_setaffinity(syscall(SYS_gettid), 
             sizeof(unsigned long int), (cpu_set_t *)(&cpumask));
 }
+
 #endif
 
 #include "interface.h"
@@ -119,6 +120,7 @@ static inline void module_detector_start(uint8_t tid,
 }
 
 #ifdef PPI_TWO_STAGE
+
 void *data_race_detector_pthread(void *args)
 {
     uint8_t i, j;
@@ -143,6 +145,9 @@ void *data_race_detector_pthread(void *args)
         if (temp_chunk->info->is_buf_full) {
             tid = temp_chunk->info->thread_id;
             size = temp_chunk->info->buf_size;
+
+            /*match_count[i] += size;*/
+
             info.analysis_id = temp_chunk->info->analysis_id;
 
             module_detector_start(tid, size, temp_chunk->buf);		
@@ -211,6 +216,12 @@ void data_race_detector(uint8_t tid, uint32_t size, struct trace_content *buf)
 
 void data_race_detector_report() 
 {
+    int i;
+
+    for (i = 0; i < MAX_CORE_NUM; i++)
+    {
+        printf("match thread %d: handle %lld\n", i, match_count[i]);
+    }
 #ifdef PPI_TWO_STAGE
     module_shared_buf_all_empty();
 #endif
