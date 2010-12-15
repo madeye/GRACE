@@ -27,7 +27,7 @@ struct barrier_entry {
     uint32_t last_barrier_ts_index[MAX_PROCESS_NUM];
 };
 
-#define MAX_BARRIER_NUM (1 << 10)
+#define MAX_BARRIER_NUM (1 << 16)
 
 struct barrier_queue {
     struct barrier_entry entry[MAX_BARRIER_NUM];

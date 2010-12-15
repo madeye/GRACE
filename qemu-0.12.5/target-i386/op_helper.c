@@ -642,8 +642,8 @@ void helper_syn_condbroad_trace(target_ulong pc) {
 #define trace_mem_collection(type1, size1, pc1, arg1, index1) { \
     env->trace_mem_ptr->type = (type1); \
     env->trace_mem_ptr->size = (size1); \
-    env->trace_mem_ptr->value.mem.address = (arg1); \
-    env->trace_mem_ptr->value.mem.index = (index1); \
+    env->trace_mem_ptr->address = (arg1); \
+    env->trace_mem_ptr->index = (index1); \
     env->trace_mem_ptr->pc = (pc1); \
     env->trace_mem_ptr++; \
 }
