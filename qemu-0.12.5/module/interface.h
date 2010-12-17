@@ -19,8 +19,7 @@
 #define TRACE_BUF_SIZE (1 * 1024)
 
 enum {
-    TRACE_TYPE_BASE,
-    TRACE_MEM_LOAD,
+    TRACE_MEM_LOAD = 0,
     TRACE_MEM_STORE,
     TRACE_SYN_LOCK,
     TRACE_SYN_UNLOCK,
@@ -40,13 +39,14 @@ enum {
 };
 
 struct trace_content {
-    uint32_t tid:8, type:2, size:2, index:20;
+    //uint32_t tid:3, type:1, size:2, address:26;
+    uint32_t type:1, size:3, address:28;
     //uint8_t tid;
     //uint8_t type;
     //uint8_t size;
-    //uint32_t index;
-    //uint32_t pc;
-    uint32_t address;
+    ////uint32_t index;
+    ////uint32_t pc;
+    //uint32_t address;
 };
 
 typedef struct DEBUGInfo {

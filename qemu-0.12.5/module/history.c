@@ -1,8 +1,20 @@
 
 /* history */
 
+struct trace_history_content {
+    /*uint32_t tid:3, type:1, size:2, index:26;*/
+    /*uint32_t type:1, size:2, index:29;*/
+    /*uint32_t index;*/
+    /*uint32_t address;*/
+    uint8_t tid;
+    uint8_t type;
+    uint8_t size;
+    uint32_t index;
+    uint32_t address;
+};
+
 struct history_entry {
-    struct trace_content content;
+    struct trace_history_content content;
 };
 
 #define MAX_STORE_QUEUE_SIZE 128
@@ -63,7 +75,7 @@ static inline void module_history_load_record(struct trace_content *content)
     temp_entry->content.type = content->type;
     temp_entry->content.size = content->size;
     temp_entry->content.address = content->address;
-    temp_entry->content.index = content->index;
+    temp_entry->content.index = global_index[content->tid];
     /*temp_entry->content.pc = content->pc;*/
 
     //tail++;
@@ -97,7 +109,7 @@ static inline void module_history_store_record(struct trace_content *content)
     temp_entry->content.type = content->type;
     temp_entry->content.size = content->size;
     temp_entry->content.address = content->address;
-    temp_entry->content.index = content->index;
+    temp_entry->content.index = global_index[content->tid];
     /*temp_entry->content.pc = content->pc;*/
 
     //tail++;
@@ -123,7 +135,12 @@ static inline void module_match_with_load(struct trace_content *content, uint8_t
 
     tid = content->tid;
     address = content->address;
-    index = content->index;
+
+#ifdef PPI_THREE_STAGE 
+    index = global_match_index[info.core_id][tid];
+#else
+    index = global_match_index[tid];
+#endif
 
     temp_queue = &history->thread[other_tid]->hash[(address >> HASH_BASE_BIT) % MAX_HASH_NUM];
 
@@ -176,7 +193,11 @@ static inline void module_match_with_store(struct trace_content *content, uint8_
 
     tid = content->tid;
     address = content->address;
-    index = content->index;
+#ifdef PPI_THREE_STAGE 
+    index = global_match_index[info.core_id][tid];
+#else
+    index = global_match_index[tid];
+#endif
 
     temp_queue = &history->thread[other_tid]->hash[(address >> HASH_BASE_BIT) % MAX_HASH_NUM];
 

@@ -10,6 +10,7 @@
 #include <pthread.h>
 #include <sys/syscall.h>
 
+
 static inline void ppi_set_cpu_thread(int cpu_no)
 {
     unsigned long int cpumask;
@@ -43,6 +44,13 @@ static inline void ppi_set_cpu_thread(int cpu_no)
 /* interface */
 
 #ifdef PPI_THREE_STAGE
+
+inline void fill_index(uint32_t *dest, uint32_t *src) {
+    int i;
+    for (i = 1; i <= MAX_THREAD_NUM; i++)
+        dest[i] = src[i];
+}
+
 static inline void module_detector_stage_two(uint8_t tid, 
         uint32_t size, struct trace_content *buf)
 {
@@ -64,15 +72,33 @@ static inline void module_detector_stage_two(uint8_t tid,
 
         // content->tid = tid;
 
-        if (content->type == TRACE_MEM_LOAD) {
-            module_history_load_record(content);
-            module_filter_load_record(content);
-        } else if (content->type == TRACE_MEM_STORE) {
-            module_history_store_record(content);
-            module_filter_store_record(content);
+        /*assert(content->tid == tid);*/
+        if (global_tunnc) {
+            global_index[content->tid] = content->address;
+            assert(global_index[content->tid] < 1 << 20);
+            global_tunnc = 0;
+            continue;
+        } 
+        if (!content->tid && !content->address) {
+            i++;
+            if (i < size) {
+                global_index[buf[i].tid] = buf[i].address;
+                assert(global_index[buf[i].tid] < 1 << 20);
+            } else {
+                global_tunnc == 1;
+            }
         } else {
-            fprintf(stderr, "unknown type : %d\n", content->type);
-            assert(0);
+            /*assert(content->tid == tid);*/
+            if (content->type == TRACE_MEM_LOAD) {
+                module_history_load_record(content);
+                module_filter_load_record(content);
+            } else if (content->type == TRACE_MEM_STORE) {
+                module_history_store_record(content);
+                module_filter_store_record(content);
+            } else {
+                fprintf(stderr, "unknown type : %d\n", content->type);
+                assert(0);
+            }
         }
     }
 }
@@ -96,13 +122,19 @@ static inline void module_detector_stage_three(uint8_t tid,
     for (i = 0; i < size; i++) {
         content = &buf[i];
 
-        if (content->type == TRACE_MEM_LOAD) {
-            module_filter_load_match(content);
-        } else if (content->type == TRACE_MEM_STORE) {
-            module_filter_store_match(content);
+        if (!content->tid && !content->address) {
+            i++;
+            global_match_index[info.core_id][buf[i].tid] = buf[i].address;
+            assert(global_match_index[info.core_id][buf[i].tid] < 1 << 20);
         } else {
-            fprintf(stderr, "unknown type : %d\n", content->type);
-            assert(0);
+            if (content->type == TRACE_MEM_LOAD) {
+                module_filter_load_match(content);
+            } else if (content->type == TRACE_MEM_STORE) {
+                module_filter_store_match(content);
+            } else {
+                fprintf(stderr, "unknown type : %d\n", content->type);
+                assert(0);
+            }
         }
     }
 }
@@ -115,7 +147,7 @@ void *module_pthread_stage_two(void *args)
 #endif
     volatile uint8_t tid;
     volatile uint32_t size;
-    struct shared_trace_chunk *temp_chunk;
+    struct shared_trace_chunk *temp_chunk, *new_chunk;
 
     i = ((int *)args)[0];
     fprintf(stderr, "stage two : core %d start!\n", i);
@@ -137,7 +169,13 @@ void *module_pthread_stage_two(void *args)
             tid = temp_chunk->info->thread_id;
             size = temp_chunk->info->buf_size;
 
+            new_chunk = &shared_buf.stage[1].core[cid].chunk[kid];
+            while (new_chunk->info->is_buf_full);
+            fill_index(new_chunk->global_index, global_index);
+            new_chunk->global_tunnc = global_tunnc;
+
             module_detector_stage_two(tid, size, temp_chunk->buf);		
+
 #if 1
             module_shared_buf_copy(1, cid, kid, tid, size, temp_chunk->buf);
 
@@ -146,6 +184,7 @@ void *module_pthread_stage_two(void *args)
                 kid = (kid + 1) % MAX_CHUNK_NUM;
             }
 #endif
+
 
             temp_chunk->info->thread_id = 0;
             temp_chunk->info->buf_size = 0;				
@@ -170,6 +209,7 @@ void *module_pthread_stage_three(void *args)
     info.core_id = i;
     ppi_set_cpu_thread(STAGE_THREE_BASE_CPU_ID + i);
 
+    
     j = 0;
 
     while(1) {
@@ -179,7 +219,15 @@ void *module_pthread_stage_three(void *args)
             tid = temp_chunk->info->thread_id;
             size = temp_chunk->info->buf_size;
 
-            module_detector_stage_three(tid, size, temp_chunk->buf);		
+            /*printf("stage 3 chunk: %d\n", j);*/
+            fill_index(global_match_index[info.core_id], temp_chunk->global_index);
+            if (temp_chunk->global_tunnc){
+                temp_chunk->global_tunnc = 0;
+                global_match_index[info.core_id][temp_chunk->buf->size] = temp_chunk->buf->address;
+                module_detector_stage_three(tid, size, temp_chunk->buf + 1);		
+            } else {
+                module_detector_stage_three(tid, size, temp_chunk->buf);		
+            }
 
             temp_chunk->info->thread_id = 0;
             temp_chunk->info->buf_size = 0;				
@@ -235,17 +283,25 @@ static inline void module_detector_start(uint8_t tid,
 
         // content->tid = tid;
 
-        if (content->type == TRACE_MEM_LOAD) {
-            module_history_load_record(content);
-            module_filter_load_record(content);
-            module_filter_load_match(content);
-        } else if (content->type == TRACE_MEM_STORE) {
-            module_history_store_record(content);
-            module_filter_store_record(content);
-            module_filter_store_match(content);
+        if (!content->tid && !content->address) {
+            i++;
+            global_index[buf[i].tid] = buf[i].address;
+            global_match_index[buf[i].tid] = global_index[buf[i].tid];
+            /*printf("timestamp tid: %d, index: %d\n", content->tid, global_index[content->tid]);*/
+            assert(global_index[buf[i].tid] < 1 << 20);
         } else {
-            fprintf(stderr, "unknown type : %d\n", content->type);
-            assert(0);
+            if (content->type == TRACE_MEM_LOAD) {
+                module_history_load_record(content);
+                module_filter_load_record(content);
+                module_filter_load_match(content);
+            } else if (content->type == TRACE_MEM_STORE) {
+                module_history_store_record(content);
+                module_filter_store_record(content);
+                module_filter_store_match(content);
+            } else {
+                fprintf(stderr, "unknown type : %d\n", content->type);
+                assert(0);
+            }
         }
     }
 }

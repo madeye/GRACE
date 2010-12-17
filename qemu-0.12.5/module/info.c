@@ -1,6 +1,5 @@
 
 /* thread info */
-
 struct global_info {
     uint8_t max_tid_num;
     uint8_t exist[MAX_PROCESS_NUM];
@@ -15,6 +14,9 @@ struct global_info {
 __thread struct global_info info;
 #else
 struct global_info info;
+uint32_t global_index[MAX_PROCESS_NUM];
+uint32_t global_match_index[MAX_PROCESS_NUM];
+uint8_t  global_tunnc;
 #endif
 
 static inline void module_info_init()
@@ -28,9 +30,14 @@ static inline void module_info_init()
 #define STAGE_THREE_BASE_CPU_ID 2
 
 #define MAX_STAGE_NUM 2
-#define MAX_CORE_NUM 4
+#define MAX_CORE_NUM 1
 #define MAX_CHUNK_NUM 4
 #define TRACE_SHARED_BUF_SIZE (TRACE_BUF_SIZE)
+
+uint32_t global_index[MAX_PROCESS_NUM];
+uint32_t global_match_index[MAX_CORE_NUM][MAX_PROCESS_NUM];
+uint8_t  global_tunnc;
+/*uint8_t  global_match_tunnc[MAX_CORE_NUM];*/
 
 struct trace_info {
     volatile uint32_t buf_size;
@@ -42,6 +49,8 @@ struct trace_info {
 struct shared_trace_chunk {
     struct trace_content *buf;
     struct trace_info *info;
+    uint32_t global_index[MAX_PROCESS_NUM];
+    uint8_t  global_tunnc;
 };
 
 struct shared_trace_core {
@@ -113,6 +122,7 @@ static inline void module_shared_buf_copy(uint8_t sid, uint8_t cid, uint8_t kid,
     temp_chunk->info->thread_id = tid;
 
     temp_chunk->info->is_buf_full = 1;
+
 }
 #endif
 
