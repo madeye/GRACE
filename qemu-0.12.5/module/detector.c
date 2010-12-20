@@ -57,6 +57,8 @@ static inline void module_detector_stage_two(uint8_t tid,
     uint32_t i;
     struct trace_content *content;
 
+    info.tid = tid;
+
     if (!info.exist[tid]) {
         printf("\tnew tid: %d\n", tid);
 
@@ -74,16 +76,16 @@ static inline void module_detector_stage_two(uint8_t tid,
 
         /*assert(content->tid == tid);*/
         if (global_tunnc) {
-            global_index[content->tid] = content->address;
-            assert(global_index[content->tid] < 1 << 20);
+            global_index[content->size] = content->address;
+            assert(global_index[content->size] < 1 << 20);
             global_tunnc = 0;
             continue;
         } 
-        if (!content->tid && !content->address) {
+        if (!content->size) {
             i++;
             if (i < size) {
-                global_index[buf[i].tid] = buf[i].address;
-                assert(global_index[buf[i].tid] < 1 << 20);
+                global_index[buf[i].size] = buf[i].address;
+                assert(global_index[buf[i].size] < 1 << 20);
             } else {
                 global_tunnc == 1;
             }
@@ -109,6 +111,8 @@ static inline void module_detector_stage_three(uint8_t tid,
     uint32_t i;
     struct trace_content *content;
 
+    info.tid = tid;
+
     if (!info.exist[tid]) {
         printf("\tnew tid: %d\n", tid);
 
@@ -122,10 +126,10 @@ static inline void module_detector_stage_three(uint8_t tid,
     for (i = 0; i < size; i++) {
         content = &buf[i];
 
-        if (!content->tid && !content->address) {
+        if (!content->size) {
             i++;
-            global_match_index[info.core_id][buf[i].tid] = buf[i].address;
-            assert(global_match_index[info.core_id][buf[i].tid] < 1 << 20);
+            global_match_index[info.core_id][buf[i].size] = buf[i].address;
+            assert(global_match_index[info.core_id][buf[i].size] < 1 << 20);
         } else {
             if (content->type == TRACE_MEM_LOAD) {
                 module_filter_load_match(content);
@@ -283,12 +287,12 @@ static inline void module_detector_start(uint8_t tid,
 
         // content->tid = tid;
 
-        if (!content->tid && !content->address) {
+        if (!content->size) {
             i++;
-            global_index[buf[i].tid] = buf[i].address;
-            global_match_index[buf[i].tid] = global_index[buf[i].tid];
+            global_index[buf[i].size] = buf[i].address;
+            global_match_index[buf[i].size] = global_index[buf[i].size];
             /*printf("timestamp tid: %d, index: %d\n", content->tid, global_index[content->tid]);*/
-            assert(global_index[buf[i].tid] < 1 << 20);
+            assert(global_index[buf[i].size] < 1 << 20);
         } else {
             if (content->type == TRACE_MEM_LOAD) {
                 module_history_load_record(content);

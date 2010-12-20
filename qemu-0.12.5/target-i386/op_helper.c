@@ -181,9 +181,12 @@ void helper_process_dequeue(void) {
 extern struct global_timestamp_queue ts;
 extern struct global_syn_info syn;
 extern struct statistics_syn_info stat_syn;
+/*#define ADDR_MASK1 0xF0000000*/
+/*#define ADDR_MASK2 0x0F000000*/
+/*#define ADDR_SWITCH 4*/
+    /*env->trace_mem_ptr->address = (((arg1) & ADDR_MASK1) >> 4) | ((arg1) & ADDR_MASK2) ; \*/
 
-#define trace_mem_collection(tid1, type1, size1, arg1) { \
-    env->trace_mem_ptr->tid = (tid1); \
+#define trace_mem_collection(type1, size1, arg1) { \
     env->trace_mem_ptr->type = (type1); \
     env->trace_mem_ptr->size = (size1); \
     env->trace_mem_ptr->address = (arg1); \
@@ -202,8 +205,8 @@ static inline void module_timestamp_save(uint8_t tid)
 
     ts.current_ts_index[tid] = index;
 
-    trace_mem_collection(0, 0, 0, 0);
-    trace_mem_collection(tid, 0, 0, index);
+    trace_mem_collection(0, 0, 0);
+    trace_mem_collection(0, tid, index);
 
     index++;
     if (index >= MAX_TIMESTAMP_NUM) {
@@ -649,35 +652,35 @@ void helper_syn_condbroad_trace(target_ulong pc) {
 #ifdef PPI_DEBUG_TOOL_GUEST
 
 void helper_load_byte_trace(target_ulong pc, target_ulong addr) {
-    trace_mem_collection(current_id, TRACE_MEM_LOAD, TRACE_MEM_SIZE_BYTE, 
+    trace_mem_collection(TRACE_MEM_LOAD, TRACE_MEM_SIZE_BYTE, 
             addr);
 }
 void helper_load_word_trace(target_ulong pc, target_ulong addr) {
-    trace_mem_collection(current_id, TRACE_MEM_LOAD, TRACE_MEM_SIZE_WORD, 
+    trace_mem_collection(TRACE_MEM_LOAD, TRACE_MEM_SIZE_WORD, 
             addr);
 }
 void helper_load_long_trace(target_ulong pc, target_ulong addr) {
-    trace_mem_collection(current_id, TRACE_MEM_LOAD, TRACE_MEM_SIZE_LONG, 
+    trace_mem_collection(TRACE_MEM_LOAD, TRACE_MEM_SIZE_LONG, 
             addr);
 }
 void helper_load_quad_trace(target_ulong pc, target_ulong addr) {
-    trace_mem_collection(current_id, TRACE_MEM_LOAD, TRACE_MEM_SIZE_QUAD, 
+    trace_mem_collection(TRACE_MEM_LOAD, TRACE_MEM_SIZE_QUAD, 
             addr);
 }
 void helper_store_byte_trace(target_ulong pc, target_ulong addr) {
-    trace_mem_collection(current_id, TRACE_MEM_STORE, TRACE_MEM_SIZE_BYTE, 
+    trace_mem_collection(TRACE_MEM_STORE, TRACE_MEM_SIZE_BYTE, 
             addr);
 }
 void helper_store_word_trace(target_ulong pc, target_ulong addr) {
-    trace_mem_collection(current_id, TRACE_MEM_STORE, TRACE_MEM_SIZE_WORD, 
+    trace_mem_collection(TRACE_MEM_STORE, TRACE_MEM_SIZE_WORD, 
             addr);
 }
 void helper_store_long_trace(target_ulong pc, target_ulong addr) {
-    trace_mem_collection(current_id, TRACE_MEM_STORE, TRACE_MEM_SIZE_LONG, 
+    trace_mem_collection(TRACE_MEM_STORE, TRACE_MEM_SIZE_LONG, 
             addr);
 }
 void helper_store_quad_trace(target_ulong pc, target_ulong addr) {
-    trace_mem_collection(current_id, TRACE_MEM_STORE, TRACE_MEM_SIZE_QUAD, 
+    trace_mem_collection(TRACE_MEM_STORE, TRACE_MEM_SIZE_QUAD, 
             addr);
 }
 

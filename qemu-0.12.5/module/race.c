@@ -2,8 +2,8 @@
 /* race */
 
 struct race_entry {
-    struct trace_content content1;
-    struct trace_content content2;
+    struct trace_full_content content1;
+    struct trace_full_content content2;
     uint32_t instance;
 };
 
@@ -87,10 +87,12 @@ static inline void module_race_print()
         fprintf(stderr, "No. %d : address : 0x%lx ; same count : %d\n", 
                 i, remain->entry[i].content2.address, remain->entry[i].instance);
         fprintf(stderr, "tid1 : %d ; type1 : %d ; size1 : %d\n", 
-                remain->entry[i].content1.tid, remain->entry[i].content1.type, 
+                remain->entry[i].content1.tid,
+                remain->entry[i].content1.type, 
                 remain->entry[i].content1.size);
         fprintf(stderr, "tid2 : %d ; type2 : %d ; size2 : %d\n\n", 
-                remain->entry[i].content2.tid, remain->entry[i].content2.type, 
+                remain->entry[i].content2.tid,
+                remain->entry[i].content2.type, 
                 remain->entry[i].content2.size);
         /*fprintf(stderr, "tid1 : %d ; type1 : %d ; size1 : %d ; pc1 : 0x%lx\n", */
                 /*remain->entry[i].content1.tid, remain->entry[i].content1.type, */
@@ -103,7 +105,7 @@ static inline void module_race_print()
     fprintf(stderr, "race remain count : %d\n\n", remain->count);
 }
 
-static inline int module_race_content_equal(struct trace_content *content1, struct trace_content *content2)
+static inline int module_race_content_equal(struct trace_full_content *content1, struct trace_full_content *content2)
 {
     if ((content1->tid == content2->tid) 
             && (content1->type == content2->type) 
@@ -117,29 +119,34 @@ static inline int module_race_content_equal(struct trace_content *content1, stru
     return 0;
 }
 
-static inline void module_race_collection(struct trace_content *content1, struct trace_content *content2) 
+static inline void module_race_collection(struct trace_full_content *content1, struct trace_content *content2) 
 {
     int i;
     struct race_queue *temp_queue;
+    struct trace_full_content temp_content;
+
+    temp_content.tid = info.tid;
+    temp_content.type = content2->type;
+    temp_content.size = content2->size;
+    temp_content.address = content2->address;
 
 #ifdef PPI_THREE_STAGE
-    temp_queue = race->thread[info.core_id];
+    temp_queue = race->thread[info.tid];
 #else
-    temp_queue = race->thread[content2->tid];
+    temp_queue = race->thread[info.tid];
 #endif
 
     for (i = 0; i < temp_queue->count; i++) {
         if (module_race_content_equal(content1, &temp_queue->entry[i].content1)
-                && module_race_content_equal(content2, &temp_queue->entry[i].content2)) {
+                && module_race_content_equal(&temp_content, &temp_queue->entry[i].content2)) {
             temp_queue->entry[i].instance++;
-
             break;
         }
     }
 
     if (i >= temp_queue->count) {
-        memcpy(&temp_queue->entry[i].content1, content1, sizeof(struct trace_content));
-        memcpy(&temp_queue->entry[i].content2, content2, sizeof(struct trace_content));
+        memcpy(&temp_queue->entry[i].content1, content1, sizeof(struct trace_full_content));
+        memcpy(&temp_queue->entry[i].content2, &temp_content, sizeof(struct trace_full_content));
         temp_queue->entry[i].instance++;
 
         temp_queue->count++;

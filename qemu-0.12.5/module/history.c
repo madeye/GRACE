@@ -1,20 +1,8 @@
 
 /* history */
 
-struct trace_history_content {
-    /*uint32_t tid:3, type:1, size:2, index:26;*/
-    /*uint32_t type:1, size:2, index:29;*/
-    /*uint32_t index;*/
-    /*uint32_t address;*/
-    uint8_t tid;
-    uint8_t type;
-    uint8_t size;
-    uint32_t index;
-    uint32_t address;
-};
-
 struct history_entry {
-    struct trace_history_content content;
+    struct trace_full_content content;
 };
 
 #define MAX_STORE_QUEUE_SIZE 128
@@ -62,7 +50,7 @@ static inline void module_history_load_record(struct trace_content *content)
     uint32_t tail;
     struct history_entry *temp_entry;
 
-    tid = content->tid;
+    tid = info.tid;
     address = content->address;
 
     temp_queue = &history->thread[tid]->hash[(address >> HASH_BASE_BIT) % MAX_HASH_NUM];
@@ -71,11 +59,11 @@ static inline void module_history_load_record(struct trace_content *content)
     temp_entry = &temp_queue->load_entry[tail];
 
     // memcpy(&temp_entry->content, content, sizeof(struct trace_content));
-    temp_entry->content.tid = content->tid;
+    temp_entry->content.tid = info.tid;
     temp_entry->content.type = content->type;
     temp_entry->content.size = content->size;
     temp_entry->content.address = content->address;
-    temp_entry->content.index = global_index[content->tid];
+    temp_entry->content.index = global_index[info.tid];
     /*temp_entry->content.pc = content->pc;*/
 
     //tail++;
@@ -96,7 +84,7 @@ static inline void module_history_store_record(struct trace_content *content)
     uint32_t tail;
     struct history_entry *temp_entry;
 
-    tid = content->tid;
+    tid = info.tid;
     address = content->address;
 
     temp_queue = &history->thread[tid]->hash[(address >> HASH_BASE_BIT) % MAX_HASH_NUM];
@@ -105,11 +93,11 @@ static inline void module_history_store_record(struct trace_content *content)
     temp_entry = &temp_queue->store_entry[tail];
 
     // memcpy(&temp_entry->content, content, sizeof(struct trace_content));
-    temp_entry->content.tid = content->tid;
+    temp_entry->content.tid = info.tid;
     temp_entry->content.type = content->type;
     temp_entry->content.size = content->size;
     temp_entry->content.address = content->address;
-    temp_entry->content.index = global_index[content->tid];
+    temp_entry->content.index = global_index[info.tid];
     /*temp_entry->content.pc = content->pc;*/
 
     //tail++;
@@ -133,7 +121,7 @@ static inline void module_match_with_load(struct trace_content *content, uint8_t
     uint32_t head, tail;
     struct history_entry *temp_entry;
 
-    tid = content->tid;
+    tid = info.tid;
     address = content->address;
 
 #ifdef PPI_THREE_STAGE 
@@ -191,7 +179,7 @@ static inline void module_match_with_store(struct trace_content *content, uint8_
     uint32_t head, tail;
     struct history_entry *temp_entry;
 
-    tid = content->tid;
+    tid = info.tid;
     address = content->address;
 #ifdef PPI_THREE_STAGE 
     index = global_match_index[info.core_id][tid];
@@ -231,7 +219,6 @@ static inline void module_match_with_store(struct trace_content *content, uint8_
 
         if (address == other_address) {
             module_race_collection(&temp_entry->content, content);
-
             break;
         } 
     }

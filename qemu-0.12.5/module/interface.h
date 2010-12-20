@@ -32,10 +32,10 @@ enum {
 };
 
 enum {
-    TRACE_MEM_SIZE_BYTE = 0,
-    TRACE_MEM_SIZE_WORD = 1,
-    TRACE_MEM_SIZE_LONG = 2,
-    TRACE_MEM_SIZE_QUAD = 3,
+    TRACE_MEM_SIZE_BYTE = 1,
+    TRACE_MEM_SIZE_WORD = 2,
+    TRACE_MEM_SIZE_LONG = 3,
+    TRACE_MEM_SIZE_QUAD = 4,
 };
 
 struct trace_content {
@@ -44,10 +44,23 @@ struct trace_content {
     //uint8_t tid;
     //uint8_t type;
     //uint8_t size;
-    ////uint32_t index;
+    //uint32_t index;
     ////uint32_t pc;
     //uint32_t address;
 };
+struct trace_full_content {
+    /*uint32_t tid:3, type:1, size:2, index:26;*/
+    uint32_t type:1, size:3, address:28;
+    uint8_t tid;
+    uint32_t index;
+    /*uint32_t address;*/
+    //uint8_t tid;
+    //uint8_t type;
+    //uint8_t size;
+    /*uint32_t index;*/
+    //uint32_t address;
+};
+
 
 typedef struct DEBUGInfo {
     /* memory trace for data race detector  */
