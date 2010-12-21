@@ -82,16 +82,16 @@ static inline void module_race_print()
         }
     }
 
-    for (i = 0; i < remain->count; i++) {
-        fprintf(stderr, "No. %d : address : 0x%lx ; same count : %d\n", 
-                i, remain->entry[i].content2.address, remain->entry[i].instance);
-        fprintf(stderr, "tid1 : %d ; type1 : %d ; size1 : %d ; pc1 : 0x%lx\n", 
-                remain->entry[i].content1.tid, remain->entry[i].content1.type, 
-                remain->entry[i].content1.size, remain->entry[i].content1.pc);
-        fprintf(stderr, "tid2 : %d ; type2 : %d ; size2 : %d ; pc2 : 0x%lx\n\n", 
-                remain->entry[i].content2.tid, remain->entry[i].content2.type, 
-                remain->entry[i].content2.size, remain->entry[i].content2.pc);
-    }
+    /*for (i = 0; i < remain->count; i++) {*/
+        /*fprintf(stderr, "No. %d : address : 0x%lx ; same count : %d\n", */
+                /*i, remain->entry[i].content2.address, remain->entry[i].instance);*/
+        /*fprintf(stderr, "tid1 : %d ; type1 : %d ; size1 : %d ; pc1 : 0x%lx\n", */
+                /*remain->entry[i].content1.tid, remain->entry[i].content1.type, */
+                /*remain->entry[i].content1.size, remain->entry[i].content1.pc);*/
+        /*fprintf(stderr, "tid2 : %d ; type2 : %d ; size2 : %d ; pc2 : 0x%lx\n\n", */
+                /*remain->entry[i].content2.tid, remain->entry[i].content2.type, */
+                /*remain->entry[i].content2.size, remain->entry[i].content2.pc);*/
+    /*}*/
 
     fprintf(stderr, "race remain count : %d\n\n", remain->count);
 }

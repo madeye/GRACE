@@ -27,7 +27,7 @@
 #include "module/process.h"
 #include <stdlib.h>
 
-#define STACK_MASK 0xffffc000
+#define STACK_MASK 0xffff8000
 extern FILE *stderr;
 
 extern uint8_t is_detect_start;             // Detection started flag
