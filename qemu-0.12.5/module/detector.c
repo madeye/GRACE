@@ -1,21 +1,31 @@
 #include <stdio.h>
+#include <stdint.h>
 #include <string.h>
 #include <assert.h>
-#include <stdlib.h>
 
-typedef unsigned char uint8_t;
-typedef unsigned short uint16_t;
-typedef unsigned int uint32_t;
-typedef unsigned long uint64_t;
+#define PPI_THREE_STAGE
 
-#define DETECTOR_INFO_PRINT
-#define DETECTOR_STATISTICS_PRINT
+#ifdef PPI_THREE_STAGE
+#include <unistd.h>
+#include <pthread.h>
+#include <sys/syscall.h>
+
+static inline void ppi_set_cpu_thread(int cpu_no)
+{
+    unsigned long int cpumask;
+
+    cpumask = (1 << cpu_no);
+
+    sched_setaffinity(syscall(SYS_gettid), 
+            sizeof(unsigned long int), (cpu_set_t *)(&cpumask));
+}
+#endif
 
 #include "interface.h"
 
-#include "race.c"
-
 #include "info.c"
+
+#include "race.c"
 
 #include "timestamp.c"
 
@@ -28,25 +38,13 @@ typedef unsigned long uint64_t;
 
 #include "filter.c"
 
-#include "handler.c"
+#define MOD_PROFILER
 
 /* interface */
 
-void data_race_detector_init() 
-{
-    module_race_init();
-    module_info_init();
-    module_syn_init();
-#ifdef DETECTOR_STATISTICS_PRINT
-    module_syn_statistics_init(); 
-#endif
-    module_timestamp_init();
-    module_filter_init();
-    module_history_init();
-    module_handler_init();
-}
-
-void data_race_detector(uint8_t tid, uint32_t size, struct trace_content *buf) 
+#ifdef PPI_THREE_STAGE
+static inline void module_detector_stage_two(uint8_t tid, 
+        uint32_t size, struct trace_content *buf)
 {
     uint32_t i;
     struct trace_content *content;
@@ -58,9 +56,37 @@ void data_race_detector(uint8_t tid, uint32_t size, struct trace_content *buf)
             info.max_tid_num = (tid + 1);
         }
 
-        module_timestamp_merge_two(0, 
-                &ts.thread[0]->entry[syn.thread.create_ts_index], 
-                tid, &ts.current_ts[tid]);
+        info.exist[tid] = 1;
+    }
+
+    for (i = 0; i < size; i++) {
+        content = &buf[i];
+
+        if (content->type == TRACE_MEM_LOAD) {
+            module_history_load_record(content);
+            module_filter_load_record(content);
+        } else if (content->type == TRACE_MEM_STORE) {
+            module_history_store_record(content);
+            module_filter_store_record(content);
+        } else {
+            fprintf(stderr, "unknown type : %d\n", content->type);
+            assert(0);
+        }
+    }
+}
+
+static inline void module_detector_stage_three(uint8_t tid, 
+        uint32_t size, struct trace_content *buf)
+{
+    uint32_t i;
+    struct trace_content *content;
+
+    if (!info.exist[tid]) {
+        printf("\tnew tid: %d\n", tid);
+
+        if (info.max_tid_num < (tid + 1)) {
+            info.max_tid_num = (tid + 1);
+        }
 
         info.exist[tid] = 1;
     }
@@ -68,21 +94,246 @@ void data_race_detector(uint8_t tid, uint32_t size, struct trace_content *buf)
     for (i = 0; i < size; i++) {
         content = &buf[i];
 
-        content->tid = tid;
-
-        (*fun_handler[content->type])(content);
+        if (content->type == TRACE_MEM_LOAD) {
+            module_filter_load_match(content);
+        } else if (content->type == TRACE_MEM_STORE) {
+            module_filter_store_match(content);
+        } else {
+            fprintf(stderr, "unknown type : %d\n", content->type);
+            assert(0);
+        }
     }
+}
+
+void *module_pthread_stage_two(void *args)
+{
+    uint8_t i, j;
+#if 0
+    uint8_t cid, kid;
+#endif
+#if 1
+    uint8_t cid, kid[MAX_CORE_NUM];
+#endif
+    volatile uint8_t tid;
+    volatile uint32_t size;
+    struct shared_trace_chunk *temp_chunk;
+#if 1
+    struct shared_trace_chunk *next_chunk;
+#endif
+
+    i = ((int *)args)[0];
+    fprintf(stderr, "stage two : core %d start!\n", i);
+
+    info.core_id = i;
+    ppi_set_cpu_thread(STAGE_TWO_BASE_CPU_ID + i);
+
+#if 0
+    cid = 0;
+    kid = 0;
+#endif
+#if 1
+    cid = 0;
+    memset(kid, 0, MAX_CORE_NUM * sizeof(uint8_t));
+#endif
+
+    j = 0;
+
+    while(1) {
+        temp_chunk = &shared_buf.stage[0].core[i].chunk[j];
+
+        if (temp_chunk->info->is_buf_full) {
+            tid = temp_chunk->info->thread_id;
+            size = temp_chunk->info->buf_size;
+
+            module_detector_stage_two(tid, size, temp_chunk->buf);
+
+#if 1
+#if 1
+            next_chunk = &shared_buf.stage[1].core[cid].chunk[kid[cid]];
+
+            while (next_chunk->info->is_buf_full) {
+                cid = (cid + 1) % MAX_CORE_NUM;
+
+                next_chunk = &shared_buf.stage[1].core[cid].chunk[kid[cid]];
+            }
+#endif
+
+            module_shared_buf_copy(1, cid, kid[cid], tid, size, temp_chunk->buf);
+
+            kid[cid] = (kid[cid] + 1) % MAX_CHUNK_NUM;
+            cid = (cid + 1) % MAX_CORE_NUM;
+#endif
+#if 0
+            module_shared_buf_copy(1, cid, kid, tid, size, temp_chunk->buf);
+
+            cid = (cid + 1) % MAX_CORE_NUM;
+            if (cid == 0) {
+                kid = (kid + 1) % MAX_CHUNK_NUM;
+            }
+#endif
+
+            temp_chunk->info->thread_id = 0;
+            temp_chunk->info->buf_size = 0;				
+
+            temp_chunk->info->is_buf_full = 0;	
+
+            j = (j + 1) % MAX_CHUNK_NUM;
+        }
+    }    
+}
+
+void *module_pthread_stage_three(void *args)
+{
+    uint8_t i, j;
+    volatile uint8_t tid;
+    volatile uint32_t size;
+    struct shared_trace_chunk *temp_chunk;
+
+    i = ((int *)args)[0];
+    fprintf(stderr, "stage three : core %d start!\n", i);
+
+    info.core_id = i;
+    ppi_set_cpu_thread(STAGE_THREE_BASE_CPU_ID + i);
+
+    j = 0;
+
+    while(1) {
+        temp_chunk = &shared_buf.stage[1].core[i].chunk[j];
+
+        if (temp_chunk->info->is_buf_full) {
+            tid = temp_chunk->info->thread_id;
+            size = temp_chunk->info->buf_size;
+
+            module_detector_stage_three(tid, size, temp_chunk->buf);		
+
+            temp_chunk->info->thread_id = 0;
+            temp_chunk->info->buf_size = 0;				
+
+            temp_chunk->info->is_buf_full = 0;	
+
+            j = (j + 1) % MAX_CHUNK_NUM;
+        }
+    }    
+}
+
+pthread_t pid[MAX_CORE_NUM];
+int cid[MAX_CORE_NUM];
+
+static inline void data_race_detector_stage()
+{
+    int i;
+
+    for (i = 0; i < MAX_CORE_NUM; i++) {
+        cid[i] = i;
+    }
+
+    /* STAGE ONE */
+    ppi_set_cpu_thread(STAGE_ONE_BASE_CPU_ID);
+
+    /* STAGE TWO */
+    pthread_create(&pid[0], NULL, module_pthread_stage_two, (void *)&cid[0]);
+
+    /* STAGE THREE */
+    for (i = 0; i < MAX_CORE_NUM; i++) {
+        pthread_create(&pid[i], NULL, module_pthread_stage_three, (void *)&cid[i]);
+    }
+}
+#else
+static inline void module_detector_start(uint8_t tid, 
+        uint32_t size, struct trace_content *buf)
+{
+    uint32_t i;
+    struct trace_content *content;
+
+    if (!info.exist[tid]) {
+        printf("\tnew tid: %d\n", tid);
+
+        if (info.max_tid_num < (tid + 1)) {
+            info.max_tid_num = (tid + 1);
+        }
+
+        info.exist[tid] = 1;
+    }
+
+    for (i = 0; i < size; i++) {
+        content = &buf[i];
+
+        if (content->type == TRACE_MEM_LOAD) {
+            module_history_load_record(content);
+            module_filter_load_record(content);
+            module_filter_load_match(content);
+        } else if (content->type == TRACE_MEM_STORE) {
+            module_history_store_record(content);
+            module_filter_store_record(content);
+            module_filter_store_match(content);
+        } else {
+            fprintf(stderr, "unknown type : %d\n", content->type);
+            assert(0);
+        }
+    }
+}
+#endif
+
+void data_race_detector_init() 
+{
+#if 1
+    fprintf(stderr, "trace buf size : %d\n", TRACE_BUF_SIZE);
+    fprintf(stderr, "trace content size : %d\n", sizeof(struct trace_content));
+#endif
+
+    module_race_init();
+    module_info_init();
+    module_filter_init();
+    module_history_init();
+#ifdef PPI_THREE_STAGE
+    module_shared_buf_init(); 
+    data_race_detector_stage();
+#endif
+}
+
+uint64_t mem_trace_count = 0;
+
+void data_race_detector(uint8_t tid, uint32_t size, struct trace_content *buf) 
+{
+#ifdef MOD_PROFILER
+    mem_trace_count += size;
+#ifdef PPI_THREE_STAGE
+    struct trace_content *buf_ptr;
+
+#if 1
+    if (info.last_tid != tid) {
+        module_shared_buf_all_empty();
+
+        info.last_tid = tid;
+    }
+#endif
+
+    buf_ptr = buf;
+
+    while (size > TRACE_SHARED_BUF_SIZE) {
+        // printf("\twarning : trace is too long! size : 0x%x\n", size);
+
+        module_shared_buf_copy(0, 0, info.chunk_id, tid, TRACE_SHARED_BUF_SIZE, buf_ptr);
+        info.chunk_id = (info.chunk_id + 1) % MAX_CHUNK_NUM;
+
+        size -= TRACE_SHARED_BUF_SIZE;
+        buf_ptr += TRACE_SHARED_BUF_SIZE;
+    }
+
+    module_shared_buf_copy(0, 0, info.chunk_id, tid, size, buf_ptr);
+    info.chunk_id = (info.chunk_id + 1) % MAX_CHUNK_NUM;
+#else
+    module_detector_start(tid, size, buf);
+#endif
+#endif
 }
 
 void data_race_detector_report() 
 {
+#ifdef PPI_THREE_STAGE
+    module_shared_buf_all_empty();
+#endif
     module_race_print();
-#ifdef DETECTOR_INFO_PRINT
-    module_syn_print();
-#ifdef DETECTOR_STATISTICS_PRINT
-    module_syn_statistics_print();
-#endif
-    module_timestamp_print();
-#endif
+    fprintf(stderr, "\nmem_trace_count : %ld\n\n", mem_trace_count);
 }
 

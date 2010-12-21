@@ -181,6 +181,36 @@ const uint64_t barrier_call[12] = {
     0x4009f8  /* 11 */
 };
 
+const uint64_t create_call[12] = {
+    0x400cc8, /* 0 */
+    0x400ce8, /* 1 */
+    0x4009f0, /* 2 */
+    0x400a90, /* 3 */
+    0x400ce0, /* 4 */
+    0x400e00, /* 5 */
+    0x400b30, /* 6 */
+    0x400b78, /* 7 */
+    0x400cd0, /* 8 */
+    0x400a50, /* 9 */
+    0x400b00, /* 10 */
+    0x400a18  /* 11 */
+};
+
+const uint64_t join_call[12] = {
+    0x400cf8, /* 0 */
+    0x400d08, /* 1 */
+    0x400a10, /* 2 */
+    0x400aa0, /* 3 */
+    0x400cf0, /* 4 */
+    0x400e30, /* 5 */
+    0x400b40, /* 6 */
+    0x400b88, /* 7 */
+    0x400d00, /* 8 */
+    0x400a70, /* 9 */
+    0x400b20, /* 10 */
+    0x400a48  /* 11 */
+};
+
 const uint64_t cond_wait_call[12] = {
     -1, /* 0 */
     -1, /* 1 */
@@ -210,12 +240,9 @@ const uint64_t cond_broad_call[12] = {
     0x400ab8  /* 11 */
 };
 
-/*#define FLUSH_RATE 100*/
-
 extern uint32_t bench_mark_id;
 extern volatile uint8_t is_detect_start;
 uint8_t is_collect = 0;
-/*static uint64_t flush_counter = 0;*/
 
 #endif
 
@@ -691,11 +718,6 @@ static inline void gen_op_addq_A0_reg_sN(int shift, int reg)
 #ifdef PPI_DEBUG_TOOL_GUEST
 static inline void gen_mem_trace(uint8_t type1, uint8_t size1, TCGv addr1) {
     if (is_detect_start  && is_collect) {
-        /*if (flush_counter >= FLUSH_RATE) {*/
-            /*gen_helper_flush_buffer();*/
-            /*flush_counter = 0;*/
-        /*}*/
-        /*flush_counter++;*/
         switch (type1)
         {
             case TRACE_MEM_LOAD:
@@ -6505,6 +6527,10 @@ do_lret:
                         gen_helper_syn_unlock_trace(tcg_const_tl(pc_start));
                     else if (tval == barrier_call[bench_mark_id])
                         gen_helper_syn_barrier_trace(tcg_const_tl(pc_start));
+                    else if (tval == create_call[bench_mark_id])
+                        gen_helper_syn_create_trace();
+                    else if (tval == join_call[bench_mark_id])
+                        gen_helper_syn_join_trace();
                     else if (tval == cond_wait_call[bench_mark_id])
                         gen_helper_syn_condwait_trace(tcg_const_tl(pc_start));
                     else if (tval == cond_broad_call[bench_mark_id])
@@ -6548,6 +6574,10 @@ do_lret:
                     gen_helper_syn_unlock_trace(tcg_const_tl(pc_start));
                 else if (tval == barrier_call[bench_mark_id])
                     gen_helper_syn_barrier_trace(tcg_const_tl(pc_start));
+                else if (tval == create_call[bench_mark_id])
+                    gen_helper_syn_create_trace();
+                else if (tval == join_call[bench_mark_id])
+                    gen_helper_syn_join_trace();
                 else if (tval == cond_wait_call[bench_mark_id])
                     gen_helper_syn_condwait_trace(tcg_const_tl(pc_start));
                 else if (tval == cond_broad_call[bench_mark_id])

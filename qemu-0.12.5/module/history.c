@@ -26,17 +26,18 @@ struct global_history_queue {
     struct history_hash_queue *thread[MAX_PROCESS_NUM];
 };
 
-struct global_history_queue history;
+struct global_history_queue *history;
 
 static inline void module_history_init()
 {
-    uint8_t i;
+    int i;
 
-    memset(&history, 0, sizeof(struct global_history_queue));
+    history = (struct global_history_queue *)malloc(sizeof(struct global_history_queue));
+    memset(history, 0, sizeof(struct global_history_queue));
 
     for (i = 0; i < MAX_PROCESS_NUM; i++) {
-        history.thread[i] = (struct history_hash_queue *)malloc(sizeof(struct history_hash_queue));		
-        memset(history.thread[i], 0, sizeof(struct history_hash_queue));
+        history->thread[i] = (struct history_hash_queue *)malloc(sizeof(struct history_hash_queue));		
+        memset(history->thread[i], 0, sizeof(struct history_hash_queue));
     }
 }
 
@@ -50,19 +51,27 @@ static inline void module_history_load_record(struct trace_content *content)
     struct history_entry *temp_entry;
 
     tid = content->tid;
-    address = content->value.mem.address;
+    address = content->address;
 
-    temp_queue = &history.thread[tid]->hash[(address >> HASH_BASE_BIT) % MAX_HASH_NUM];
+    temp_queue = &history->thread[tid]->hash[(address >> HASH_BASE_BIT) % MAX_HASH_NUM];
+
     tail = temp_queue->load_tail;	
     temp_entry = &temp_queue->load_entry[tail];
 
-    memcpy(&temp_entry->content, content, sizeof(struct trace_content));
+    //memcpy(&temp_entry->content, content, sizeof(struct trace_content));
+    temp_entry->content.tid = content->tid;
+    temp_entry->content.type = content->type;
+    temp_entry->content.size = content->size;
+    temp_entry->content.address = content->address;
+    temp_entry->content.index = content->index;
+    temp_entry->content.pc = content->pc;
 
-    tail++;
-    if (tail >= MAX_LOAD_QUEUE_SIZE) {
-        tail = 0;
-    }
-    temp_queue->load_tail = tail;
+    //tail++;
+    //if (tail >= MAX_LOAD_QUEUE_SIZE) {
+    //    tail = 0;
+    //}
+    //temp_queue->load_tail = tail;
+    temp_queue->load_tail = (tail + 1) % MAX_LOAD_QUEUE_SIZE;
 #endif
 }
 
@@ -76,25 +85,33 @@ static inline void module_history_store_record(struct trace_content *content)
     struct history_entry *temp_entry;
 
     tid = content->tid;
-    address = content->value.mem.address;
+    address = content->address;
 
-    temp_queue = &history.thread[tid]->hash[(address >> HASH_BASE_BIT) % MAX_HASH_NUM];
+    temp_queue = &history->thread[tid]->hash[(address >> HASH_BASE_BIT) % MAX_HASH_NUM];
+
     tail = temp_queue->store_tail;
     temp_entry = &temp_queue->store_entry[tail];
 
-    memcpy(&temp_entry->content, content, sizeof(struct trace_content));
+    //memcpy(&temp_entry->content, content, sizeof(struct trace_content));
+    temp_entry->content.tid = content->tid;
+    temp_entry->content.type = content->type;
+    temp_entry->content.size = content->size;
+    temp_entry->content.address = content->address;
+    temp_entry->content.index = content->index;
+    temp_entry->content.pc = content->pc;
 
-    tail++;
-    if (tail >= MAX_STORE_QUEUE_SIZE) {
-        tail = 0;
-    }
-    temp_queue->store_tail = tail;
+    //tail++;
+    //if (tail >= MAX_STORE_QUEUE_SIZE) {
+    //    tail = 0;
+    //}
+    //temp_queue->store_tail = tail;
+    temp_queue->store_tail = (tail + 1) % MAX_STORE_QUEUE_SIZE;
 #endif
 }
 
 /* match */
 
-void module_match_with_load(struct trace_content *content, uint8_t other_tid) 
+static inline void module_match_with_load(struct trace_content *content, uint8_t other_tid) 
 {
 #ifdef MOD_MATCH
     uint8_t tid;
@@ -105,10 +122,10 @@ void module_match_with_load(struct trace_content *content, uint8_t other_tid)
     struct history_entry *temp_entry;
 
     tid = content->tid;
-    index = content->value.mem.index;
-    address = content->value.mem.address;
+    address = content->address;
+    index = content->index;
 
-    temp_queue = &history.thread[other_tid]->hash[(address >> HASH_BASE_BIT) % MAX_HASH_NUM];
+    temp_queue = &history->thread[other_tid]->hash[(address >> HASH_BASE_BIT) % MAX_HASH_NUM];
 
     tail = temp_queue->load_tail;
     head = tail + 1;
@@ -126,7 +143,7 @@ void module_match_with_load(struct trace_content *content, uint8_t other_tid)
 
         temp_entry= &temp_queue->load_entry[tail];
 
-        other_index = temp_entry->content.value.mem.index;
+        other_index = temp_entry->content.index;
 
         if (last_index != other_index) {
             if (module_timestamp_order(other_tid, other_index, tid, index)) {
@@ -136,13 +153,9 @@ void module_match_with_load(struct trace_content *content, uint8_t other_tid)
             last_index = other_index;
         }
 
-        other_address = temp_entry->content.value.mem.address;
+        other_address = temp_entry->content.address;
 
         if (address == other_address) {
-            /*if ((address % content->size) != 0) {*/
-                /*content->size = address % content->size;*/
-            /*}*/
-
             module_race_collection(&temp_entry->content, content);
 
             break;
@@ -151,7 +164,7 @@ void module_match_with_load(struct trace_content *content, uint8_t other_tid)
 #endif
 }
 
-void module_match_with_store(struct trace_content *content, uint8_t other_tid) 
+static inline void module_match_with_store(struct trace_content *content, uint8_t other_tid) 
 {
 #ifdef MOD_MATCH
     uint8_t tid;
@@ -162,10 +175,10 @@ void module_match_with_store(struct trace_content *content, uint8_t other_tid)
     struct history_entry *temp_entry;
 
     tid = content->tid;
-    index = content->value.mem.index;
-    address = content->value.mem.address;
+    address = content->address;
+    index = content->index;
 
-    temp_queue = &history.thread[other_tid]->hash[(address >> HASH_BASE_BIT) % MAX_HASH_NUM];
+    temp_queue = &history->thread[other_tid]->hash[(address >> HASH_BASE_BIT) % MAX_HASH_NUM];
 
     tail = temp_queue->store_tail;
     head = tail + 1;
@@ -183,7 +196,7 @@ void module_match_with_store(struct trace_content *content, uint8_t other_tid)
 
         temp_entry = &temp_queue->store_entry[tail];
 
-        other_index = temp_entry->content.value.mem.index;  
+        other_index = temp_entry->content.index;  
 
         if (last_index != other_index) {
             if (module_timestamp_order(other_tid, other_index, tid, index)) {   
@@ -193,13 +206,9 @@ void module_match_with_store(struct trace_content *content, uint8_t other_tid)
             last_index = other_index;
         }
 
-        other_address = temp_entry->content.value.mem.address;
+        other_address = temp_entry->content.address;
 
         if (address == other_address) {
-            /*if ((address % content->size) != 0) {*/
-                /*content->size = address % content->size;*/
-            /*}*/
-
             module_race_collection(&temp_entry->content, content);
 
             break;

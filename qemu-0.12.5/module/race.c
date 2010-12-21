@@ -7,7 +7,7 @@ struct race_entry {
     uint32_t instance;
 };
 
-#define MAX_RACE_NUM (1 << 19)
+#define MAX_RACE_NUM (1 << 20)
 
 struct race_queue {
     struct race_entry entry[MAX_RACE_NUM];
@@ -16,24 +16,29 @@ struct race_queue {
 
 struct global_race_queue {
     struct race_queue *thread[MAX_PROCESS_NUM];
-    struct race_queue remain;
+    struct race_queue *remain;
+    uint32_t sum;
 };
 
-struct global_race_queue race;
+struct global_race_queue *race;
 
 static inline void module_race_init() 
 {
-    uint32_t i;
+    int i;
 
-    memset(&race, 0, sizeof(struct global_race_queue));
+    race = (struct global_race_queue *)malloc(sizeof(struct global_race_queue));
+    memset(race, 0, sizeof(struct global_race_queue));
 
     for (i = 0; i < MAX_PROCESS_NUM; i++) {
-        race.thread[i] = (struct race_queue *)malloc(sizeof(struct race_queue));		
-        memset(race.thread[i], 0, sizeof(struct race_queue));
+        race->thread[i] = (struct race_queue *)malloc(sizeof(struct race_queue));		
+        memset(race->thread[i], 0, sizeof(struct race_queue));
     }
+
+    race->remain = (struct race_queue *)malloc(sizeof(struct race_queue));
+    memset(race->remain, 0, sizeof(struct race_queue));
 }
 
-static inline uint8_t module_race_equal(struct race_entry *race1, struct race_entry *race2)
+static inline int module_race_equal(struct race_entry *race1, struct race_entry *race2)
 {
     if ((race1->content2.type == race2->content2.type)
             && (race1->content2.size == race2->content2.size)
@@ -46,7 +51,7 @@ static inline uint8_t module_race_equal(struct race_entry *race1, struct race_en
 
 static inline void module_race_filter(struct race_queue *remain, struct race_entry *race) 
 {
-    uint32_t i;
+    int i;
 
     for (i = 0; i < remain->count; i++) {
         if (module_race_equal(&remain->entry[i], race)) {
@@ -59,7 +64,7 @@ static inline void module_race_filter(struct race_queue *remain, struct race_ent
 
         remain->count++;
         if (remain->count >= MAX_RACE_NUM) {
-            printf("race queue overflow!\n");
+            fprintf(stderr, "race queue overflow!\n");
             assert(0);
         }
     } 
@@ -67,35 +72,40 @@ static inline void module_race_filter(struct race_queue *remain, struct race_ent
 
 static inline void module_race_print() 
 {
-    uint32_t i, j;
+    int i, j;
+    struct race_queue *remain;
+
+    remain = race->remain;
 
     for (i = 0; i < MAX_PROCESS_NUM; i++) {
-        for (j = 0; j < race.thread[i]->count; j++) {
-            module_race_filter(&race.remain, &race.thread[i]->entry[j]);
+        for (j = 0; j < race->thread[i]->count; j++) {
+            module_race_filter(remain, &race->thread[i]->entry[j]);
         }
     }
 
-    for (i = 0; i < race.remain.count; i++) {
-        printf("No. %d : address : 0x%x ; same count : %d\n", 
-                i, race.remain.entry[i].content2.value.mem.address, race.remain.entry[i].instance);
-        printf("tid1 : %d ; type1 : %d ; size1 : %d ; pc1 : 0x%x\n", 
-                race.remain.entry[i].content1.tid, race.remain.entry[i].content1.type, 
-                race.remain.entry[i].content1.size, race.remain.entry[i].content1.pc);
-        printf("tid2 : %d ; type2 : %d ; size2 : %d ; pc2 : 0x%x\n\n", 
-                race.remain.entry[i].content2.tid, race.remain.entry[i].content2.type, 
-                race.remain.entry[i].content2.size, race.remain.entry[i].content2.pc);
+    for (i = 0; i < remain->count; i++) {
+        fprintf(stderr, "No. %d : address : 0x%lx ; same count : %d\n", 
+                i, remain->entry[i].content2.address, remain->entry[i].instance);
+        fprintf(stderr, "tid1 : %d ; type1 : %d ; size1 : %d ; pc1 : 0x%lx\n", 
+                remain->entry[i].content1.tid, remain->entry[i].content1.type, 
+                remain->entry[i].content1.size, remain->entry[i].content1.pc);
+        fprintf(stderr, "tid2 : %d ; type2 : %d ; size2 : %d ; pc2 : 0x%lx\n\n", 
+                remain->entry[i].content2.tid, remain->entry[i].content2.type, 
+                remain->entry[i].content2.size, remain->entry[i].content2.pc);
     }
 
-    printf("race remain count : %d\n\n", race.remain.count);
+    fprintf(stderr, "race sum count : %d\n", race->sum);
+    fprintf(stderr, "race number counte : %d\n", race->thread[0]->count);
+    fprintf(stderr, "race remain count : %d\n\n", remain->count);
 }
 
-static inline uint8_t module_race_content_equal(struct trace_content *content1, struct trace_content *content2)
+static inline int module_race_content_equal(struct trace_content *content1, struct trace_content *content2)
 {
-    if ((content1->tid == content2->tid) 
-            && (content1->type == content2->type) 
+    if ((content1->type == content2->type) 
             && (content1->size == content2->size) 
-            && (content1->value.mem.address == content2->value.mem.address) 
-            && (content1->pc == content2->pc)) {
+            && (content1->pc == content2->pc)
+            /* && (content1->tid == content2->tid) */ 
+            /* && (content1->address == content2->address) */ ) {
         return 1;
     }
 
@@ -104,13 +114,13 @@ static inline uint8_t module_race_content_equal(struct trace_content *content1, 
 
 static inline void module_race_collection(struct trace_content *content1, struct trace_content *content2) 
 {
-    uint32_t i;
+    int i;
     struct race_queue *temp_queue;
 
-    temp_queue = race.thread[content2->tid];
+    temp_queue = race->thread[info.core_id];
 
     for (i = 0; i < temp_queue->count; i++) {
-        if (module_race_content_equal(content1, &temp_queue->entry[i].content1)
+        if (module_race_content_equal(content1, &temp_queue->entry[i].content1) 
                 && module_race_content_equal(content2, &temp_queue->entry[i].content2)) {
             temp_queue->entry[i].instance++;
 
@@ -125,9 +135,11 @@ static inline void module_race_collection(struct trace_content *content1, struct
 
         temp_queue->count++;
         if (temp_queue->count >= MAX_RACE_NUM) {
-            printf("race queue overflow!\n");
+            fprintf(stderr, "race queue overflow!\n");
             assert(0);
         }
     }
+
+    race->sum++;
 }
 

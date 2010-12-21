@@ -23,12 +23,9 @@
 #include "kvm.h"
 
 #ifdef PPI_DEBUG_TOOL
-
-#define PPI_DETECTOR_MODULE
-
-extern uint32_t total_id;
-extern uint8_t thread_start;
-extern uint8_t thread_exit;
+// extern uint32_t total_id;
+// extern uint8_t thread_start;
+// extern uint8_t thread_exit;
 extern uint8_t timing_start;
 extern uint8_t timing_end;
 extern uint8_t current_id;
@@ -49,6 +46,16 @@ clock_t end_time;
 
 time_t first_time;
 time_t second_time;
+
+#if 0
+struct timespec {
+    time_t tv_sec; /* seconds */
+    long tv_nsec; /* nanoseconds */ 
+};
+#endif
+
+struct timespec time1;
+struct timespec time2;
 #endif
 
 #include <assert.h>
@@ -56,7 +63,14 @@ time_t second_time;
 
 extern FILE *stderr;
 
+#include "../module/timestamp.h"
+#include "../module/sync.h"
+#include <assert.h>
+#include <string.h>
 
+extern struct global_timestamp_queue ts;
+extern struct global_syn_info syn;
+extern struct statistics_syn_info stat_syn;
 #endif
 
 #if !defined(CONFIG_SOFTMMU)
@@ -661,32 +675,6 @@ int cpu_exec(CPUState *env1)
 
 
 #ifdef PPI_DEBUG_TOOL
-
-                    if (thread_start) {
-#ifdef PPI_PRINT_INFO
-                        printf("\tthread start : last tid : %d ; current tid : %d\n", last_id, current_id);
-#endif
-
-                        trace_syn_collection(TRACE_SYN_CREATE, 0, 0, 0, EIP);      
-
-                        thread_start = 0;
-                    }
-                    if (thread_exit) {
-#ifdef PPI_PRINT_INFO
-                        printf("\tthread exit : last tid : %d ; current tid : %d\n", last_id, current_id);
-#endif
-
-                        trace_syn_collection(TRACE_SYN_JOIN, 0, 0, 0, EIP);
-
-                        thread_exit= 0;
-                    }
-
-                    /*if (is_detect_start && current_id) {*/
-                        /*is_collect = 1;    	*/
-                    /*} else {*/
-                        /*is_collect = 0;*/
-                    /*}*/
-
                     // TODO: Necessary to add is_detect_start here?
                     if (is_detect_start) {
                         if (last_id != current_id) {
@@ -700,10 +688,10 @@ int cpu_exec(CPUState *env1)
                     }
 
                     if (timing_start) {
-
 #ifdef PPI_PRINT_INFO
                         start_time= clock();
                         first_time = time(NULL);
+                        clock_gettime(CLOCK_REALTIME, &time1);
                         printf("\ttiming start!\n");
 #endif
 
@@ -712,14 +700,22 @@ int cpu_exec(CPUState *env1)
 
                     if (timing_end) {
                         data_race_detector_report();
+                        module_syn_print(&syn);
+                        module_syn_statistics_print(&stat_syn);
+                        module_timestamp_print(&ts);
 
 #ifdef PPI_PRINT_INFO
                         end_time = clock();
                         second_time = time(NULL);
+                        clock_gettime(CLOCK_REALTIME, &time2);
                         printf("\ttiming end!\n");
-                        printf("\nTime costs : %f (s) ; %f (s)\n", 
-                                (double)(end_time - start_time) / 1000000, difftime(second_time, first_time));
+                        fprintf(stderr, "\nTime costs : %f (s) ; %f (s) ; %f (s)\n", 
+                                (double)(end_time - start_time) / 1000000, 
+                                difftime(second_time, first_time),
+                                (difftime(time2.tv_sec, time1.tv_sec) * 1000000000
+                                + (double)(time2.tv_nsec - time1.tv_nsec)) / 1000000000);
 #endif
+
                         is_detect_start = 0;
                         timing_end = 0;
                     }
