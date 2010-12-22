@@ -3,7 +3,7 @@
 #include <string.h>
 #include <assert.h>
 
-#define PPI_THREE_STAGE
+/*#define PPI_THREE_STAGE*/
 
 #ifdef PPI_THREE_STAGE
 #include <unistd.h>
@@ -271,6 +271,8 @@ static inline void module_detector_start(uint8_t tid,
 {
     uint32_t i;
     struct trace_content *content;
+
+    info.tid = tid;
 
     if (!info.exist[tid]) {
         printf("\tnew tid: %d\n", tid);
