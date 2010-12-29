@@ -3,7 +3,7 @@
 #include <string.h>
 #include <assert.h>
 
-/*#define PPI_THREE_STAGE*/
+#define PPI_THREE_STAGE
 
 #ifdef PPI_THREE_STAGE
 #include <unistd.h>
@@ -146,12 +146,13 @@ static inline void module_detector_stage_three(uint8_t tid,
 void *module_pthread_stage_two(void *args)
 {
     uint8_t i, j;
-#if 1
-    uint8_t cid, kid;
-#endif
+    uint8_t cid, kid[MAX_CORE_NUM];
+
     volatile uint8_t tid;
     volatile uint32_t size;
+
     struct shared_trace_chunk *temp_chunk, *new_chunk;
+    struct shared_trace_chunk *next_chunk;
 
     i = ((int *)args)[0];
     fprintf(stderr, "stage two : core %d start!\n", i);
@@ -159,10 +160,8 @@ void *module_pthread_stage_two(void *args)
     info.core_id = i;
     ppi_set_cpu_thread(STAGE_TWO_BASE_CPU_ID + i);
 
-#if 1
     cid = 0;
-    kid = 0;
-#endif
+    memset(kid, 0, MAX_CORE_NUM * sizeof(uint8_t));
 
     j = 0;
 
@@ -173,7 +172,15 @@ void *module_pthread_stage_two(void *args)
             tid = temp_chunk->info->thread_id;
             size = temp_chunk->info->buf_size;
 
-            new_chunk = &shared_buf.stage[1].core[cid].chunk[kid];
+            next_chunk = &shared_buf.stage[1].core[cid].chunk[kid[cid]];
+
+            while (next_chunk->info->is_buf_full) {
+                cid = (cid + 1) % MAX_CORE_NUM;
+
+                next_chunk = &shared_buf.stage[1].core[cid].chunk[kid[cid]];
+            }
+
+            new_chunk = &shared_buf.stage[1].core[cid].chunk[kid[cid]];
             while (new_chunk->info->is_buf_full);
             fill_index(new_chunk->global_index, global_index);
             new_chunk->global_tunnc = global_tunnc;
@@ -181,12 +188,10 @@ void *module_pthread_stage_two(void *args)
             module_detector_stage_two(tid, size, temp_chunk->buf);		
 
 #if 1
-            module_shared_buf_copy(1, cid, kid, tid, size, temp_chunk->buf);
+            module_shared_buf_copy(1, cid, kid[cid], tid, size, temp_chunk->buf);
 
+            kid[cid] = (kid[cid] + 1) % MAX_CHUNK_NUM;
             cid = (cid + 1) % MAX_CORE_NUM;
-            if (cid == 0) {
-                kid = (kid + 1) % MAX_CHUNK_NUM;
-            }
 #endif
 
 
