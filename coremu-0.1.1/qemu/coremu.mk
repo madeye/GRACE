@@ -1,1 +1,1 @@
-COREMU_LIB = /root/hg/coremu-0.1.1/coremu/obj/libcoremu.a
+COREMU_LIB = /root/projects/repo-ppi-debug/coremu-0.1.1/coremu/obj/libcoremu.a

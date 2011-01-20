@@ -5,7 +5,7 @@
 #define PPI_PROCESS_INFO
 #define PPI_SYN_INFO
 
-#define TRACE_PRIVATE_BUF_SIZE (32 * 1024 * 1024)
+#define TRACE_PRIVATE_BUF_SIZE (16 * 1024 * 1024)
 
 #define TRACE_MEM_INT
 #define TRACE_MEM_FLOAT
@@ -38,18 +38,18 @@ enum {
 };
 
 struct trace_content {
-    uint32_t tid:8, type:2, size:2, index:20;
-    //uint8_t tid;
-    //uint8_t type;
-    //uint8_t size;
-    //uint32_t index;
+    //uint32_t tid:8, type:2, size:2, index:20;
+    uint8_t tid;
+    uint8_t type;
+    uint8_t size;
+    uint32_t index;
     uint32_t pc;
     uint32_t address;
 };
 
 typedef struct DEBUGInfo {
     /* memory trace for data race detector  */
-    struct trace_content *trace_mem_buf;
+    struct trace_content trace_mem_buf[TRACE_PRIVATE_BUF_SIZE];
     //struct trace_content *env->trace_mem_ptr, *trace_mem_end;
     /* uint8_t current_thread_id; */
 } DEBUGInfo;
