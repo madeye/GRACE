@@ -118,12 +118,18 @@ static inline void module_detector_stage_three(uint8_t tid,
 void *module_pthread_stage_two(void *args)
 {
     uint8_t i, j;
-#if 1
+#if 0
     uint8_t cid, kid;
+#endif
+#if 1
+    uint8_t cid, kid[MAX_CORE_NUM];
 #endif
     volatile uint8_t tid;
     volatile uint32_t size;
     struct shared_trace_chunk *temp_chunk;
+#if 1
+        struct shared_trace_chunk *next_chunk;
+#endif        
 
     i = ((int *)args)[0];
     fprintf(stderr, "stage two : core %d start!\n", i);
@@ -131,9 +137,13 @@ void *module_pthread_stage_two(void *args)
     info.core_id = i;
     ppi_set_cpu_thread(STAGE_TWO_BASE_CPU_ID + i);
 
-#if 1
+#if 0
     cid = 0;
     kid = 0;
+#endif
+#if 1
+    cid = 0;
+    memset(kid, 0, MAX_CORE_NUM * sizeof(uint8_t));
 #endif
 
     j = 0;
@@ -152,7 +162,24 @@ void *module_pthread_stage_two(void *args)
             size = temp_chunk->info->buf_size;
 
             module_detector_stage_two(tid, size, temp_chunk->buf);		
+
 #if 1
+#if 1
+            next_chunk = &shared_buf.stage[1].core[cid].chunk[kid[cid]];
+
+            while (next_chunk->info->is_buf_full) {
+                cid = (cid + 1) % MAX_CORE_NUM;
+
+                next_chunk = &shared_buf.stage[1].core[cid].chunk[kid[cid]];
+            }
+#endif
+
+            module_shared_buf_copy(1, cid, kid[cid], tid, size, temp_chunk->buf);
+
+            kid[cid] = (kid[cid] + 1) % MAX_CHUNK_NUM;
+            cid = (cid + 1) % MAX_CORE_NUM;
+#endif
+#if 0
             module_shared_buf_copy(1, cid, kid, tid, size, temp_chunk->buf);
 
             cid = (cid + 1) % MAX_CORE_NUM;
@@ -291,7 +318,7 @@ void data_race_detector(uint8_t tid, uint32_t size, struct trace_content *buf)
 #ifdef PPI_THREE_STAGE
     struct trace_content *buf_ptr;
 
-#if 0
+#if 1
     if (last_tid != tid) {
         module_shared_buf_all_empty();
 
