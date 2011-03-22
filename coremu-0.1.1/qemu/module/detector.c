@@ -306,6 +306,7 @@ void data_race_detector_init()
     module_info_init();
     module_filter_init();
     module_history_init();
+    module_cuda_init_interface();
 #ifdef PPI_THREE_STAGE
     module_shared_buf_init(); 
     data_race_detector_stage();

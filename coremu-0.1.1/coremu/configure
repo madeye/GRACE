@@ -91,6 +91,7 @@ mkdir -p $coremuroot/obj/qemu/module
 
 echo "PREFIXDIR := ${prefix}" > coremu.mk
 echo "COREMU_LIB = ${coremuroot}/obj/libcoremu.a" > ${qemusrc}/coremu.mk
+echo "CUDA_MATCH_LIB = ${coremuroot}/obj/libmatch_x86_64.a" >> ${qemusrc}/coremu.mk
 
 configfile=$coremuroot/incl/coremu-config.h
 
