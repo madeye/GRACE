@@ -23,23 +23,23 @@ struct history_hash_queue {
 };
 
 struct global_history_queue {
-    struct history_hash_queue *thread[MAX_PROCESS_NUM];
+    struct history_hash_queue thread[MAX_PROCESS_NUM];
 };
 
-struct global_history_queue *history;
+struct global_history_queue history;
 
-static inline void module_history_init()
-{
-    int i;
+/*static inline void module_history_init()*/
+/*{*/
+    /*int i;*/
 
-    history = (struct global_history_queue *)malloc(sizeof(struct global_history_queue));
-    memset(history, 0, sizeof(struct global_history_queue));
+    /*history = (struct global_history_queue *)malloc(sizeof(struct global_history_queue));*/
+    /*memset(history, 0, sizeof(struct global_history_queue));*/
 
-    for (i = 0; i < MAX_PROCESS_NUM; i++) {
-        history->thread[i] = (struct history_hash_queue *)malloc(sizeof(struct history_hash_queue));		
-        memset(history->thread[i], 0, sizeof(struct history_hash_queue));
-    }
-}
+    /*for (i = 0; i < MAX_PROCESS_NUM; i++) {*/
+        /*history->thread[i] = (struct history_hash_queue *)malloc(sizeof(struct history_hash_queue));		*/
+        /*memset(history->thread[i], 0, sizeof(struct history_hash_queue));*/
+    /*}*/
+/*}*/
 
 static inline void module_history_load_record(struct trace_content *content) 
 {
@@ -53,7 +53,7 @@ static inline void module_history_load_record(struct trace_content *content)
     tid = content->tid;
     address = content->address;
 
-    temp_queue = &history->thread[tid]->hash[(address >> HASH_BASE_BIT) % MAX_HASH_NUM];
+    temp_queue = &(history.thread[tid].hash[(address >> HASH_BASE_BIT) % MAX_HASH_NUM]);
 
     tail = temp_queue->load_tail;	
     temp_entry = &temp_queue->load_entry[tail];
@@ -87,7 +87,7 @@ static inline void module_history_store_record(struct trace_content *content)
     tid = content->tid;
     address = content->address;
 
-    temp_queue = &history->thread[tid]->hash[(address >> HASH_BASE_BIT) % MAX_HASH_NUM];
+    temp_queue = &(history.thread[tid].hash[(address >> HASH_BASE_BIT) % MAX_HASH_NUM]);
 
     tail = temp_queue->store_tail;
     temp_entry = &temp_queue->store_entry[tail];
@@ -125,7 +125,7 @@ static inline void module_match_with_load(struct trace_content *content, uint8_t
     address = content->address;
     index = content->index;
 
-    temp_queue = &history->thread[other_tid]->hash[(address >> HASH_BASE_BIT) % MAX_HASH_NUM];
+    temp_queue = &(history.thread[other_tid].hash[(address >> HASH_BASE_BIT) % MAX_HASH_NUM]);
 
     tail = temp_queue->load_tail;
     head = tail + 1;
@@ -133,7 +133,7 @@ static inline void module_match_with_load(struct trace_content *content, uint8_t
         head = 0;
     }
 
-    last_index = ts.thread[other_tid]->count;
+    last_index = ts.thread[other_tid].count;
 
     while (tail != head) {
         if (tail == 0) {
@@ -178,7 +178,7 @@ static inline void module_match_with_store(struct trace_content *content, uint8_
     address = content->address;
     index = content->index;
 
-    temp_queue = &history->thread[other_tid]->hash[(address >> HASH_BASE_BIT) % MAX_HASH_NUM];
+    temp_queue = &(history.thread[other_tid].hash[(address >> HASH_BASE_BIT) % MAX_HASH_NUM]);
 
     tail = temp_queue->store_tail;
     head = tail + 1;
@@ -186,7 +186,7 @@ static inline void module_match_with_store(struct trace_content *content, uint8_
         head = 0;
     }
 
-    last_index = ts.thread[other_tid]->count;
+    last_index = ts.thread[other_tid].count;
 
     while (tail != head) {
         if (tail == 0) {

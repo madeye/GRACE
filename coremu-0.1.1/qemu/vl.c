@@ -2694,7 +2694,7 @@ int main(int argc, char **argv, char **envp)
     data_race_detector_init();
     process_queue_init(&process_queue);
 
-    module_timestamp_init(&ts);
+    /*module_timestamp_init(&ts);*/
     module_syn_init(&syn);
     module_syn_statistics_init(&stat_syn);
 #endif

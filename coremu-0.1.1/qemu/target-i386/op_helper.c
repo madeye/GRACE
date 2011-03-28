@@ -198,7 +198,7 @@ static inline void module_timestamp_save(uint8_t tid)
     uint32_t index;
     struct timestamp_queue *temp_queue;
 
-    temp_queue = ts.thread[tid];
+    temp_queue = &ts.thread[tid];
     index = temp_queue->count;
 
     memcpy(&temp_queue->entry[index], &ts.current_ts[tid], sizeof(struct timestamp));
@@ -295,7 +295,7 @@ void helper_syn_lock_trace(target_ulong pc) {
             syn.mutex.entry[i].is_lock++;
 
             module_timestamp_merge_two(syn.mutex.entry[i].last_unlock_tid, 
-                    &ts.thread[syn.mutex.entry[i].last_unlock_tid]->entry[syn.mutex.entry[i].last_unlock_ts_index], 
+                    &ts.thread[syn.mutex.entry[i].last_unlock_tid].entry[syn.mutex.entry[i].last_unlock_ts_index], 
                     tid, &ts.current_ts[tid]);
 
             break;
@@ -322,7 +322,7 @@ void helper_syn_lock_trace(target_ulong pc) {
             for (k = 0; k < MAX_PROCESS_NUM; k++) {
                 if (syn.cond.entry[i].is_require[k]) {
                      module_timestamp_merge_two(k, 
-                            &ts.thread[k]->entry[syn.cond.entry[i].last_cond_ts_index[k]], 
+                            &ts.thread[k].entry[syn.cond.entry[i].last_cond_ts_index[k]], 
                             tid, &ts.current_ts[tid]);
                 }
             }
@@ -365,7 +365,7 @@ void helper_syn_unlock_trace(target_ulong pc) {
             for (k = 0; k < MAX_PROCESS_NUM; k++) {
                 if (syn.mutex.entry[i].is_require[k] > 0) {
                     module_timestamp_merge_two(syn.mutex.entry[i].last_unlock_tid, 
-                            &ts.thread[syn.mutex.entry[i].last_unlock_tid]->entry[syn.mutex.entry[i].last_unlock_ts_index], 
+                            &ts.thread[syn.mutex.entry[i].last_unlock_tid].entry[syn.mutex.entry[i].last_unlock_ts_index], 
                             k, &ts.current_ts[k]);
                 }
             }
@@ -420,7 +420,7 @@ void helper_syn_barrier_trace(target_ulong pc) {
 
                 for (k = 0; k < MAX_PROCESS_NUM; k++) {
                     if (syn.barrier.entry[i].is_require[k]) {
-                        ts1[k] = &ts.thread[k]->entry[syn.barrier.entry[i].last_barrier_ts_index[k]];
+                        ts1[k] = &ts.thread[k].entry[syn.barrier.entry[i].last_barrier_ts_index[k]];
                         ts2[k] = &ts.current_ts[k];
                     }
                 }
@@ -503,7 +503,7 @@ static inline void helper_syn_clone_trace() {
 
     parent_tid = syn.thread.create_ts_tid;
     module_timestamp_merge_two(parent_tid, 
-            &ts.thread[parent_tid]->entry[syn.thread.create_ts_index], 
+            &ts.thread[parent_tid].entry[syn.thread.create_ts_index], 
             tid, &ts.current_ts[tid]);
 
     stat_syn.clone_count++;
@@ -529,7 +529,7 @@ static inline void helper_syn_exit_trace() {
 
     parent_tid = syn.thread.create_ts_tid;
     module_timestamp_merge_two(tid, 
-            &ts.thread[tid]->entry[syn.thread.exit_ts_index[tid]], 
+            &ts.thread[tid].entry[syn.thread.exit_ts_index[tid]], 
             parent_tid, &ts.current_ts[parent_tid]);
 
     stat_syn.exit_count++;
@@ -625,7 +625,7 @@ void helper_syn_condbroad_trace(target_ulong pc) {
 
             for (k = 0; k < MAX_PROCESS_NUM; k++) {
                 if (syn.cond.entry[i].is_require[k]) {
-                    ts1[k] = &ts.thread[k]->entry[syn.cond.entry[i].last_cond_ts_index[k]];
+                    ts1[k] = &ts.thread[k].entry[syn.cond.entry[i].last_cond_ts_index[k]];
                     ts2[k] = &ts.current_ts[k];
                 }
             }

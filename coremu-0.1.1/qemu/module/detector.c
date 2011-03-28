@@ -4,6 +4,7 @@
 #include <assert.h>
 
 #define PPI_THREE_STAGE
+/*#define CUDA*/
 
 #ifdef PPI_THREE_STAGE
 #include <unistd.h>
@@ -226,7 +227,20 @@ void *module_pthread_stage_three(void *args)
             tid = temp_chunk->info->thread_id;
             size = temp_chunk->info->buf_size;
 
+#ifndef CUDA
             module_detector_stage_three(tid, size, temp_chunk->buf);		
+#else
+            if (!info.exist[tid]) {
+                printf("\tnew tid: %d\n", tid);
+
+                if (info.max_tid_num < (tid + 1)) {
+                    info.max_tid_num = (tid + 1);
+                }
+
+                info.exist[tid] = 1;
+            }
+            module_detector_stage_three_cuda(tid, size, temp_chunk->buf);		
+#endif
 
             temp_chunk->info->thread_id = 0;
             temp_chunk->info->buf_size = 0;				
@@ -304,8 +318,8 @@ void data_race_detector_init()
     fprintf(stderr, "trace content size : %d\n", sizeof(struct trace_content));
     module_race_init();
     module_info_init();
-    module_filter_init();
-    module_history_init();
+    /*module_filter_init();*/
+    /*module_history_init();*/
     module_cuda_init_interface();
 #ifdef PPI_THREE_STAGE
     module_shared_buf_init(); 
