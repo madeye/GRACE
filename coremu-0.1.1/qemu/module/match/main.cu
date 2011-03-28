@@ -9,8 +9,6 @@
 // Included Headers 
 
 #include <stdint.h>
-
-
 #include <cutil_inline.h>
 
 #include "../interface.h"
@@ -51,27 +49,29 @@ __host__ static void tool_global_timestamp_queue_init(
 #define STRIDE 4
 
 __host__ static void tool_history_queue_init(
-        struct history_entry *history_queue, int size)
+        struct global_history_queue *h_ghq, int size)
 {
-    int i;
+    int t, h, i;
 
     printf("\nHistory Queue Entry :\n");
     printf("No\tAddress\tTid\tType\tSize\tIndex\tPC\n");
 
-    for (i = 0; i < size; i++)
-    {
-        history_queue[i].content.address = (i % STRIDE) << 2;
-        history_queue[i].content.tid = 1;
-        history_queue[i].content.type = 2;
-        history_queue[i].content.size = 4;
-        history_queue[i].content.index = (i / STRIDE);
-        history_queue[i].content.pc = 0xf;
+    for (t = 0; t < 2; t++)
+        for (h = 0; h < MAX_HASH_NUM; h++)
+            for (i = 0; i < size; i++)
+            {
+                h_ghq->thread[t].hash[h].load_entry[i].content.address = (i % STRIDE) << 2;
+                h_ghq->thread[t].hash[h].load_entry[i].content.tid = 1;
+                h_ghq->thread[t].hash[h].load_entry[i].content.type = 2;
+                h_ghq->thread[t].hash[h].load_entry[i].content.size = 4;
+                h_ghq->thread[t].hash[h].load_entry[i].content.index = (i / STRIDE);
+                h_ghq->thread[t].hash[h].load_entry[i].content.pc = 0xf;
 
-        printf("%d\t0x%llx\t%d\t%d\t%d\t%d\t0x%x\n", i, 
-                history_queue[i].content.address, history_queue[i].content.tid,
-                history_queue[i].content.type, history_queue[i].content.size,
-                history_queue[i].content.index, history_queue[i].content.pc);
-    }
+                printf("%d\t0x%llx\t%d\t%d\t%d\t%d\t0x%x\n", i, 
+                        history_queue[i].content.address, history_queue[i].content.tid,
+                        history_queue[i].content.type, history_queue[i].content.size,
+                        history_queue[i].content.index, history_queue[i].content.pc);
+            }
 }
 
 __host__ static void tool_trace_buf_init(
@@ -116,43 +116,50 @@ __host__ static void tool_result_queue_print(
 ///////////////////////////////////////////////
 // Global Device Data Structure 
 
-struct trace_content *d_buf;
-struct global_timestamp_queue *d_timestamp;  
-struct global_history_queue *d_history;
+struct trace_content *d_trace_buf;
+struct global_timestamp_queue *d_gtq;  
+struct global_history_queue *d_ghq;
 
-extern "C" void module_detector_stage_three_cuda(uint8_t tid, 
-        uint32_t size, struct trace_content *buf);
+extern "C" void module_cuda_stage_three(int h_max_tid_num, 
+        uint32_t size, struct trace_content *buf, int *result_queue);
 
-void module_detector_stage_three_cuda(uint8_t tid, 
-        uint32_t size, struct trace_content *buf)
+void module_cuda_stage_three(int h_max_tid_num, 
+        uint32_t size, struct trace_content *buf, int *result_queue)
 {
     uint32_t i;
 
-    CUDA_SAFE_CALL(cudaMalloc((void **) &d_buf,
-                size * sizeof(struct trace_content)));
-    CUDA_SAFE_CALL(cudaMemcpy(d_buf, buf,
+    CUDA_SAFE_CALL(cudaMemcpy(d_trace_buf, buf,
                 size * sizeof(struct trace_content),
-                cudaMemcpyHostToDevice))
-    
-    for (i = 0; i < size; i++) {
-        content = &buf[i];
+                cudaMemcpyHostToDevice));
 
-        if (content->type == TRACE_MEM_LOAD) {
-            module_filter_load_match(content);
-        } else if (content->type == TRACE_MEM_STORE) {
-            module_filter_store_match(content);
-        } else {
-            fprintf(stderr, "unknown type : %d\n", content->type);
-            assert(0);
-        }
-    }
+    CUDA_SAFE_CALL(cudaMemcpyToSymbol(d_max_tid_num, h_max_tid_num, 
+                sizeof(int)));
+
+    module_cuda_stage_three_kernel
+        <<<(size + NUM_THREADS - 1) / NUM_THREADS, NUM_THREADS>>>
+        (size, d_gtq, d_ghq, d_trace_buf, d_result_queue);
+    
 }
 
-extern "C" void module_detector_init_cuda(); 
+extern "C" void module_cuda_free(); 
 
-void module_detector_init_cuda() {
+void module_cuda_free() {
 
-    cutilSafeCall(cudaMalloc((void **)&d_history_queue, 
+    cutilSafeCall(cudaFree(d_gtq));
+    cutilSafeCall(cudaFree(d_ghq));
+    cutilSafeCall(cudaMalloc(d_trace_buf));
+    /*cutilSafeCall(cudaMalloc((void **)&d_result_queue,*/
+                /*sizeof(int) * HISTORY_QUEUE_SIZE));*/
+
+}
+
+extern "C" void module_cuda_init(); 
+
+void module_cuda_init() {
+
+    cutilSafeCall(cudaMalloc((void **)&d_gtq, 
+                sizeof(struct global_timestamp_queue)));
+    cutilSafeCall(cudaMalloc((void **)&d_ghq, 
                 sizeof(struct global_history_queue)));
     cutilSafeCall(cudaMalloc((void **)&d_trace_buf, 
                 TRACE_BUF_SIZE * sizeof(struct trace_content)));
@@ -166,12 +173,64 @@ void module_detector_init_cuda() {
 
 }
 
-extern "C" void module_detector_update_cuda(uint8_t tid, 
-        uint32_t size, struct trace_content *buf);
+extern "C" void module_cuda_update(
+        struct global_history_queue *h_ghq 
+        struct global_timestamp_queue *h_gtq); 
 
-void module_detector_update_cuda(
-        struct global_history_queue *h_hq 
-        struct global_timestamp_queue *h_tq) {
+void module_cuda_update(
+        struct global_history_queue *h_ghq 
+        struct global_timestamp_queue *h_gtq) {
 
+    CUDA_SAFE_CALL(cudaMemcpy(d_ghq, h_ghq,
+                sizeof(struct global_history_queue),
+                cudaMemcpyHostToDevice))
+
+    CUDA_SAFE_CALL(cudaMemcpy(d_gtq, h_gtq,
+                sizeof(struct global_timestamp_queue),
+                cudaMemcpyHostToDevice))
 
 }
+
+#ifdef COMPILE_TO_BINARY
+int main(int argc, char** argv)  
+{
+    struct global_timestamp_queue *h_gtq;
+    struct global_history_queue *h_ghq;
+    struct trace_content *h_trace_buf;
+    int *h_result_queue;
+
+    h_gtq = (struct global_timestamp_queue *)malloc(
+            sizeof(struct global_timestamp_queue));
+    memset(h_gts_queue, 0, sizeof(struct global_timestamp_queue));
+    tool_global_timestamp_queue_init(h_gtq);
+
+    h_ghq = (struct history_entry *)malloc(
+            sizeof(struct global_history_queue));
+    memset(h_history_queue, 0, 
+            sizeof(struct global_history_queue));
+    tool_history_queue_init(h_ghq, sizeof(struct global_history_queue));
+
+    h_trace_buf = (struct trace_content *)malloc(
+            TRACE_BUF_SIZE * sizeof(struct trace_content));
+    memset(h_trace_buf, 0, TRACE_BUF_SIZE * sizeof(struct trace_content));
+    tool_trace_buf_init(h_trace_buf, TRACE_BUF_SIZE);
+
+    h_result_queue = (int *)malloc(sizeof(int) * TRACE_BUF_SIZE);
+    memset(h_result_queue, 0, sizeof(int) * TRACE_BUF_SIZE);
+
+    module_cuda_init();
+    module_cuda_update(h_ghq, h_gtq);
+    module_cuda_stage_three(0, TRACE_BUF_SIZE, h_trace_buf, h_result_queue);
+    module_cuda_free();
+
+    tool_result_queue_print(h_result_queue, TRACE_BUF_SIZE);
+
+    free(h_history_queue);
+    free(h_trace_buf);
+    free(h_result_queue);
+
+    cudaThreadExit();
+    //cutilExit(argc, argv);
+}
+#endif
+

@@ -7,11 +7,29 @@
 
 #include "structs.h"
 
-__global__ void stage_three_kernel(uint8_t tid, 
-        uint32_t size, struct trace_content *buf)
+#define NUM_THREADS 32
+
+__device__ struct global_history_queue *ghq;
+__device__ struct global_timestamp_queue * gtq;
+__device__ struct global_page_filter *pfilter;
+__constant__ int d_max_tid_num;
+
+__global__ void module_cuda_stage_three_kernel( 
+        uint32_t size,
+        struct global_timestamp_queue *d_gtq,
+        struct global_history_queue *d_ghq,
+        struct global_page_filter *d_pfilter,
+        struct trace_content *buf,
+        int *d_result_queue)
 {
-    const int i = threadIdx.x;
     struct trace_content content;
+    const int i = blockIdx.x * NUM_THREADS + threadIdx.x;
+    if (i >= size)
+        return;
+
+    ghq = d_ghq;
+    gtq = d_gtq;
+    pfilter = d_pfilter;
 
     /*for (i = 0; i < size; i++) {*/
     content = buf[i];
@@ -21,7 +39,7 @@ __global__ void stage_three_kernel(uint8_t tid,
     } else if (content->type == TRACE_MEM_STORE) {
         module_filter_store_match(content);
     } else {
-        fprintf(stderr, "unknown type : %d\n", content->type);
+        /*fprintf(stderr, "unknown type : %d\n", content->type);*/
         assert(0);
     }
     /*}*/
@@ -42,9 +60,9 @@ __device__ inline void module_filter_load_match(struct trace_content *content)
 
     index = (address >> FILTER_BASE_BIT) & FILTER_ENTRY_MASK;
 
-    for (i = 0; i < info.max_tid_num; i++) {
+    for (i = 0; i < d_max_tid_num; i++) {
         if (i != tid) {
-            if (pfilter->thread[i]->entry[index].store) {
+            if (pfilter->thread[i].entry[index].store) {
                 module_match_with_store(content, i);
             }
         }
@@ -63,13 +81,13 @@ __device__ inline void module_filter_store_match(struct trace_content *content)
 
     index = (address >> FILTER_BASE_BIT) & FILTER_ENTRY_MASK;
 
-    for (i = 0; i < info.max_tid_num; i++) {
+    for (i = 0; i < d_max_tid_num; i++) {
         if (i != tid) {
-            if (pfilter->thread[i]->entry[index].load) {
+            if (pfilter->thread[i].entry[index].load) {
                 module_match_with_load(content, i);
             }
 
-            if (pfilter->thread[i]->entry[index].store) {
+            if (pfilter->thread[i].entry[index].store) {
                 module_match_with_store(content, i);
             }
         }
@@ -92,7 +110,7 @@ static inline void module_match_with_load(struct trace_content *content, uint8_t
     address = content->address;
     index = content->index;
 
-    temp_queue = &(history.thread[other_tid].hash[(address >> HASH_BASE_BIT) % MAX_HASH_NUM]);
+    temp_queue = &(ghq->thread[other_tid].hash[(address >> HASH_BASE_BIT) % MAX_HASH_NUM]);
 
     tail = temp_queue->load_tail;
     head = tail + 1;
@@ -100,7 +118,7 @@ static inline void module_match_with_load(struct trace_content *content, uint8_t
         head = 0;
     }
 
-    last_index = ts.thread[other_tid].count;
+    last_index = gtq->thread[other_tid].count;
 
     while (tail != head) {
         if (tail == 0) {
@@ -143,7 +161,7 @@ static inline void module_match_with_store(struct trace_content *content, uint8_
     address = content->address;
     index = content->index;
 
-    temp_queue = &(history.thread[other_tid].hash[(address >> HASH_BASE_BIT) % MAX_HASH_NUM]);
+    temp_queue = &(ghq->thread[other_tid].hash[(address >> HASH_BASE_BIT) % MAX_HASH_NUM]);
 
     tail = temp_queue->store_tail;
     head = tail + 1;
@@ -151,7 +169,7 @@ static inline void module_match_with_store(struct trace_content *content, uint8_
         head = 0;
     }
 
-    last_index = ts.thread[other_tid].count;
+    last_index = gtq->thread[other_tid].count;
 
     while (tail != head) {
         if (tail == 0) {

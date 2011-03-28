@@ -72,6 +72,3 @@ struct global_page_filter {
     struct page_filter thread[MAX_PROCESS_NUM];
 };
 
-__device__ struct global_page_filter d_pfilter;
-
-
