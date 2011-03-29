@@ -21,8 +21,8 @@ __device__ inline int module_timestamp_order(
 {
     struct timestamp *ts1, *ts2;
 
-    ts1 = &gtq->thread[tid1].entry[index1];
-    ts2 = &gtq->thread[tid2].entry[index2];
+    ts1 = &d_gtq->thread[tid1].entry[index1];
+    ts2 = &d_gtq->thread[tid2].entry[index2];
 
     if ( ( (ts1->scalar[tid1] < ts2->scalar[tid1])
         && (ts1->scalar[tid2] < ts2->scalar[tid2]) ) || 
@@ -53,7 +53,7 @@ __device__ inline void module_match_with_load(
     address = content->address;
     index = content->index;
 
-    temp_queue = &(ghq->thread[other_tid].hash[(address >> HASH_BASE_BIT) % MAX_HASH_NUM]);
+    temp_queue = &(d_ghq->thread[other_tid].hash[(address >> HASH_BASE_BIT) % MAX_HASH_NUM]);
 
     tail = temp_queue->load_tail;
     head = tail + 1;
@@ -62,7 +62,6 @@ __device__ inline void module_match_with_load(
     }
 
     last_index = d_gtq->thread[other_tid].count;
-    result_queue[i] = 0;
 
     while (tail != head) {
         if (tail == 0) {
@@ -86,7 +85,7 @@ __device__ inline void module_match_with_load(
 
         if (address == other_address) {
             /*module_race_collection(&temp_entry->content, content);*/
-            result_queue[i] = 1;
+            d_result_queue[i] = 1;
             break;
         }
     }
@@ -111,7 +110,7 @@ __device__ inline void module_match_with_store(
     address = content->address;
     index = content->index;
 
-    temp_queue = &(ghq->thread[other_tid].hash[(address >> HASH_BASE_BIT) % MAX_HASH_NUM]);
+    temp_queue = &(d_ghq->thread[other_tid].hash[(address >> HASH_BASE_BIT) % MAX_HASH_NUM]);
 
     tail = temp_queue->store_tail;
     head = tail + 1;
@@ -120,8 +119,6 @@ __device__ inline void module_match_with_store(
     }
 
     last_index = d_gtq->thread[other_tid].count;
-
-    result_queue[i] = 0;
 
     while (tail != head) {
         if (tail == 0) {
@@ -145,7 +142,7 @@ __device__ inline void module_match_with_store(
 
         if (address == other_address) {
             /*module_race_collection(&temp_entry->content, content);*/
-            result_queue[i] = 1;
+            d_result_queue[i] = 1;
             break;
         } 
     }
@@ -173,8 +170,8 @@ __device__ inline void module_filter_load_match(
 
     for (i = 0; i < d_max_tid_num; i++) {
         if (i != tid) {
-            if (pfilter->thread[i].entry[index].store) {
-                module_match_with_store(content, i);
+            if (d_pfilter->thread[i].entry[index].store) {
+                module_match_with_store(d_gtq, d_ghq, content, i, d_result_queue);
             }
         }
     }
@@ -199,12 +196,12 @@ __device__ inline void module_filter_store_match(
 
     for (i = 0; i < d_max_tid_num; i++) {
         if (i != tid) {
-            if (pfilter->thread[i].entry[index].load) {
-                module_match_with_load(content, i);
+            if (d_pfilter->thread[i].entry[index].load) {
+                module_match_with_load(d_gtq, d_ghq, content, i, d_result_queue);
             }
 
-            if (pfilter->thread[i].entry[index].store) {
-                module_match_with_store(content, i);
+            if (d_pfilter->thread[i].entry[index].store) {
+                module_match_with_store(d_gtq, d_ghq, content, i, d_result_queue);
             }
         }
     }
@@ -223,25 +220,25 @@ __global__ void module_cuda_stage_three_kernel(
         int *d_result_queue)
 {
     struct trace_content *content;
-    const int i = blockIdx.x * NUM_THREADS + threadIdx.x;
+    int i = blockIdx.x * blockDim.x + threadIdx.x;
+    /*int i = threadIdx.x;*/
     if (i >= size)
         return;
 
     /*for (i = 0; i < size; i++) {*/
     content = &buf[i];
 
-    result_queue[i] = 0;
+    d_result_queue[i] = 0;
 
     if (content->type == TRACE_MEM_LOAD) {
         module_filter_load_match(d_gtq, d_ghq, d_pfilter, content,
                 d_result_queue);
     } else if (content->type == TRACE_MEM_STORE) {
-        module_filter_store_match_match(d_gtq, d_ghq, d_pfilter, content,
+        module_filter_store_match(d_gtq, d_ghq, d_pfilter, content,
                 d_result_queue);
     } else {
         /*fprintf(stderr, "unknown type : %d\n", content->type);*/
         /*assert(0);*/
     }
-    /*}*/
 }
 

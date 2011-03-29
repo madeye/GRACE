@@ -65,6 +65,13 @@ static void tool_global_page_filter_init(
                 module_filter_load_record(h_pfilter,
                         &h_ghq->thread[t].hash[h].load_entry[i].content);
             }
+    for (t = 0; t < 2; t++)
+        for (h = 0; h < MAX_HASH_NUM; h++)
+        {
+            printf("thread: %d, entry: %d, status: %d \n", 
+                    t, h, h_pfilter->thread[t].entry[h].load);
+        }
+    
 
 }
 
@@ -110,7 +117,7 @@ __host__ static void tool_global_history_queue_init(
             {
                 h_ghq->thread[t].hash[h].load_entry[i].content.address = (i % STRIDE) << 2;
                 h_ghq->thread[t].hash[h].load_entry[i].content.tid = 1;
-                h_ghq->thread[t].hash[h].load_entry[i].content.type = 2;
+                h_ghq->thread[t].hash[h].load_entry[i].content.type = 1;
                 h_ghq->thread[t].hash[h].load_entry[i].content.size = 4;
                 h_ghq->thread[t].hash[h].load_entry[i].content.index = (i / STRIDE);
                 h_ghq->thread[t].hash[h].load_entry[i].content.pc = 0xf;
@@ -137,7 +144,7 @@ __host__ static void tool_trace_buf_init(
     {
         trace_buf[i].address = (STRIDE >> 1) << 2;
         trace_buf[i].tid = 0;
-        trace_buf[i].type = 1;
+        trace_buf[i].type = 2;
         trace_buf[i].size = 4;
         trace_buf[i].index = 1;
         trace_buf[i].pc = 0x4;
@@ -174,10 +181,10 @@ struct global_page_filter *d_pfilter;
 int *d_result_queue;
 
 extern "C" void module_cuda_stage_three(int h_max_tid_num, 
-        uint32_t size, struct trace_content *buf, int *d_result_queue);
+        uint32_t size, struct trace_content *buf);
 
 void module_cuda_stage_three(int h_max_tid_num, 
-        uint32_t size, struct trace_content *buf, int *d_result_queue)
+        uint32_t size, struct trace_content *buf)
 {
     CUDA_SAFE_CALL(cudaMemcpy(d_trace_buf, buf,
                 size * sizeof(struct trace_content),
@@ -286,7 +293,7 @@ int main(int argc, char** argv)
 
     module_cuda_init();
     module_cuda_update(h_ghq, h_gtq, h_pfilter);
-    module_cuda_stage_three(1, TRACE_BUF_SIZE, h_trace_buf, h_result_queue);
+    module_cuda_stage_three(1, TRACE_BUF_SIZE, h_trace_buf);
 
     CUDA_SAFE_CALL(cudaThreadSynchronize());
     CUDA_SAFE_CALL(cudaMemcpy(h_result_queue, d_result_queue,
