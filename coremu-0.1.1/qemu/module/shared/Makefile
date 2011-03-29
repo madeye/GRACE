@@ -1,5 +1,6 @@
-#################################################################################
-# Copyright 1993-2006 NVIDIA Corporation.  All rights reserved.
+###############################################################################
+#
+# Copyright 1993-2010 NVIDIA Corporation.  All rights reserved.
 #
 # NOTICE TO USER:   
 #
@@ -26,26 +27,23 @@
 # 227.7202-4 (JUNE 1995), all U.S. Government End Users acquire the 
 # source code with only those rights set forth herein.
 #
-################################################################################
+###############################################################################
 #
-# Build script for project
+# CUda UTility library build script
 #
-################################################################################
+###############################################################################
 
-# Add source files here
-EXECUTABLE	:= match
-#STATIC_LIB	:= libmatch.a
-# Cuda source files (compiled with cudacc)
-CUFILES		:= main.cu
-# C/C++ source files (compiled with gcc / c++)
-CCFILES		:=
+###############################################################################
+# SOURCE VARS
+CCFILES := 	src/shrUtils.cpp \
+            src/rendercheckGL.cpp \
+            src/cmd_arg_reader.cpp
 
-#USECUDADYNLIB	:= 1
-#USEDRVAPI       := 1
+SRCDIR := src/
 
-#OMIT_CUTIL_LIB	:= 1 
+ROOTDIR := .
 
-################################################################################
-# Rules and targets
+STATIC_LIB := libshrutil.a
 
-include ../common/common.mk
+include common.mk
+

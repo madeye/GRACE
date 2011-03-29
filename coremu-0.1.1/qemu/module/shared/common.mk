@@ -1,6 +1,6 @@
 ################################################################################
 #
-# Copyright 1993-2010 NVIDIA Corporation.  All rights reserved.
+# Copyright 1993-2009 NVIDIA Corporation.  All rights reserved.
 #
 # NVIDIA Corporation and its licensors retain all intellectual property and 
 # proprietary rights in and to this software and related documentation. 
@@ -21,7 +21,7 @@
 .SUFFIXES : .cu .cu_dbg.o .c_dbg.o .cpp_dbg.o .cu_rel.o .c_rel.o .cpp_rel.o .cubin .ptx
 
 # Add new SM Versions here as devices with new Compute Capability are released
-SM_VERSIONS   := 10 11 12 13 20
+SM_VERSIONS   := sm_10 sm_11 sm_12 sm_13 sm_20
 
 CUDA_INSTALL_PATH ?= /usr/local/cuda
 
@@ -46,18 +46,19 @@ OSARCH= $(shell uname -m)
 # Basic directory setup for SDK
 # (override directories only if they are not already defined)
 SRCDIR     ?= 
-ROOTDIR    ?= .
-ROOTBINDIR ?= $(ROOTDIR)/
+ROOTDIR    ?= ..
+ROOTBINDIR ?= $(ROOTDIR)/../bin
 BINDIR     ?= $(ROOTBINDIR)/$(OSLOWER)
 ROOTOBJDIR ?= obj
-LIBDIR     := $(ROOTDIR)/../
-COMMONDIR  := $(ROOTDIR)/../common/
+#LIBDIR     := $(ROOTDIR)/../lib
+LIBDIR     := ./lib
+COMMONDIR  := $(ROOTDIR)/../C/common
 SHAREDDIR  := $(ROOTDIR)/../shared/
 
 # Compilers
 NVCC       := $(CUDA_INSTALL_PATH)/bin/nvcc 
-CXX        := g++ -fPIC
-CC         := gcc -fPIC
+CXX        := g++
+CC         := gcc
 LINK       := g++ -fPIC
 
 # Includes
@@ -98,6 +99,7 @@ ifeq ($(x86_64),1)
     NVCCFLAGS       += -m64
     LIB_ARCH         = x86_64
     CUDPPLIB_SUFFIX  = x86_64
+
     ifneq ($(DARWIN),)
          CXX_ARCH_FLAGS += -arch x86_64
     else
@@ -109,6 +111,7 @@ else
         NVCCFLAGS       += -m32
         LIB_ARCH         = i386
         CUDPPLIB_SUFFIX  = i386
+
         ifneq ($(DARWIN),)
              CXX_ARCH_FLAGS += -arch i386
         else
@@ -116,35 +119,31 @@ else
         endif
     else 
         ifeq "$(strip $(HP_64))" ""
-            LIB_ARCH        = i386
-            CUDPPLIB_SUFFIX = i386
-            NVCCFLAGS      += -m32
-            ifneq ($(DARWIN),)
-               CXX_ARCH_FLAGS += -arch i386
-            else
-               CXX_ARCH_FLAGS += -m32
-            endif
+             NVCCFLAGS      += -m32
+             LIB_ARCH        = i386
+             CUDPPLIB_SUFFIX = i386
+             ifneq ($(DARWIN),)
+                CXX_ARCH_FLAGS += -arch i386
+             else
+                CXX_ARCH_FLAGS += -m32
+             endif
         else
-            LIB_ARCH        = x86_64
-            CUDPPLIB_SUFFIX = x86_64
-            NVCCFLAGS      += -m64
-            ifneq ($(DARWIN),)
-               CXX_ARCH_FLAGS += -arch x86_64
-            else
-               CXX_ARCH_FLAGS += -m64
-            endif
+             NVCCFLAGS      += -m64
+             LIB_ARCH        = x86_64
+             CUDPPLIB_SUFFIX = x86_64
+             ifneq ($(DARWIN),)
+                CXX_ARCH_FLAGS += -arch x86_64
+             else
+                CXX_ARCH_FLAGS += -m64
+             endif
         endif
     endif
 endif
 
-# Compiler-specific flags (by default, we always use sm_10 and sm_20), unless we use the SMVERSION template
-GENCODE_SM10 := -gencode=arch=compute_10,code=\"sm_10,compute_10\"
-GENCODE_SM20 := -gencode=arch=compute_20,code=\"sm_20,compute_20\"
-
-CXXFLAGS  += $(CXXWARN_FLAGS) $(CXX_ARCH_FLAGS)
-CFLAGS    += $(CWARN_FLAGS) $(CXX_ARCH_FLAGS)
-LINKFLAGS +=
-LINK      += $(LINKFLAGS) $(CXX_ARCH_FLAGS)
+# Compiler-specific flags
+CXXFLAGS  := $(CXXWARN_FLAGS) $(CXX_ARCH_FLAGS)
+CFLAGS    := $(CWARN_FLAGS) $(CXX_ARCH_FLAGS)
+LINK      += $(CXX_ARCH_FLAGS)
 
 # This option for Mac allows CUDA applications to work without requiring to set DYLD_LIBRARY_PATH
 ifneq ($(DARWIN),)
@@ -237,7 +236,7 @@ ifeq ($(USERENDERCHECKGL),1)
 endif
 
 ifeq ($(USECUDPP), 1)
-    CUDPPLIB := -lcudpp_$(CUDPPLIB_SUFFIX)
+    CUDPPLIB := -lcudpp_$(CUDPPLIB_SUFFIX)$(LIBSUFFIX)
 
     ifeq ($(emu), 1)
         CUDPPLIB := $(CUDPPLIB)_emu
@@ -302,16 +301,6 @@ ifeq ($(USECUBLAS),1)
   endif
 endif
 
-ifeq ($(USECURAND),1)
-    LIB += -lcurand
-endif
-
-ifeq ($(USECUSPARSE),1)
-  LIB += -lcusparse
-endif
-
-# Lib/exe configuration
-# Lib/exe configuration
 # Lib/exe configuration
 ifneq ($(STATIC_LIB),)
 	TARGETDIR := $(LIBDIR)
@@ -319,7 +308,7 @@ ifneq ($(STATIC_LIB),)
 	LINKLINE  = ar rucv $(TARGET) $(OBJS)
 else
 	ifneq ($(OMIT_CUTIL_LIB),1)
-	LIB += -lcutil_$(LIB_ARCH)$(LIBSUFFIX) -lshrutil_$(LIB_ARCH)$(LIBSUFFIX)
+		LIB += -lcutil_$(LIB_ARCH)$(LIBSUFFIX) -lshrutil$(LIBSUFFIX)
 	endif
 	# Device emulation configuration
 	ifeq ($(emu), 1)
@@ -356,10 +345,6 @@ endif
 
 ifdef maxregisters
 	NVCCFLAGS += -maxrregcount $(maxregisters)
-endif
-
-ifeq ($(ptxas), 1)
-        NVCCFLAGS += --ptxas-options=-v
 endif
 
 # Add cudacc flags
@@ -404,13 +389,11 @@ $(OBJDIR)/%.c.o : $(SRCDIR)%.c $(C_DEPS)
 $(OBJDIR)/%.cpp.o : $(SRCDIR)%.cpp $(C_DEPS)
 	$(VERBOSE)$(CXX) $(CXXFLAGS) -o $@ -c $<
 
-# Default arch includes gencode for sm_10, sm_20, and other archs from GENCODE_ARCH declared in the makefile
 $(OBJDIR)/%.cu.o : $(SRCDIR)%.cu $(CU_DEPS)
-	$(VERBOSE)$(NVCC) $(GENCODE_SM10) $(GENCODE_ARCH) $(GENCODE_SM20) $(NVCCFLAGS) $(SMVERSIONFLAGS) -o $@ -c $<
+	$(VERBOSE)$(NVCC) $(NVCCFLAGS) $(SMVERSIONFLAGS) $(GENCODE_ARCH) -o $@ -c $<
 
-# Default arch includes gencode for sm_10, sm_20, and other archs from GENCODE_ARCH declared in the makefile
 $(CUBINDIR)/%.cubin : $(SRCDIR)%.cu cubindirectory
-	$(VERBOSE)$(NVCC) $(GENCODE_SM10) $(GENCODE_ARCH) $(GENCODE_SM20) $(CUBIN_ARCH_FLAG) $(NVCCFLAGS) $(SMVERSIONFLAGS) -o $@ -cubin $<
+	$(VERBOSE)$(NVCC) $(CUBIN_ARCH_FLAG) $(NVCCFLAGS) $(SMVERSIONFLAGS) -o $@ -cubin $<
 
 $(PTXDIR)/%.ptx : $(SRCDIR)%.cu ptxdirectory
 	$(VERBOSE)$(NVCC) $(CUBIN_ARCH_FLAG) $(NVCCFLAGS) $(SMVERSIONFLAGS) -o $@ -ptx $<
@@ -425,17 +408,14 @@ $(PTXDIR)/%.ptx : $(SRCDIR)%.cu ptxdirectory
 # The intended use for this is to allow Makefiles that use common.mk to compile
 # files to different Compute Capability targets (aka SM arch version).  To do
 # so, in the Makefile, list files for each SM arch separately, like so:
-# This will be used over the default rule abov
 #
 # CUFILES_sm_10 := mycudakernel_sm10.cu app.cu
 # CUFILES_sm_12 := anothercudakernel_sm12.cu
 #
 define SMVERSION_template
-#OBJS += $(patsubst %.cu,$(OBJDIR)/%.cu_$(1).o,$(notdir $(CUFILES_$(1))))
-OBJS += $(patsubst %.cu,$(OBJDIR)/%.cu_$(1).o,$(notdir $(CUFILES_sm_$(1))))
+OBJS += $(patsubst %.cu,$(OBJDIR)/%.cu_$(1).o,$(notdir $(CUFILES_$(1))))
 $(OBJDIR)/%.cu_$(1).o : $(SRCDIR)%.cu $(CU_DEPS)
-#	$(VERBOSE)$(NVCC) -o $$@ -c $$< $(NVCCFLAGS)  $(1)
-	$(VERBOSE)$(NVCC) -gencode=arch=compute_$(1),code=\"sm_$(1),compute_$(1)\" $(GENCODE_SM20) -o $$@ -c $$< $(NVCCFLAGS)
+	$(VERBOSE)$(NVCC) -o $$@ -c $$< $(NVCCFLAGS) -arch $(1)
 endef
 
 # This line invokes the above template for each arch version stored in
@@ -463,10 +443,7 @@ tidy :
 	$(VERBOSE)find . | egrep "\~" | xargs rm -f
 
 clean : tidy
-	$(VERBOSE)rm -f *.stub.c *.gpu *.cu.cpp *.i *.ii
-	$(VERBOSE)rm -f *.cubin *.ptx *.fatbin.c *.hash
-	$(VERBOSE)rm -f *.cudafe1.c *.cudafe2.c *.cudafe1.cpp *.cudafe2.cpp
-	$(VERBOSE)rm -f $(OBJS) 
+	$(VERBOSE)rm -f $(OBJS)
 	$(VERBOSE)rm -f $(CUBINS)
 	$(VERBOSE)rm -f $(PTXBINS)
 	$(VERBOSE)rm -f $(TARGET)
