@@ -171,6 +171,7 @@ struct trace_content *d_trace_buf;
 struct global_timestamp_queue *d_gtq;  
 struct global_history_queue *d_ghq;
 struct global_page_filter *d_pfilter;
+int *d_result_queue;
 
 extern "C" void module_cuda_stage_three(int h_max_tid_num, 
         uint32_t size, struct trace_content *buf, int *d_result_queue);
@@ -199,8 +200,7 @@ void module_cuda_free() {
     CUDA_SAFE_CALL(cudaFree(d_ghq));
     CUDA_SAFE_CALL(cudaFree(d_trace_buf));
     CUDA_SAFE_CALL(cudaFree(d_pfilter));
-    /*CUDA_SAFE_CALL(cudaMalloc((void **)&d_result_queue,*/
-                /*sizeof(int) * HISTORY_QUEUE_SIZE));*/
+    CUDA_SAFE_CALL(cudaFree(d_result_queue));
 
 }
 
@@ -216,8 +216,8 @@ void module_cuda_init() {
                 TRACE_BUF_SIZE * sizeof(struct trace_content)));
     CUDA_SAFE_CALL(cudaMalloc((void **)&d_pfilter, 
                 sizeof(struct global_page_filter)));
-    /*CUDA_SAFE_CALL(cudaMalloc((void **)&d_result_queue,*/
-                /*sizeof(int) * HISTORY_QUEUE_SIZE));*/
+    CUDA_SAFE_CALL(cudaMalloc((void **)&d_result_queue,
+                sizeof(int) * TRACE_BUF_SIZE));
 
     cudaSetDevice(cutGetMaxGflopsDeviceId());
 
@@ -286,7 +286,13 @@ int main(int argc, char** argv)
 
     module_cuda_init();
     module_cuda_update(h_ghq, h_gtq, h_pfilter);
-    module_cuda_stage_three(0, TRACE_BUF_SIZE, h_trace_buf, h_result_queue);
+    module_cuda_stage_three(1, TRACE_BUF_SIZE, h_trace_buf, h_result_queue);
+
+    CUDA_SAFE_CALL(cudaThreadSynchronize());
+    CUDA_SAFE_CALL(cudaMemcpy(h_result_queue, d_result_queue,
+                sizeof(int) * TRACE_BUF_SIZE,
+                cudaMemcpyDeviceToHost));
+
     module_cuda_free();
 
     tool_result_queue_print(h_result_queue, TRACE_BUF_SIZE);

@@ -9,16 +9,14 @@
 
 #define NUM_THREADS 32
 
-__device__ struct global_history_queue *ghq;
-__device__ struct global_timestamp_queue * gtq;
-__device__ struct global_page_filter *pfilter;
 __constant__ int d_max_tid_num;
-
 
 ///////////////////////////////////////////////
 // Match Stage Device Functions 
 
-__device__ inline int module_timestamp_order(uint8_t tid1, uint32_t index1, 
+__device__ inline int module_timestamp_order(
+        struct global_timestamp_queue *d_gtq,
+        uint8_t tid1, uint32_t index1, 
         uint8_t tid2, uint32_t index2) 
 {
     struct timestamp *ts1, *ts2;
@@ -36,7 +34,12 @@ __device__ inline int module_timestamp_order(uint8_t tid1, uint32_t index1,
     return 0;
 }
 
-__device__ inline void module_match_with_load(struct trace_content *content, uint8_t other_tid) 
+__device__ inline void module_match_with_load(
+        struct global_timestamp_queue *d_gtq,
+        struct global_history_queue *d_ghq,
+        struct trace_content *content,
+        uint8_t other_tid, 
+        int *d_result_queue)
 {
     uint8_t tid;
     uint64_t address, other_address;
@@ -44,6 +47,7 @@ __device__ inline void module_match_with_load(struct trace_content *content, uin
     struct history_queue *temp_queue;
     uint32_t head, tail;
     struct history_entry *temp_entry;
+    const int i = blockIdx.x * NUM_THREADS + threadIdx.x;
 
     tid = content->tid;
     address = content->address;
@@ -57,7 +61,8 @@ __device__ inline void module_match_with_load(struct trace_content *content, uin
         head = 0;
     }
 
-    last_index = gtq->thread[other_tid].count;
+    last_index = d_gtq->thread[other_tid].count;
+    result_queue[i] = 0;
 
     while (tail != head) {
         if (tail == 0) {
@@ -70,7 +75,7 @@ __device__ inline void module_match_with_load(struct trace_content *content, uin
         other_index = temp_entry->content.index;
 
         if (last_index != other_index) {
-            if (module_timestamp_order(other_tid, other_index, tid, index)) {
+            if (module_timestamp_order(d_gtq, other_tid, other_index, tid, index)) {
                 break;
             }
 
@@ -81,13 +86,18 @@ __device__ inline void module_match_with_load(struct trace_content *content, uin
 
         if (address == other_address) {
             /*module_race_collection(&temp_entry->content, content);*/
-
+            result_queue[i] = 1;
             break;
         }
     }
 }
 
-__device__ inline void module_match_with_store(struct trace_content *content, uint8_t other_tid) 
+__device__ inline void module_match_with_store(
+        struct global_timestamp_queue *d_gtq,
+        struct global_history_queue *d_ghq,
+        struct trace_content *content,
+        uint8_t other_tid, 
+        int *d_result_queue)
 {
     uint8_t tid;
     uint64_t address, other_address;
@@ -95,6 +105,7 @@ __device__ inline void module_match_with_store(struct trace_content *content, ui
     struct history_queue *temp_queue;
     uint32_t head, tail;
     struct history_entry *temp_entry;
+    const int i = blockIdx.x * NUM_THREADS + threadIdx.x;
 
     tid = content->tid;
     address = content->address;
@@ -108,7 +119,9 @@ __device__ inline void module_match_with_store(struct trace_content *content, ui
         head = 0;
     }
 
-    last_index = gtq->thread[other_tid].count;
+    last_index = d_gtq->thread[other_tid].count;
+
+    result_queue[i] = 0;
 
     while (tail != head) {
         if (tail == 0) {
@@ -121,7 +134,7 @@ __device__ inline void module_match_with_store(struct trace_content *content, ui
         other_index = temp_entry->content.index;  
 
         if (last_index != other_index) {
-            if (module_timestamp_order(other_tid, other_index, tid, index)) {   
+            if (module_timestamp_order(d_gtq, other_tid, other_index, tid, index)) {   
                 break;
             }
 
@@ -132,7 +145,7 @@ __device__ inline void module_match_with_store(struct trace_content *content, ui
 
         if (address == other_address) {
             /*module_race_collection(&temp_entry->content, content);*/
-
+            result_queue[i] = 1;
             break;
         } 
     }
@@ -141,7 +154,12 @@ __device__ inline void module_match_with_store(struct trace_content *content, ui
 ///////////////////////////////////////////////
 // Filter Stage Device Functions 
 
-__device__ inline void module_filter_load_match(struct trace_content *content) 
+__device__ inline void module_filter_load_match(
+        struct global_timestamp_queue *d_gtq,
+        struct global_history_queue *d_ghq,
+        struct global_page_filter *d_pfilter,
+        struct trace_content *content, 
+        int *d_result_queue)
 {
     uint8_t i;
     uint8_t tid;
@@ -162,7 +180,12 @@ __device__ inline void module_filter_load_match(struct trace_content *content)
     }
 }
 
-__device__ inline void module_filter_store_match(struct trace_content *content) 
+__device__ inline void module_filter_store_match(
+        struct global_timestamp_queue *d_gtq,
+        struct global_history_queue *d_ghq,
+        struct global_page_filter *d_pfilter,
+        struct trace_content *content, 
+        int *d_result_queue)
 {
     uint8_t i;
     uint8_t tid;
@@ -204,17 +227,17 @@ __global__ void module_cuda_stage_three_kernel(
     if (i >= size)
         return;
 
-    ghq = d_ghq;
-    gtq = d_gtq;
-    pfilter = d_pfilter;
-
     /*for (i = 0; i < size; i++) {*/
     content = &buf[i];
 
+    result_queue[i] = 0;
+
     if (content->type == TRACE_MEM_LOAD) {
-        module_filter_load_match(content);
+        module_filter_load_match(d_gtq, d_ghq, d_pfilter, content,
+                d_result_queue);
     } else if (content->type == TRACE_MEM_STORE) {
-        module_filter_store_match(content);
+        module_filter_store_match_match(d_gtq, d_ghq, d_pfilter, content,
+                d_result_queue);
     } else {
         /*fprintf(stderr, "unknown type : %d\n", content->type);*/
         /*assert(0);*/

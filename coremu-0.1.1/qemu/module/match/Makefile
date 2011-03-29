@@ -38,7 +38,7 @@ EXECUTABLE	:= match
 # Cuda source files (compiled with cudacc)
 CUFILES		:= main.cu
 # C/C++ source files (compiled with gcc / c++)
-CCFILES		:=
+CCFILES		:= 
 
 #USECUDADYNLIB	:= 1
 #USEDRVAPI       := 1
