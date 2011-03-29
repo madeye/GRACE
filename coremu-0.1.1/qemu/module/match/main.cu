@@ -182,7 +182,7 @@ void module_cuda_stage_three(int h_max_tid_num,
                 size * sizeof(struct trace_content),
                 cudaMemcpyHostToDevice));
 
-    CUDA_SAFE_CALL(cudaMemcpyToSymbol(&d_max_tid_num, &h_max_tid_num, 
+    CUDA_SAFE_CALL(cudaMemcpyToSymbol(d_max_tid_num, &h_max_tid_num, 
                 sizeof(int)));
 
     module_cuda_stage_three_kernel
@@ -238,15 +238,15 @@ void module_cuda_update(
 
     CUDA_SAFE_CALL(cudaMemcpy(d_ghq, h_ghq,
                 sizeof(struct global_history_queue),
-                cudaMemcpyHostToDevice))
+                cudaMemcpyHostToDevice));
 
     CUDA_SAFE_CALL(cudaMemcpy(d_gtq, h_gtq,
                 sizeof(struct global_timestamp_queue),
-                cudaMemcpyHostToDevice))
+                cudaMemcpyHostToDevice));
 
     CUDA_SAFE_CALL(cudaMemcpy(d_pfilter, h_pfilter,
-                sizeof(struct global_timestamp_queue),
-                cudaMemcpyHostToDevice))
+                sizeof(struct global_page_filter),
+                cudaMemcpyHostToDevice));
 
 }
 
@@ -268,13 +268,13 @@ int main(int argc, char** argv)
             sizeof(struct global_history_queue));
     memset(h_ghq, 0, 
             sizeof(struct global_history_queue));
-    tool_global_history_queue_init(h_ghq, sizeof(struct global_history_queue));
+    tool_global_history_queue_init(h_ghq, MAX_LOAD_QUEUE_SIZE);
 
     h_pfilter = (struct global_page_filter *)malloc(
             sizeof(struct global_page_filter));
     memset(h_pfilter, 0, 
             sizeof(struct global_page_filter));
-    tool_global_page_filter_init(h_pfilter, h_ghq, sizeof(struct global_page_filter));
+    tool_global_page_filter_init(h_pfilter, h_ghq, MAX_LOAD_QUEUE_SIZE);
 
     h_trace_buf = (struct trace_content *)malloc(
             TRACE_BUF_SIZE * sizeof(struct trace_content));
