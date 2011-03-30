@@ -50,7 +50,7 @@ ROOTDIR    ?= .
 ROOTBINDIR ?= $(ROOTDIR)/
 BINDIR     ?= $(ROOTBINDIR)/$(OSLOWER)
 ROOTOBJDIR ?= obj
-LIBDIR     := $(ROOTDIR)/../
+LIBDIR     := $(ROOTDIR)/../lib/
 COMMONDIR  := $(ROOTDIR)/../common/
 SHAREDDIR  := $(ROOTDIR)/../shared/
 

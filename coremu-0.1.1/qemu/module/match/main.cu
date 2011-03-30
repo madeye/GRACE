@@ -58,16 +58,17 @@ static void tool_global_page_filter_init(
 {
     int t, h, i;
 
-    for (t = 0; t < 2; t++)
-        for (h = 0; h < MAX_HASH_NUM; h++)
-            for (i = 0; i < size; i++)
-            {
-                module_filter_load_record(h_pfilter,
-                        &h_ghq->thread[t].hash[h].load_entry[i].content);
-            }
+    /*for (t = 0; t < 2; t++)*/
+        /*for (h = 0; h < MAX_HASH_NUM; h++)*/
+            /*for (i = 0; i < size; i++)*/
+            /*{*/
+                /*module_filter_load_record(h_pfilter,*/
+                        /*&h_ghq->thread[t].hash[h].load_entry[i].content);*/
+            /*}*/
     for (t = 0; t < 2; t++)
         for (h = 0; h < MAX_HASH_NUM; h++)
         {
+            h_pfilter->thread[t].entry[h].load = 1;
             printf("thread: %d, entry: %d, status: %d \n", 
                     t, h, h_pfilter->thread[t].entry[h].load);
         }
@@ -293,7 +294,7 @@ int main(int argc, char** argv)
 
     module_cuda_init();
     module_cuda_update(h_ghq, h_gtq, h_pfilter);
-    module_cuda_stage_three(1, TRACE_BUF_SIZE, h_trace_buf);
+    module_cuda_stage_three(2, TRACE_BUF_SIZE, h_trace_buf);
 
     CUDA_SAFE_CALL(cudaThreadSynchronize());
     CUDA_SAFE_CALL(cudaMemcpy(h_result_queue, d_result_queue,

@@ -83,11 +83,11 @@ __device__ inline void module_match_with_load(
 
         other_address = temp_entry->content.address;
 
-        if (address == other_address) {
+        /*if (address == other_address) {*/
             /*module_race_collection(&temp_entry->content, content);*/
             d_result_queue[i] = 1;
             break;
-        }
+        /*}*/
     }
 }
 
@@ -140,11 +140,11 @@ __device__ inline void module_match_with_store(
 
         other_address = temp_entry->content.address;
 
-        if (address == other_address) {
+        /*if (address == other_address) {*/
             /*module_race_collection(&temp_entry->content, content);*/
             d_result_queue[i] = 1;
             break;
-        } 
+        /*} */
     }
 }
 
