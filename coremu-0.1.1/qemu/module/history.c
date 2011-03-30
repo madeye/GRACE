@@ -26,7 +26,7 @@ struct global_history_queue {
     struct history_hash_queue thread[MAX_PROCESS_NUM];
 };
 
-struct global_history_queue history;
+volatile struct global_history_queue history;
 
 /*static inline void module_history_init()*/
 /*{*/

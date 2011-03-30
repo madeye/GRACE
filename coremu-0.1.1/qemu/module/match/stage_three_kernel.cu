@@ -12,6 +12,73 @@
 __constant__ int d_max_tid_num;
 
 ///////////////////////////////////////////////
+// History Stage Device Functions 
+
+__device__ inline void module_history_load_record(struct trace_content *content) 
+{
+    uint8_t tid;
+    uint64_t address;
+    struct history_queue *temp_queue;
+    uint32_t tail;
+    struct history_entry *temp_entry;
+
+    tid = content->tid;
+    address = content->address;
+
+    temp_queue = &(history.thread[tid].hash[(address >> HASH_BASE_BIT) % MAX_HASH_NUM]);
+
+    tail = temp_queue->load_tail;	
+    temp_entry = &temp_queue->load_entry[tail];
+
+    // memcpy(&temp_entry->content, content, sizeof(struct trace_content));
+    temp_entry->content.tid = content->tid;
+    temp_entry->content.type = content->type;
+    temp_entry->content.size = content->size;
+    temp_entry->content.address = content->address;
+    temp_entry->content.index = content->index;
+    temp_entry->content.pc = content->pc;
+
+    //tail++;
+    //if (tail >= MAX_LOAD_QUEUE_SIZE) {
+    //    tail = 0;
+    //}
+    //temp_queue->load_tail = tail;
+    temp_queue->load_tail = (tail + 1) % MAX_LOAD_QUEUE_SIZE;
+}
+
+__device__ inline void module_history_store_record(struct trace_content *content) 
+{
+    uint8_t tid;
+    uint64_t address;
+    struct history_queue *temp_queue;
+    uint32_t tail;
+    struct history_entry *temp_entry;
+
+    tid = content->tid;
+    address = content->address;
+
+    temp_queue = &(d_ghq->thread[tid].hash[(address >> HASH_BASE_BIT) % MAX_HASH_NUM]);
+
+    tail = temp_queue->store_tail;
+    temp_entry = &temp_queue->store_entry[tail];
+
+    // memcpy(&temp_entry->content, content, sizeof(struct trace_content));
+    temp_entry->content.tid = content->tid;
+    temp_entry->content.type = content->type;
+    temp_entry->content.size = content->size;
+    temp_entry->content.address = content->address;
+    temp_entry->content.index = content->index;
+    temp_entry->content.pc = content->pc;
+
+    //tail++;
+    //if (tail >= MAX_STORE_QUEUE_SIZE) {
+    //    tail = 0;
+    //}
+    //temp_queue->store_tail = tail;
+    temp_queue->store_tail = (tail + 1) % MAX_STORE_QUEUE_SIZE;
+}
+
+///////////////////////////////////////////////
 // Match Stage Device Functions 
 
 __device__ inline int module_timestamp_order(
@@ -83,11 +150,11 @@ __device__ inline void module_match_with_load(
 
         other_address = temp_entry->content.address;
 
-        /*if (address == other_address) {*/
+        if (address == other_address) {
             /*module_race_collection(&temp_entry->content, content);*/
             d_result_queue[i] = 1;
             break;
-        /*}*/
+        }
     }
 }
 
@@ -140,11 +207,11 @@ __device__ inline void module_match_with_store(
 
         other_address = temp_entry->content.address;
 
-        /*if (address == other_address) {*/
+        if (address == other_address) {
             /*module_race_collection(&temp_entry->content, content);*/
             d_result_queue[i] = 1;
             break;
-        /*} */
+        } 
     }
 }
 

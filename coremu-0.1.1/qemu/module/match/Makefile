@@ -33,8 +33,8 @@
 ################################################################################
 
 # Add source files here
-EXECUTABLE	:= match
-#STATIC_LIB	:= libmatch.a
+#EXECUTABLE	:= match
+STATIC_LIB	:= libmatch.a
 # Cuda source files (compiled with cudacc)
 CUFILES		:= main.cu 
 # C/C++ source files (compiled with gcc / c++)

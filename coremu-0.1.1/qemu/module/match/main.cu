@@ -17,7 +17,7 @@
 ///////////////////////////////////////////////
 // Test Functions 
 
-#define COMPILE_TO_BINARY
+/*#define COMPILE_TO_BINARY*/
 #ifdef COMPILE_TO_BINARY
 
 static void module_filter_store_record(
@@ -216,6 +216,8 @@ extern "C" void module_cuda_init();
 
 void module_cuda_init() {
 
+    /*cudaSetDevice(cutGetMaxGflopsDeviceId());*/
+
     CUDA_SAFE_CALL(cudaMalloc((void **)&d_gtq, 
                 sizeof(struct global_timestamp_queue)));
     CUDA_SAFE_CALL(cudaMalloc((void **)&d_ghq, 
@@ -226,8 +228,6 @@ void module_cuda_init() {
                 sizeof(struct global_page_filter)));
     CUDA_SAFE_CALL(cudaMalloc((void **)&d_result_queue,
                 sizeof(int) * TRACE_BUF_SIZE));
-
-    cudaSetDevice(cutGetMaxGflopsDeviceId());
 
     printf("\nglobal timestamp queue size : 0x%lx\n", 
             sizeof(struct global_timestamp_queue));

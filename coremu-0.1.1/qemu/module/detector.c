@@ -3,10 +3,6 @@
 #include <string.h>
 #include <assert.h>
 
-#define PPI_THREE_STAGE
-/*#define CUDA*/
-
-#ifdef PPI_THREE_STAGE
 #include <unistd.h>
 #include <pthread.h>
 #include <sys/syscall.h>
@@ -15,6 +11,21 @@
 /*pthread_cond_t  stage2_cond = PTHREAD_COND_INITIALIZER;*/
 pthread_mutex_t det_lock = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t  det_cond = PTHREAD_COND_INITIALIZER;
+volatile uint8_t stage_three_stop = 0;
+
+#ifdef CUDA
+extern struct trace_content *d_trace_buf;
+extern struct global_timestamp_queue *d_gtq;  
+extern struct global_history_queue *d_ghq;
+extern struct global_page_filter *d_pfilter;
+extern int *d_result_queue;
+#endif
+
+
+#define PPI_THREE_STAGE
+#define CUDA
+
+#ifdef PPI_THREE_STAGE
 extern volatile uint8_t is_detect_start;
 
 static inline void ppi_set_cpu_thread(int cpu_no)
@@ -214,7 +225,15 @@ void *module_pthread_stage_three(void *args)
 
     j = 0;
 
+#ifdef CUDA
+    printf("CUDA Init.\n");
+    module_cuda_init();
+#endif
+
     while(1) {
+
+        if (stage_three_stop) 
+            break;
 
         pthread_mutex_lock(&det_lock);
         if (!is_detect_start)
@@ -239,7 +258,8 @@ void *module_pthread_stage_three(void *args)
 
                 info.exist[tid] = 1;
             }
-            module_detector_stage_three_cuda(tid, size, temp_chunk->buf);		
+            module_cuda_update(&history, &ts, &pfilter);
+            module_cuda_stage_three(info.max_tid_num, size, temp_chunk->buf);		
 #endif
 
             temp_chunk->info->thread_id = 0;
@@ -250,6 +270,9 @@ void *module_pthread_stage_three(void *args)
             j = (j + 1) % MAX_CHUNK_NUM;
         }
     }    
+#ifdef CUDA
+    module_cuda_free();
+#endif
 }
 
 pthread_t pid[MAX_CORE_NUM];
@@ -291,6 +314,7 @@ static inline void module_detector_start(uint8_t tid,
         info.exist[tid] = 1;
     }
 
+#ifndef CUDA
     for (i = 0; i < size; i++) {
         content = &buf[i];
 
@@ -309,6 +333,26 @@ static inline void module_detector_start(uint8_t tid,
             assert(0);
         }
     }
+#else
+    for (i = 0; i < size; i++) {
+        content = &buf[i];
+
+        // content->tid = tid;
+
+        if (content->type == TRACE_MEM_LOAD) {
+            module_history_load_record(content);
+            module_filter_load_record(content);
+        } else if (content->type == TRACE_MEM_STORE) {
+            module_history_store_record(content);
+            module_filter_store_record(content);
+        } else {
+            fprintf(stderr, "unknown type : %d\n", content->type);
+            assert(0);
+        }
+    }
+    /*module_cuda_update(&history, &ts, &pfilter);*/
+    /*module_cuda_stage_three(info.max_tid_num, size, buf);		*/
+#endif
 }
 #endif
 
@@ -320,7 +364,6 @@ void data_race_detector_init()
     module_info_init();
     /*module_filter_init();*/
     /*module_history_init();*/
-    module_cuda_init_interface();
 #ifdef PPI_THREE_STAGE
     module_shared_buf_init(); 
     data_race_detector_stage();
@@ -366,6 +409,7 @@ void data_race_detector_report()
 #ifdef PPI_THREE_STAGE
     module_shared_buf_all_empty();
 #endif
+    stage_three_stop = 1;
     module_race_print();
 }
 

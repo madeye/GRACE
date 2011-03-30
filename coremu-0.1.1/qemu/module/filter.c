@@ -17,7 +17,7 @@ struct global_page_filter {
     struct page_filter thread[MAX_PROCESS_NUM];
 };
 
-struct global_page_filter pfilter;
+volatile struct global_page_filter pfilter;
 
 /*static inline void module_filter_init()*/
 /*{*/
