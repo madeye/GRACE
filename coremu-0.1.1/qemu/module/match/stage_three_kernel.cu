@@ -7,89 +7,89 @@
 
 #include "structs.h"
 
-#define NUM_THREADS 32
+#define NUM_THREADS 128
 
 __constant__ int d_max_tid_num;
 
 ///////////////////////////////////////////////
 // History Stage Device Functions 
 
-__device__ inline void module_history_load_record(struct trace_content *content) 
-{
-    uint8_t tid;
-    uint64_t address;
-    struct history_queue *temp_queue;
-    uint32_t tail;
-    struct history_entry *temp_entry;
+/*__device__ inline void module_history_load_record(struct trace_content *content) */
+/*{*/
+    /*uint8_t tid;*/
+    /*uint64_t address;*/
+    /*struct history_queue *temp_queue;*/
+    /*uint32_t tail;*/
+    /*struct history_entry *temp_entry;*/
 
-    tid = content->tid;
-    address = content->address;
+    /*tid = content->tid;*/
+    /*address = content->address;*/
 
-    temp_queue = &(history.thread[tid].hash[(address >> HASH_BASE_BIT) % MAX_HASH_NUM]);
+    /*temp_queue = &(history.thread[tid].hash[(address >> HASH_BASE_BIT) % MAX_HASH_NUM]);*/
 
-    tail = temp_queue->load_tail;	
-    temp_entry = &temp_queue->load_entry[tail];
+    /*tail = temp_queue->load_tail;	*/
+    /*temp_entry = &temp_queue->load_entry[tail];*/
 
-    // memcpy(&temp_entry->content, content, sizeof(struct trace_content));
-    temp_entry->content.tid = content->tid;
-    temp_entry->content.type = content->type;
-    temp_entry->content.size = content->size;
-    temp_entry->content.address = content->address;
-    temp_entry->content.index = content->index;
-    temp_entry->content.pc = content->pc;
+    /*// memcpy(&temp_entry->content, content, sizeof(struct trace_content));*/
+    /*temp_entry->content.tid = content->tid;*/
+    /*temp_entry->content.type = content->type;*/
+    /*temp_entry->content.size = content->size;*/
+    /*temp_entry->content.address = content->address;*/
+    /*temp_entry->content.index = content->index;*/
+    /*temp_entry->content.pc = content->pc;*/
 
-    //tail++;
-    //if (tail >= MAX_LOAD_QUEUE_SIZE) {
-    //    tail = 0;
-    //}
-    //temp_queue->load_tail = tail;
-    temp_queue->load_tail = (tail + 1) % MAX_LOAD_QUEUE_SIZE;
-}
+    /*//tail++;*/
+    /*//if (tail >= MAX_LOAD_QUEUE_SIZE) {*/
+    /*//    tail = 0;*/
+    /*//}*/
+    /*//temp_queue->load_tail = tail;*/
+    /*temp_queue->load_tail = (tail + 1) % MAX_LOAD_QUEUE_SIZE;*/
+/*}*/
 
-__device__ inline void module_history_store_record(struct trace_content *content) 
-{
-    uint8_t tid;
-    uint64_t address;
-    struct history_queue *temp_queue;
-    uint32_t tail;
-    struct history_entry *temp_entry;
+/*__device__ inline void module_history_store_record(struct trace_content *content) */
+/*{*/
+    /*uint8_t tid;*/
+    /*uint64_t address;*/
+    /*struct history_queue *temp_queue;*/
+    /*uint32_t tail;*/
+    /*struct history_entry *temp_entry;*/
 
-    tid = content->tid;
-    address = content->address;
+    /*tid = content->tid;*/
+    /*address = content->address;*/
 
-    temp_queue = &(d_ghq->thread[tid].hash[(address >> HASH_BASE_BIT) % MAX_HASH_NUM]);
+    /*temp_queue = &(d_ghq->thread[tid].hash[(address >> HASH_BASE_BIT) % MAX_HASH_NUM]);*/
 
-    tail = temp_queue->store_tail;
-    temp_entry = &temp_queue->store_entry[tail];
+    /*tail = temp_queue->store_tail;*/
+    /*temp_entry = &temp_queue->store_entry[tail];*/
 
-    // memcpy(&temp_entry->content, content, sizeof(struct trace_content));
-    temp_entry->content.tid = content->tid;
-    temp_entry->content.type = content->type;
-    temp_entry->content.size = content->size;
-    temp_entry->content.address = content->address;
-    temp_entry->content.index = content->index;
-    temp_entry->content.pc = content->pc;
+    /*// memcpy(&temp_entry->content, content, sizeof(struct trace_content));*/
+    /*temp_entry->content.tid = content->tid;*/
+    /*temp_entry->content.type = content->type;*/
+    /*temp_entry->content.size = content->size;*/
+    /*temp_entry->content.address = content->address;*/
+    /*temp_entry->content.index = content->index;*/
+    /*temp_entry->content.pc = content->pc;*/
 
-    //tail++;
-    //if (tail >= MAX_STORE_QUEUE_SIZE) {
-    //    tail = 0;
-    //}
-    //temp_queue->store_tail = tail;
-    temp_queue->store_tail = (tail + 1) % MAX_STORE_QUEUE_SIZE;
-}
+    /*//tail++;*/
+    /*//if (tail >= MAX_STORE_QUEUE_SIZE) {*/
+    /*//    tail = 0;*/
+    /*//}*/
+    /*//temp_queue->store_tail = tail;*/
+    /*temp_queue->store_tail = (tail + 1) % MAX_STORE_QUEUE_SIZE;*/
+/*}*/
 
 ///////////////////////////////////////////////
 // Match Stage Device Functions 
 
 __device__ inline int module_timestamp_order(
-        struct global_timestamp_queue *d_gtq,
+        struct timestamp_queue *d_gtq,
         uint8_t tid1, uint32_t index1, 
         uint8_t tid2, uint32_t index2) 
 {
     struct timestamp *ts1, *ts2;
 
-    ts1 = &d_gtq->thread[tid1].entry[index1];
-    ts2 = &d_gtq->thread[tid2].entry[index2];
+    ts1 = &d_gtq[tid1].entry[index1];
+    ts2 = &d_gtq[tid2].entry[index2];
 
     if ( ( (ts1->scalar[tid1] < ts2->scalar[tid1])
         && (ts1->scalar[tid2] < ts2->scalar[tid2]) ) || 
@@ -102,7 +102,7 @@ __device__ inline int module_timestamp_order(
 }
 
 __device__ inline void module_match_with_load(
-        struct global_timestamp_queue *d_gtq,
+        struct timestamp_queue *d_gtq,
         struct global_history_queue *d_ghq,
         struct trace_content *content,
         uint8_t other_tid, 
@@ -128,7 +128,7 @@ __device__ inline void module_match_with_load(
         head = 0;
     }
 
-    last_index = d_gtq->thread[other_tid].count;
+    last_index = d_gtq[other_tid].count;
 
     while (tail != head) {
         if (tail == 0) {
@@ -159,7 +159,7 @@ __device__ inline void module_match_with_load(
 }
 
 __device__ inline void module_match_with_store(
-        struct global_timestamp_queue *d_gtq,
+        struct timestamp_queue *d_gtq,
         struct global_history_queue *d_ghq,
         struct trace_content *content,
         uint8_t other_tid, 
@@ -185,7 +185,7 @@ __device__ inline void module_match_with_store(
         head = 0;
     }
 
-    last_index = d_gtq->thread[other_tid].count;
+    last_index = d_gtq[other_tid].count;
 
     while (tail != head) {
         if (tail == 0) {
@@ -219,7 +219,7 @@ __device__ inline void module_match_with_store(
 // Filter Stage Device Functions 
 
 __device__ inline void module_filter_load_match(
-        struct global_timestamp_queue *d_gtq,
+        struct timestamp_queue *d_gtq,
         struct global_history_queue *d_ghq,
         struct global_page_filter *d_pfilter,
         struct trace_content *content, 
@@ -245,7 +245,7 @@ __device__ inline void module_filter_load_match(
 }
 
 __device__ inline void module_filter_store_match(
-        struct global_timestamp_queue *d_gtq,
+        struct timestamp_queue *d_gtq,
         struct global_history_queue *d_ghq,
         struct global_page_filter *d_pfilter,
         struct trace_content *content, 
@@ -280,7 +280,7 @@ __device__ inline void module_filter_store_match(
 
 __global__ void module_cuda_stage_three_kernel( 
         int size,
-        struct global_timestamp_queue *d_gtq,
+        struct timestamp_queue *d_gtq,
         struct global_history_queue *d_ghq,
         struct global_page_filter *d_pfilter,
         struct trace_content *buf,

@@ -13,15 +13,6 @@ pthread_mutex_t det_lock = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t  det_cond = PTHREAD_COND_INITIALIZER;
 volatile uint8_t stage_three_stop = 0;
 
-#ifdef CUDA
-extern struct trace_content *d_trace_buf;
-extern struct global_timestamp_queue *d_gtq;  
-extern struct global_history_queue *d_ghq;
-extern struct global_page_filter *d_pfilter;
-extern int *d_result_queue;
-#endif
-
-
 #define PPI_THREE_STAGE
 #define CUDA
 
@@ -258,7 +249,7 @@ void *module_pthread_stage_three(void *args)
 
                 info.exist[tid] = 1;
             }
-            module_cuda_update(&history, &ts, &pfilter);
+            module_cuda_update(ts.thread);
             module_cuda_stage_three(info.max_tid_num, size, temp_chunk->buf);		
 #endif
 

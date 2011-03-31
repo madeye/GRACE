@@ -21,11 +21,11 @@ struct timestamp_queue {
     struct timestamp entry[MAX_TIMESTAMP_NUM];
 };
 
-struct global_timestamp_queue {
-    struct timestamp_queue thread[MAX_PROCESS_NUM];
-    struct timestamp current_ts[MAX_PROCESS_NUM];
-    uint32_t current_ts_index[MAX_PROCESS_NUM];
-};
+//struct global_timestamp_queue {
+    //struct timestamp_queue thread[MAX_PROCESS_NUM];
+    //struct timestamp current_ts[MAX_PROCESS_NUM];
+    //uint32_t current_ts_index[MAX_PROCESS_NUM];
+//};
 
 ///////////////////////////////////////////////
 // History Data Structure 
