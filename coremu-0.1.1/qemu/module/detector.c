@@ -219,6 +219,7 @@ void *module_pthread_stage_three(void *args)
 #ifdef CUDA
     printf("CUDA Init.\n");
     module_cuda_init();
+    ts.thread = h_gtq;
 #endif
 
     while(1) {
@@ -249,7 +250,7 @@ void *module_pthread_stage_three(void *args)
 
                 info.exist[tid] = 1;
             }
-            module_cuda_update(ts.thread);
+            /*module_cuda_update(ts.thread);*/
             module_cuda_stage_three(info.max_tid_num, size, temp_chunk->buf);		
 #endif
 

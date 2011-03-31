@@ -182,7 +182,7 @@ struct global_page_filter *d_pfilter;
 int *d_result_queue;
 
 struct global_history_queue *history; 
-/*struct timestamp_queue *h_gtq; */
+struct timestamp_queue *h_gtq; 
 struct global_page_filter *pfilter;
 
 extern "C" void module_cuda_stage_three(int h_max_tid_num, 
@@ -216,11 +216,11 @@ void module_cuda_free(
         /*struct global_page_filter *pfilter */
         ) {
 
-    /*CUDA_SAFE_CALL(cudaFreeHost(h_gtq));*/
+    CUDA_SAFE_CALL(cudaFreeHost(h_gtq));
     CUDA_SAFE_CALL(cudaFreeHost(history));
     CUDA_SAFE_CALL(cudaFreeHost(pfilter));
 
-    CUDA_SAFE_CALL(cudaFree(d_gtq));
+    /*CUDA_SAFE_CALL(cudaFree(d_gtq));*/
     /*CUDA_SAFE_CALL(cudaFree(d_ghq));*/
     CUDA_SAFE_CALL(cudaFree(d_trace_buf));
     /*CUDA_SAFE_CALL(cudaFree(d_pfilter));*/
@@ -244,8 +244,8 @@ void module_cuda_init(
     cudaSetDeviceFlags( cudaDeviceMapHost );
 
     // Allocate for mapped memory
-    /*CUDA_SAFE_CALL(cudaHostAlloc((void **)&h_gtq, sizeof(struct*/
-                    /*timestamp_queue) * MAX_PROCESS_NUM, cudaHostAllocMapped));*/
+    CUDA_SAFE_CALL(cudaHostAlloc((void **)&h_gtq, sizeof(struct
+                    timestamp_queue) * MAX_PROCESS_NUM, cudaHostAllocMapped));
     CUDA_SAFE_CALL(cudaHostAlloc((void **)&history, sizeof(struct
                     global_history_queue), cudaHostAllocMapped));
     CUDA_SAFE_CALL(cudaHostAlloc((void **)&pfilter, sizeof(struct
@@ -257,19 +257,19 @@ void module_cuda_init(
     /*pfilter = pfilter;*/
 
     // Init mapped memory
-    /*memset(h_gtq, 0, sizeof(struct timestamp_queue) * MAX_PROCESS_NUM);*/
+    memset(h_gtq, 0, sizeof(struct timestamp_queue) * MAX_PROCESS_NUM);
     memset(history, 0, sizeof(struct global_history_queue));
     memset(pfilter, 0, sizeof(struct global_page_filter));
 
-    /*CUDA_SAFE_CALL(cudaHostGetDevicePointer((void **)&d_gtq,*/
-                /*(void *)h_gtq, 0));*/
+    CUDA_SAFE_CALL(cudaHostGetDevicePointer((void **)&d_gtq,
+                (void *)h_gtq, 0));
     CUDA_SAFE_CALL(cudaHostGetDevicePointer((void **)&d_ghq,
                 (void *)history, 0));
     CUDA_SAFE_CALL(cudaHostGetDevicePointer((void **)&d_pfilter,
                 (void *)pfilter, 0));
 
-    CUDA_SAFE_CALL(cudaMalloc((void **)&d_gtq, 
-                MAX_PROCESS_NUM * sizeof(struct timestamp_queue)));
+    /*CUDA_SAFE_CALL(cudaMalloc((void **)&d_gtq, */
+                /*MAX_PROCESS_NUM * sizeof(struct timestamp_queue)));*/
     /*CUDA_SAFE_CALL(cudaMalloc((void **)&d_ghq, */
                 /*sizeof(struct global_history_queue)));*/
     CUDA_SAFE_CALL(cudaMalloc((void **)&d_trace_buf, 
@@ -286,13 +286,13 @@ void module_cuda_init(
 
 extern "C" void module_cuda_update(
         /*struct global_history_queue *history, */
-        struct timestamp_queue *h_gtq 
+        /*struct timestamp_queue *h_gtq */
         /*struct global_page_filter *pfilter*/
         ); 
 
 void module_cuda_update(
         /*struct global_history_queue *history, */
-        struct timestamp_queue *h_gtq 
+        /*struct timestamp_queue *h_gtq */
         /*struct global_page_filter *pfilter*/
         ) { 
 
@@ -300,9 +300,9 @@ void module_cuda_update(
                 /*sizeof(struct global_history_queue),*/
                 /*cudaMemcpyHostToDevice));*/
 
-    CUDA_SAFE_CALL(cudaMemcpy(d_gtq, h_gtq,
-                MAX_PROCESS_NUM * sizeof(struct timestamp_queue),
-                cudaMemcpyHostToDevice));
+    /*CUDA_SAFE_CALL(cudaMemcpy(d_gtq, h_gtq,*/
+                /*MAX_PROCESS_NUM * sizeof(struct timestamp_queue),*/
+                /*cudaMemcpyHostToDevice));*/
 
     /*CUDA_SAFE_CALL(cudaMemcpy(d_pfilter, pfilter,*/
                 /*sizeof(struct global_page_filter),*/
@@ -322,9 +322,9 @@ int main(int argc, char** argv)
 
     module_cuda_init(ghq, pfilter);
 
-    h_gtq = (struct timestamp_queue *)malloc(
-            MAX_PROCESS_NUM * sizeof(struct timestamp_queue));
-    memset(h_gtq, 0, MAX_PROCESS_NUM * sizeof(struct timestamp_queue));
+    /*h_gtq = (struct timestamp_queue *)malloc(*/
+            /*MAX_PROCESS_NUM * sizeof(struct timestamp_queue));*/
+    /*memset(h_gtq, 0, MAX_PROCESS_NUM * sizeof(struct timestamp_queue));*/
     tool_global_timestamp_queue_init(h_gtq);
 
     /*history = (struct global_history_queue *)malloc(*/

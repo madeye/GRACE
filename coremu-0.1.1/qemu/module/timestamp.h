@@ -3,6 +3,8 @@
 
 /* timestamp */
 
+#define CUDA
+
 struct timestamp {
     uint32_t scalar[MAX_PROCESS_NUM];
 };
@@ -15,7 +17,11 @@ struct timestamp_queue {
 };
 
 struct global_timestamp_queue {
+#ifndef CUDA
     struct timestamp_queue thread[MAX_PROCESS_NUM];
+#else
+    struct timestamp_queue *thread;
+#endif
     struct timestamp current_ts[MAX_PROCESS_NUM];
     uint32_t current_ts_index[MAX_PROCESS_NUM];
 };

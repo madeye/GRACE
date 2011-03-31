@@ -4,6 +4,7 @@
 #include "timestamp.h"
 
 extern struct global_timestamp_queue ts;
+extern struct timestamp_queue *h_gtq;
 
 static inline int module_timestamp_order(uint8_t tid1, uint32_t index1, 
         uint8_t tid2, uint32_t index2) 

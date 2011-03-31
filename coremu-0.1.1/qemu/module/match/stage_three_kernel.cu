@@ -7,7 +7,7 @@
 
 #include "structs.h"
 
-#define NUM_THREADS 128
+#define NUM_THREADS 64
 
 __constant__ int d_max_tid_num;
 
