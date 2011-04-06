@@ -177,10 +177,10 @@ __device__ inline void module_match_with_load(
 
         if (address == other_address) {
             /*module_race_collection(&temp_entry->content, content);*/
-            d_result_queue[d_race_counter].pc1 = temp_entry->content.pc;
-            d_result_queue[d_race_counter].pc2 = content->pc;
-            d_result_queue[d_race_counter].address = address;
-            atomicAdd(&d_race_counter, 1);
+            int index = atomicAdd(&d_race_counter, 1);
+            d_result_queue[index].pc1 = temp_entry->content.pc;
+            d_result_queue[index].pc2 = content->pc;
+            d_result_queue[index].address = address;
             break;
         }
     }
@@ -240,10 +240,10 @@ __device__ inline void module_match_with_store(
         if (address == other_address) {
             /*module_race_collection(&temp_entry->content, content);*/
             /*d_result_queue[i] = 1;*/
-            d_result_queue[d_race_counter].pc1 = temp_entry->content.pc;
-            d_result_queue[d_race_counter].pc2 = content->pc;
-            d_result_queue[d_race_counter].address = address;
-            atomicAdd(&d_race_counter, 1);
+            int index = atomicAdd(&d_race_counter, 1);
+            d_result_queue[index].pc1 = temp_entry->content.pc;
+            d_result_queue[index].pc2 = content->pc;
+            d_result_queue[index].address = address;
             break;
         } 
     }
@@ -328,6 +328,8 @@ __global__ void module_cuda_stage_three_kernel(
 
     /*for (i = 0; i < size; i++) {*/
     content = &buf[i];
+    /*if (content->address == 0 || content->pc == 0)*/
+        /*return;*/
 
     if (content->type == TRACE_MEM_LOAD) {
         module_filter_load_match(d_gtq, d_ghq, d_pfilter, content,
