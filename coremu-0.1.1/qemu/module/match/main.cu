@@ -179,11 +179,12 @@ struct trace_content *d_trace_buf;
 struct timestamp_queue *d_gtq;  
 struct global_history_queue *d_ghq;
 struct global_page_filter *d_pfilter;
-struct global_race *d_result_queue;
+struct race_entry *d_result_queue;
 
 struct global_history_queue *history; 
 struct timestamp_queue *h_gtq; 
 struct global_page_filter *pfilter;
+struct race_entry *h_result_queue;
 
 int h_race_counter;
 
@@ -224,6 +225,16 @@ void module_cuda_free(
 
     CUDA_SAFE_CALL(cudaMemcpyFromSymbol(&h_race_counter, d_race_counter, sizeof(int)));
     printf("Dynamic Race Num: %d\n", h_race_counter);
+    h_result_queue = (struct race_entry *) malloc (sizeof(race_entry) *
+            h_race_counter);
+    CUDA_SAFE_CALL(cudaMemcpy(h_result_queue, d_result_queue,
+                sizeof(struct race_entry) * h_race_counter,
+                cudaMemcpyDeviceToHost));
+    for (int i = 0; i < h_race_counter; i++)
+        printf("pc1: %d pc2: %d addr: %ld\n",
+                h_result_queue[i].pc1,
+                h_result_queue[i].pc2,
+                h_result_queue[i].address);
     
     CUDA_SAFE_CALL(cudaFreeHost(h_gtq));
     CUDA_SAFE_CALL(cudaFreeHost(history));
@@ -286,7 +297,7 @@ void module_cuda_init(
     /*CUDA_SAFE_CALL(cudaMalloc((void **)&d_pfilter, */
                 /*sizeof(struct global_page_filter)));*/
     CUDA_SAFE_CALL(cudaMalloc((void **)&d_result_queue,
-                sizeof(struct global_race)));
+                sizeof(struct race_entry) * MAX_RACE_NUM));
 
     h_race_counter = 0;
 
@@ -365,7 +376,7 @@ int main(int argc, char** argv)
 
     CUDA_SAFE_CALL(cudaThreadSynchronize());
     CUDA_SAFE_CALL(cudaMemcpy(h_result_queue, d_result_queue,
-                sizeof(struct global_race),
+                sizeof(struct race_entry) * MAX_RACE_NUM,
                 cudaMemcpyDeviceToHost));
 
     tool_result_queue_print(h_result_queue, TRACE_BUF_SIZE);

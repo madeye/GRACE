@@ -86,6 +86,3 @@ struct race_entry {
     uint64_t address;
 };
 
-struct global_race {
-    struct race_entry list[MAX_RACE_NUM];
-};
