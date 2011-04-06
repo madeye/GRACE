@@ -6,7 +6,8 @@
 #define FILTER_ENTRY_MASK 0xfffff
 
 struct filter_entry {
-    uint8_t load:1, store:1;
+    uint8_t load;
+    uint8_t store;
 };
 
 struct page_filter {

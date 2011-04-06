@@ -179,11 +179,13 @@ struct trace_content *d_trace_buf;
 struct timestamp_queue *d_gtq;  
 struct global_history_queue *d_ghq;
 struct global_page_filter *d_pfilter;
-int *d_result_queue;
+struct global_race *d_result_queue;
 
 struct global_history_queue *history; 
 struct timestamp_queue *h_gtq; 
 struct global_page_filter *pfilter;
+
+int h_race_counter;
 
 extern "C" void module_cuda_stage_three(int h_max_tid_num, 
         uint32_t size, struct trace_content *buf);
@@ -191,6 +193,8 @@ extern "C" void module_cuda_stage_three(int h_max_tid_num,
 void module_cuda_stage_three(int h_max_tid_num, 
         uint32_t size, struct trace_content *buf)
 {
+    cudaFuncSetCacheConfig(module_cuda_stage_three_kernel, cudaFuncCachePreferL1); 
+
     CUDA_SAFE_CALL(cudaMemcpy(d_trace_buf, buf,
                 size * sizeof(struct trace_content),
                 cudaMemcpyHostToDevice));
@@ -201,6 +205,8 @@ void module_cuda_stage_three(int h_max_tid_num,
     module_cuda_stage_three_kernel
         <<<(size + NUM_THREADS - 1) / NUM_THREADS, NUM_THREADS>>>
         (size, d_gtq, d_ghq, d_pfilter, d_trace_buf, d_result_queue);
+
+    CUDA_SAFE_CALL(cudaThreadSynchronize());
     
 }
 
@@ -216,6 +222,9 @@ void module_cuda_free(
         /*struct global_page_filter *pfilter */
         ) {
 
+    CUDA_SAFE_CALL(cudaMemcpyFromSymbol(&h_race_counter, d_race_counter, sizeof(int)));
+    printf("Dynamic Race Num: %d\n", h_race_counter);
+    
     CUDA_SAFE_CALL(cudaFreeHost(h_gtq));
     CUDA_SAFE_CALL(cudaFreeHost(history));
     CUDA_SAFE_CALL(cudaFreeHost(pfilter));
@@ -277,8 +286,12 @@ void module_cuda_init(
     /*CUDA_SAFE_CALL(cudaMalloc((void **)&d_pfilter, */
                 /*sizeof(struct global_page_filter)));*/
     CUDA_SAFE_CALL(cudaMalloc((void **)&d_result_queue,
-                sizeof(int) * TRACE_BUF_SIZE));
+                sizeof(struct global_race)));
 
+    h_race_counter = 0;
+
+    CUDA_SAFE_CALL(cudaMemcpyToSymbol(d_race_counter, &h_race_counter, 
+                sizeof(int)));
     printf("\nglobal timestamp queue size : %d\n", 
             MAX_PROCESS_NUM * sizeof(struct timestamp_queue));
 
@@ -352,7 +365,7 @@ int main(int argc, char** argv)
 
     CUDA_SAFE_CALL(cudaThreadSynchronize());
     CUDA_SAFE_CALL(cudaMemcpy(h_result_queue, d_result_queue,
-                sizeof(int) * TRACE_BUF_SIZE,
+                sizeof(struct global_race),
                 cudaMemcpyDeviceToHost));
 
     tool_result_queue_print(h_result_queue, TRACE_BUF_SIZE);

@@ -7,9 +7,34 @@
 
 #include "structs.h"
 
-#define NUM_THREADS 64
+#define NUM_THREADS 32
 
 __constant__ int d_max_tid_num;
+__device__ int d_race_counter;
+
+#define cudaAssert(condition) \
+      if (!(condition)) { asm("trap;"); }
+
+///////////////////////////////////////////////
+// Race Collection Device Functions 
+
+/*__device__ inline void module_race_collection(struct trace_content *content1, struct trace_content *content2, ) */
+/*{*/
+    /*int i;*/
+    /*struct race_queue *temp_queue;*/
+
+    /*if (i >= temp_queue->count) {*/
+        /*memcpy(&temp_queue->entry[i].content1, content1, sizeof(struct trace_content));*/
+        /*memcpy(&temp_queue->entry[i].content2, content2, sizeof(struct trace_content));*/
+        /*temp_queue->entry[i].instance++;*/
+
+        /*temp_queue->count++;*/
+        /*if (temp_queue->count >= MAX_RACE_NUM) {*/
+            /*fprintf(stderr, "race queue overflow!\n");*/
+            /*assert(0);*/
+        /*}*/
+    /*}*/
+/*}*/
 
 ///////////////////////////////////////////////
 // History Stage Device Functions 
@@ -106,7 +131,7 @@ __device__ inline void module_match_with_load(
         struct global_history_queue *d_ghq,
         struct trace_content *content,
         uint8_t other_tid, 
-        int *d_result_queue)
+        struct global_race *d_result_queue)
 {
     uint8_t tid;
     uint64_t address, other_address;
@@ -114,7 +139,7 @@ __device__ inline void module_match_with_load(
     struct history_queue *temp_queue;
     uint32_t head, tail;
     struct history_entry *temp_entry;
-    const int i = blockIdx.x * NUM_THREADS + threadIdx.x;
+    /*const int i = blockIdx.x * NUM_THREADS + threadIdx.x;*/
 
     tid = content->tid;
     address = content->address;
@@ -152,7 +177,10 @@ __device__ inline void module_match_with_load(
 
         if (address == other_address) {
             /*module_race_collection(&temp_entry->content, content);*/
-            d_result_queue[i] = 1;
+            d_result_queue->list[d_race_counter].pc1 = temp_entry->content.pc;
+            d_result_queue->list[d_race_counter].pc2 = content->pc;
+            d_result_queue->list[d_race_counter].address = address;
+            atomicAdd(&d_race_counter, 1);
             break;
         }
     }
@@ -163,7 +191,7 @@ __device__ inline void module_match_with_store(
         struct global_history_queue *d_ghq,
         struct trace_content *content,
         uint8_t other_tid, 
-        int *d_result_queue)
+        struct global_race *d_result_queue)
 {
     uint8_t tid;
     uint64_t address, other_address;
@@ -171,13 +199,15 @@ __device__ inline void module_match_with_store(
     struct history_queue *temp_queue;
     uint32_t head, tail;
     struct history_entry *temp_entry;
-    const int i = blockIdx.x * NUM_THREADS + threadIdx.x;
+    /*const int i = blockIdx.x * NUM_THREADS + threadIdx.x;*/
 
     tid = content->tid;
     address = content->address;
     index = content->index;
 
     temp_queue = &(d_ghq->thread[other_tid].hash[(address >> HASH_BASE_BIT) % MAX_HASH_NUM]);
+    cudaAssert((address >> HASH_BASE_BIT) % MAX_HASH_NUM < MAX_HASH_NUM);
+    /*temp_queue = &(d_ghq->thread[other_tid].hash[0]);*/
 
     tail = temp_queue->store_tail;
     head = tail + 1;
@@ -209,7 +239,11 @@ __device__ inline void module_match_with_store(
 
         if (address == other_address) {
             /*module_race_collection(&temp_entry->content, content);*/
-            d_result_queue[i] = 1;
+            /*d_result_queue[i] = 1;*/
+            d_result_queue->list[d_race_counter].pc1 = temp_entry->content.pc;
+            d_result_queue->list[d_race_counter].pc2 = content->pc;
+            d_result_queue->list[d_race_counter].address = address;
+            atomicAdd(&d_race_counter, 1);
             break;
         } 
     }
@@ -223,7 +257,7 @@ __device__ inline void module_filter_load_match(
         struct global_history_queue *d_ghq,
         struct global_page_filter *d_pfilter,
         struct trace_content *content, 
-        int *d_result_queue)
+        struct global_race *d_result_queue)
 {
     uint8_t i;
     uint8_t tid;
@@ -249,7 +283,7 @@ __device__ inline void module_filter_store_match(
         struct global_history_queue *d_ghq,
         struct global_page_filter *d_pfilter,
         struct trace_content *content, 
-        int *d_result_queue)
+        struct global_race *d_result_queue)
 {
     uint8_t i;
     uint8_t tid;
@@ -284,7 +318,7 @@ __global__ void module_cuda_stage_three_kernel(
         struct global_history_queue *d_ghq,
         struct global_page_filter *d_pfilter,
         struct trace_content *buf,
-        int *d_result_queue)
+        struct global_race *d_result_queue)
 {
     struct trace_content *content;
     int i = blockIdx.x * blockDim.x + threadIdx.x;
@@ -294,8 +328,6 @@ __global__ void module_cuda_stage_three_kernel(
 
     /*for (i = 0; i < size; i++) {*/
     content = &buf[i];
-
-    d_result_queue[i] = 0;
 
     if (content->type == TRACE_MEM_LOAD) {
         module_filter_load_match(d_gtq, d_ghq, d_pfilter, content,

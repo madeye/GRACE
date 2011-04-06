@@ -63,7 +63,8 @@ struct global_history_queue {
 #define FILTER_ENTRY_MASK 0xfffff
 
 struct filter_entry {
-    uint8_t load:1, store:1;
+    uint8_t load;
+    uint8_t store;
 };
 
 struct page_filter {
@@ -74,3 +75,17 @@ struct global_page_filter {
     struct page_filter thread[MAX_PROCESS_NUM];
 };
 
+///////////////////////////////////////////////
+// Device Race Data Structure 
+
+#define MAX_RACE_NUM (1 << 24)
+
+struct race_entry {
+    uint32_t pc1;
+    uint32_t pc2;
+    uint64_t address;
+};
+
+struct global_race {
+    struct race_entry list[MAX_RACE_NUM];
+};

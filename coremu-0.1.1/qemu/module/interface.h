@@ -14,7 +14,7 @@
 // #define TRACE_PC_LIMIT 0x10000000
 
 
-#define TRACE_BUF_SIZE (128 * 1024)
+#define TRACE_BUF_SIZE (64 * 1024)
 
 enum {
     TRACE_MEM_BASE,
@@ -38,11 +38,11 @@ enum {
 };
 
 struct trace_content {
-    uint32_t tid:8, type:2, size:2, index:20;
-    //uint8_t tid;
-    //uint8_t type;
-    //uint8_t size;
-    //uint32_t index;
+    //uint32_t tid:8, type:2, size:2, index:20;
+    uint8_t tid;
+    uint8_t type;
+    uint8_t size;
+    uint32_t index;
     uint32_t pc;
     uint64_t address;
 };
