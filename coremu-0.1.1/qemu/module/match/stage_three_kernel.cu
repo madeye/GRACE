@@ -13,27 +13,27 @@ __constant__ int d_max_tid_num;
 __device__ int d_race_counter;
 
 #define cudaAssert(condition) \
-      if (!(condition)) { asm("trap;"); }
+    if (!(condition)) { asm("trap;"); }
 
 ///////////////////////////////////////////////
 // Race Collection Device Functions 
 
 /*__device__ inline void module_race_collection(struct trace_content *content1, struct trace_content *content2, ) */
 /*{*/
-    /*int i;*/
-    /*struct race_queue *temp_queue;*/
+/*int i;*/
+/*struct race_queue *temp_queue;*/
 
-    /*if (i >= temp_queue->count) {*/
-        /*memcpy(&temp_queue->entry[i].content1, content1, sizeof(struct trace_content));*/
-        /*memcpy(&temp_queue->entry[i].content2, content2, sizeof(struct trace_content));*/
-        /*temp_queue->entry[i].instance++;*/
+/*if (i >= temp_queue->count) {*/
+/*memcpy(&temp_queue->entry[i].content1, content1, sizeof(struct trace_content));*/
+/*memcpy(&temp_queue->entry[i].content2, content2, sizeof(struct trace_content));*/
+/*temp_queue->entry[i].instance++;*/
 
-        /*temp_queue->count++;*/
-        /*if (temp_queue->count >= MAX_RACE_NUM) {*/
-            /*fprintf(stderr, "race queue overflow!\n");*/
-            /*assert(0);*/
-        /*}*/
-    /*}*/
+/*temp_queue->count++;*/
+/*if (temp_queue->count >= MAX_RACE_NUM) {*/
+/*fprintf(stderr, "race queue overflow!\n");*/
+/*assert(0);*/
+/*}*/
+/*}*/
 /*}*/
 
 ///////////////////////////////////////////////
@@ -41,66 +41,66 @@ __device__ int d_race_counter;
 
 /*__device__ inline void module_history_load_record(struct trace_content *content) */
 /*{*/
-    /*uint8_t tid;*/
-    /*uint64_t address;*/
-    /*struct history_queue *temp_queue;*/
-    /*uint32_t tail;*/
-    /*struct history_entry *temp_entry;*/
+/*uint8_t tid;*/
+/*uint64_t address;*/
+/*struct history_queue *temp_queue;*/
+/*uint32_t tail;*/
+/*struct history_entry *temp_entry;*/
 
-    /*tid = content->tid;*/
-    /*address = content->address;*/
+/*tid = content->tid;*/
+/*address = content->address;*/
 
-    /*temp_queue = &(history.thread[tid].hash[(address >> HASH_BASE_BIT) % MAX_HASH_NUM]);*/
+/*temp_queue = &(history.thread[tid].hash[(address >> HASH_BASE_BIT) % MAX_HASH_NUM]);*/
 
-    /*tail = temp_queue->load_tail;	*/
-    /*temp_entry = &temp_queue->load_entry[tail];*/
+/*tail = temp_queue->load_tail;	*/
+/*temp_entry = &temp_queue->load_entry[tail];*/
 
-    /*// memcpy(&temp_entry->content, content, sizeof(struct trace_content));*/
-    /*temp_entry->content.tid = content->tid;*/
-    /*temp_entry->content.type = content->type;*/
-    /*temp_entry->content.size = content->size;*/
-    /*temp_entry->content.address = content->address;*/
-    /*temp_entry->content.index = content->index;*/
-    /*temp_entry->content.pc = content->pc;*/
+/*// memcpy(&temp_entry->content, content, sizeof(struct trace_content));*/
+/*temp_entry->content.tid = content->tid;*/
+/*temp_entry->content.type = content->type;*/
+/*temp_entry->content.size = content->size;*/
+/*temp_entry->content.address = content->address;*/
+/*temp_entry->content.index = content->index;*/
+/*temp_entry->content.pc = content->pc;*/
 
-    /*//tail++;*/
-    /*//if (tail >= MAX_LOAD_QUEUE_SIZE) {*/
-    /*//    tail = 0;*/
-    /*//}*/
-    /*//temp_queue->load_tail = tail;*/
-    /*temp_queue->load_tail = (tail + 1) % MAX_LOAD_QUEUE_SIZE;*/
+/*//tail++;*/
+/*//if (tail >= MAX_LOAD_QUEUE_SIZE) {*/
+/*//    tail = 0;*/
+/*//}*/
+/*//temp_queue->load_tail = tail;*/
+/*temp_queue->load_tail = (tail + 1) % MAX_LOAD_QUEUE_SIZE;*/
 /*}*/
 
 /*__device__ inline void module_history_store_record(struct trace_content *content) */
 /*{*/
-    /*uint8_t tid;*/
-    /*uint64_t address;*/
-    /*struct history_queue *temp_queue;*/
-    /*uint32_t tail;*/
-    /*struct history_entry *temp_entry;*/
+/*uint8_t tid;*/
+/*uint64_t address;*/
+/*struct history_queue *temp_queue;*/
+/*uint32_t tail;*/
+/*struct history_entry *temp_entry;*/
 
-    /*tid = content->tid;*/
-    /*address = content->address;*/
+/*tid = content->tid;*/
+/*address = content->address;*/
 
-    /*temp_queue = &(d_ghq->thread[tid].hash[(address >> HASH_BASE_BIT) % MAX_HASH_NUM]);*/
+/*temp_queue = &(d_ghq->thread[tid].hash[(address >> HASH_BASE_BIT) % MAX_HASH_NUM]);*/
 
-    /*tail = temp_queue->store_tail;*/
-    /*temp_entry = &temp_queue->store_entry[tail];*/
+/*tail = temp_queue->store_tail;*/
+/*temp_entry = &temp_queue->store_entry[tail];*/
 
-    /*// memcpy(&temp_entry->content, content, sizeof(struct trace_content));*/
-    /*temp_entry->content.tid = content->tid;*/
-    /*temp_entry->content.type = content->type;*/
-    /*temp_entry->content.size = content->size;*/
-    /*temp_entry->content.address = content->address;*/
-    /*temp_entry->content.index = content->index;*/
-    /*temp_entry->content.pc = content->pc;*/
+/*// memcpy(&temp_entry->content, content, sizeof(struct trace_content));*/
+/*temp_entry->content.tid = content->tid;*/
+/*temp_entry->content.type = content->type;*/
+/*temp_entry->content.size = content->size;*/
+/*temp_entry->content.address = content->address;*/
+/*temp_entry->content.index = content->index;*/
+/*temp_entry->content.pc = content->pc;*/
 
-    /*//tail++;*/
-    /*//if (tail >= MAX_STORE_QUEUE_SIZE) {*/
-    /*//    tail = 0;*/
-    /*//}*/
-    /*//temp_queue->store_tail = tail;*/
-    /*temp_queue->store_tail = (tail + 1) % MAX_STORE_QUEUE_SIZE;*/
+/*//tail++;*/
+/*//if (tail >= MAX_STORE_QUEUE_SIZE) {*/
+/*//    tail = 0;*/
+/*//}*/
+/*//temp_queue->store_tail = tail;*/
+/*temp_queue->store_tail = (tail + 1) % MAX_STORE_QUEUE_SIZE;*/
 /*}*/
 
 ///////////////////////////////////////////////
@@ -116,14 +116,11 @@ __device__ inline int module_timestamp_order(
     ts1 = &d_gtq[tid1].entry[index1];
     ts2 = &d_gtq[tid2].entry[index2];
 
-    if ( ( (ts1->scalar[tid1] < ts2->scalar[tid1])
-        && (ts1->scalar[tid2] < ts2->scalar[tid2]) ) || 
-         ( (ts1->scalar[tid1] > ts2->scalar[tid1]) 
-         &&(ts1->scalar[tid2] > ts2->scalar[tid2]) ) ) {
-        return 1;
-    }
+    return  ( (ts1->scalar[tid1] < ts2->scalar[tid1])
+                && (ts1->scalar[tid2] < ts2->scalar[tid2]) ) || 
+            ( (ts1->scalar[tid1] > ts2->scalar[tid1]) 
+              &&(ts1->scalar[tid2] > ts2->scalar[tid2]) ); 
 
-    return 0;
 }
 
 __device__ inline void module_match_with_load(
@@ -135,7 +132,8 @@ __device__ inline void module_match_with_load(
 {
     uint8_t tid;
     uint64_t address, other_address;
-    uint32_t index, other_index, last_index;
+    uint32_t index, other_index;
+    /*uint32_t last_index;*/
     struct history_queue *temp_queue;
     uint32_t head, tail;
     struct history_entry *temp_entry;
@@ -153,7 +151,8 @@ __device__ inline void module_match_with_load(
         head = 0;
     }
 
-    last_index = d_gtq[other_tid].count;
+    /*last_index = d_gtq[other_tid].count;*/
+    /*last_index = 0;*/
 
     while (tail != head) {
         if (tail == 0) {
@@ -165,19 +164,21 @@ __device__ inline void module_match_with_load(
 
         other_index = temp_entry->content.index;
 
-        if (last_index != other_index) {
+        /*if (last_index != other_index) {*/
             if (module_timestamp_order(d_gtq, other_tid, other_index, tid, index)) {
                 break;
             }
 
-            last_index = other_index;
-        }
+            /*last_index = other_index;*/
+        /*}*/
 
         other_address = temp_entry->content.address;
 
         if (address == other_address) {
             /*module_race_collection(&temp_entry->content, content);*/
             int index = atomicAdd(&d_race_counter, 1);
+            /*d_result_queue[index].ts1 = d_gtq[tid].entry[temp_entry->content.index];*/
+            /*d_result_queue[index].ts2 = d_gtq[tid].entry[content->index];*/
             d_result_queue[index].pc1 = temp_entry->content.pc;
             d_result_queue[index].pc2 = content->pc;
             d_result_queue[index].address = address;
@@ -195,7 +196,8 @@ __device__ inline void module_match_with_store(
 {
     uint8_t tid;
     uint64_t address, other_address;
-    uint32_t index, other_index, last_index;
+    uint32_t index, other_index;
+    /*uint32_t last_index;*/
     struct history_queue *temp_queue;
     uint32_t head, tail;
     struct history_entry *temp_entry;
@@ -215,7 +217,8 @@ __device__ inline void module_match_with_store(
         head = 0;
     }
 
-    last_index = d_gtq[other_tid].count;
+    /*last_index = d_gtq[other_tid].count;*/
+    /*last_index = 0;*/
 
     while (tail != head) {
         if (tail == 0) {
@@ -227,13 +230,13 @@ __device__ inline void module_match_with_store(
 
         other_index = temp_entry->content.index;  
 
-        if (last_index != other_index) {
-            if (module_timestamp_order(d_gtq, other_tid, other_index, tid, index)) {   
+        /*if (last_index != other_index) {*/
+            if (module_timestamp_order(d_gtq, other_tid, other_index, tid, index)) {
                 break;
             }
 
-            last_index = other_index;
-        }
+            /*last_index = other_index;*/
+        /*}*/
 
         other_address = temp_entry->content.address;
 
@@ -241,6 +244,8 @@ __device__ inline void module_match_with_store(
             /*module_race_collection(&temp_entry->content, content);*/
             /*d_result_queue[i] = 1;*/
             int index = atomicAdd(&d_race_counter, 1);
+            /*d_result_queue[index].ts1 = d_gtq[tid].entry[temp_entry->content.index];*/
+            /*d_result_queue[index].ts2 = d_gtq[tid].entry[content->index];*/
             d_result_queue[index].pc1 = temp_entry->content.pc;
             d_result_queue[index].pc2 = content->pc;
             d_result_queue[index].address = address;
@@ -329,7 +334,7 @@ __global__ void module_cuda_stage_three_kernel(
     /*for (i = 0; i < size; i++) {*/
     content = &buf[i];
     /*if (content->address == 0 || content->pc == 0)*/
-        /*return;*/
+    /*return;*/
 
     if (content->type == TRACE_MEM_LOAD) {
         module_filter_load_match(d_gtq, d_ghq, d_pfilter, content,

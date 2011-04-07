@@ -5,7 +5,7 @@
 // Revision: 0.1
 ////////////////////////////////////////////////////////////////////////////////
 
-#define MAX_PROCESS_NUM 16
+#define MAX_PROCESS_NUM 8
 
 ///////////////////////////////////////////////
 // Timestamp Data Structure 
@@ -84,5 +84,7 @@ struct race_entry {
     uint32_t pc1;
     uint32_t pc2;
     uint64_t address;
+    //timestamp ts1;
+    //timestamp ts2;
 };
 

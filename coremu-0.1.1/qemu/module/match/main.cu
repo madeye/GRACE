@@ -230,11 +230,19 @@ void module_cuda_free(
     CUDA_SAFE_CALL(cudaMemcpy(h_result_queue, d_result_queue,
                 sizeof(struct race_entry) * h_race_counter,
                 cudaMemcpyDeviceToHost));
-    for (int i = 0; i < h_race_counter; i++)
-        printf("pc1: %d pc2: %d addr: %ld\n",
+    for (int i = 0; i < h_race_counter; i++) {
+        if (i > 100) break;
+        printf(
+                /*"ts1: %d %d, ts2: %d %d, */
+                "pc1: 0x%x pc2: 0x%x addr: 0x%lx\n",
+                /*h_result_queue[i].ts1.scalar[1],*/
+                /*h_result_queue[i].ts1.scalar[2],*/
+                /*h_result_queue[i].ts2.scalar[1],*/
+                /*h_result_queue[i].ts2.scalar[2],*/
                 h_result_queue[i].pc1,
                 h_result_queue[i].pc2,
                 h_result_queue[i].address);
+    }
     
     CUDA_SAFE_CALL(cudaFreeHost(h_gtq));
     CUDA_SAFE_CALL(cudaFreeHost(history));
