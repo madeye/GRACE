@@ -9,6 +9,8 @@
 
 #define NUM_THREADS 32
 
+#define SHARED_MEMORY
+
 __constant__ int d_max_tid_num;
 __device__ int d_race_counter;
 
@@ -325,16 +327,31 @@ __global__ void module_cuda_stage_three_kernel(
         struct trace_content *buf,
         struct race_entry *d_result_queue)
 {
+#ifdef SHARED_MEMORY
+    __shared__ struct trace_content content [NUM_THREADS];
+#else
     struct trace_content *content;
+#endif
     int i = blockIdx.x * blockDim.x + threadIdx.x;
+    int tid = threadIdx.x;
     /*int i = threadIdx.x;*/
     if (i >= size)
         return;
 
-    /*for (i = 0; i < size; i++) {*/
+#ifdef SHARED_MEMORY
+
+    content[tid] = buf[i];
+
+    if (content[tid].type == TRACE_MEM_LOAD) {
+        module_filter_load_match(d_gtq, d_ghq, d_pfilter, &content[tid],
+                d_result_queue);
+    } else if (content[tid].type == TRACE_MEM_STORE) {
+        module_filter_store_match(d_gtq, d_ghq, d_pfilter, &content[tid],
+                d_result_queue);
+    } else {
+    }
+#else
     content = &buf[i];
-    /*if (content->address == 0 || content->pc == 0)*/
-    /*return;*/
 
     if (content->type == TRACE_MEM_LOAD) {
         module_filter_load_match(d_gtq, d_ghq, d_pfilter, content,
@@ -343,8 +360,8 @@ __global__ void module_cuda_stage_three_kernel(
         module_filter_store_match(d_gtq, d_ghq, d_pfilter, content,
                 d_result_queue);
     } else {
-        /*fprintf(stderr, "unknown type : %d\n", content->type);*/
-        /*assert(0);*/
     }
+#endif
+
 }
 

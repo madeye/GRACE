@@ -218,8 +218,11 @@ void *module_pthread_stage_three(void *args)
 
 #ifdef CUDA
     printf("CUDA Init.\n");
-    module_cuda_init();
-    ts.thread = h_gtq;
+    module_cuda_config_register(512);
+    module_cuda_init_interface();
+
+    /*module_cuda_init();*/
+    /*ts.thread = h_gtq;*/
 #endif
 
     while(1) {
@@ -251,7 +254,17 @@ void *module_pthread_stage_three(void *args)
                 info.exist[tid] = 1;
             }
             /*module_cuda_update(ts.thread);*/
-            module_cuda_stage_three(info.max_tid_num, size, temp_chunk->buf);		
+            /*module_cuda_stage_three(info.max_tid_num, size, temp_chunk->buf);		*/
+
+            module_cuda_history_hash_queue_update_interface(
+                    info.last_tid, &history.thread[info.last_tid]);
+            module_cuda_page_filter_update_interface(
+                    info.last_tid, &pfilter.thread[info.last_tid]);
+            module_cuda_tid_update_interface(info.max_tid_num);
+            module_cuda_timestamp_entry_update_interface(info.max_tid_num, ts.current_ts_index, 
+
+            module_cuda_match_with_trace_buf_interface(tid, size, temp_chunk->buf);
+
 #endif
 
             temp_chunk->info->thread_id = 0;
@@ -263,7 +276,10 @@ void *module_pthread_stage_three(void *args)
         }
     }    
 #ifdef CUDA
-    module_cuda_free();
+    /*module_cuda_free();*/
+    module_cuda_global_race_queue_fetch_interface(race);
+    module_cuda_free_interface();                       
+    module_race_print();
 #endif
 }
 
@@ -371,6 +387,7 @@ void data_race_detector(uint8_t tid, uint32_t size, struct trace_content *buf)
 #if 1
     if (last_tid != tid) {
         module_shared_buf_all_empty();
+        info.last_tid = last_tid;
 
         last_tid = tid;
     }
@@ -402,6 +419,10 @@ void data_race_detector_report()
     module_shared_buf_all_empty();
 #endif
     stage_three_stop = 1;
+    /*module_cuda_global_race_queue_fetch_interface(race);*/
+    /*module_cuda_free_interface();                       */
+#ifndef CUDA
     module_race_print();
+#endif
 }
 

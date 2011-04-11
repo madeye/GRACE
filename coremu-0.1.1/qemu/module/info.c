@@ -7,6 +7,7 @@ struct global_info {
 #ifdef PPI_THREE_STAGE
     uint8_t core_id;
 #endif
+    uint8_t last_tid;
 };
 
 #ifdef PPI_THREE_STAGE
@@ -24,8 +25,8 @@ static inline void module_info_init()
 
 #ifdef PPI_THREE_STAGE
 #define STAGE_ONE_BASE_CPU_ID 0
-#define STAGE_TWO_BASE_CPU_ID 2
-#define STAGE_THREE_BASE_CPU_ID 3
+#define STAGE_TWO_BASE_CPU_ID 4
+#define STAGE_THREE_BASE_CPU_ID 5
 
 #define MAX_STAGE_NUM 2
 #define MAX_CORE_NUM 1

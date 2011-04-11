@@ -27,6 +27,7 @@
 #ifdef PPI_DEBUG_TOOL
 #include "module/process.h"
 #include <stdlib.h>
+#define CUDA
 
 #define STACK_MASK 0xffffc000
 extern FILE *stderr;
@@ -202,6 +203,10 @@ static inline void module_timestamp_save(uint8_t tid)
     index = temp_queue->count;
 
     memcpy(&temp_queue->entry[index], &ts.current_ts[tid], sizeof(struct timestamp));
+
+/*#ifdef CUDA*/
+    /*module_cuda_timestamp_entry_update_interface(tid, index, &ts.current_ts[tid]);*/
+/*#endif*/
 
     ts.current_ts_index[tid] = index;
 

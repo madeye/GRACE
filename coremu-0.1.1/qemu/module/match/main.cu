@@ -391,7 +391,7 @@ int main(int argc, char** argv)
 
     module_cuda_free();
 
-    free(h_gtq);
+    /*free(h_gtq);*/
     /*free(history);*/
     /*free(pfilter);*/
     free(h_trace_buf);

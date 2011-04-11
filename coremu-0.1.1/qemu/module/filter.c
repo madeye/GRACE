@@ -6,8 +6,9 @@
 #define FILTER_ENTRY_MASK 0xfffff
 
 struct filter_entry {
-    uint8_t load;
-    uint8_t store;
+    uint8_t load:1, store:1;
+    /*uint8_t load;*/
+    /*uint8_t store;*/
 };
 
 struct page_filter {
@@ -18,20 +19,21 @@ struct global_page_filter {
     struct page_filter thread[MAX_PROCESS_NUM];
 };
 
-extern struct global_page_filter *pfilter;
+/*extern struct global_page_filter *pfilter;*/
+struct global_page_filter pfilter;
 
-static inline void module_filter_init()
-{
-    int i;
+/*static inline void module_filter_init()*/
+/*{*/
+    /*int i;*/
 
-    pfilter = (struct global_page_filter *)malloc(sizeof(struct global_page_filter));
-    memset(pfilter, 0, sizeof(struct global_page_filter));
+    /*pfilter = (struct global_page_filter *)malloc(sizeof(struct global_page_filter));*/
+    /*memset(pfilter, 0, sizeof(struct global_page_filter));*/
 
-    /*for (i = 0; i < MAX_PROCESS_NUM; i++) {*/
-        /*pfilter->thread[i] = (struct page_filter *)malloc(sizeof(struct page_filter));	*/
-        /*memset(pfilter->thread[i], 0, sizeof(struct page_filter));*/
-    /*}*/
-}
+    /*[>for (i = 0; i < MAX_PROCESS_NUM; i++) {<]*/
+        /*[>pfilter.thread[i] = (struct page_filter *)malloc(sizeof(struct page_filter));	<]*/
+        /*[>memset(pfilter.thread[i], 0, sizeof(struct page_filter));<]*/
+    /*[>}<]*/
+/*}*/
 
 static inline void module_filter_load_record(struct trace_content *content) 
 {
@@ -45,7 +47,7 @@ static inline void module_filter_load_record(struct trace_content *content)
 
     index = (address >> FILTER_BASE_BIT) & FILTER_ENTRY_MASK;
 
-    pfilter->thread[tid].entry[index].load = 1;
+    pfilter.thread[tid].entry[index].load = 1;
 #endif
 }
 
@@ -64,7 +66,7 @@ static inline void module_filter_load_match(struct trace_content *content)
 
     for (i = 0; i < info.max_tid_num; i++) {
         if (i != tid) {
-            if (pfilter->thread[i].entry[index].store) {
+            if (pfilter.thread[i].entry[index].store) {
                 module_match_with_store(content, i);
             }
         }
@@ -84,7 +86,7 @@ static inline void module_filter_store_record(struct trace_content *content)
 
     index = (address >> FILTER_BASE_BIT) & FILTER_ENTRY_MASK;
 
-    pfilter->thread[tid].entry[index].store = 1;
+    pfilter.thread[tid].entry[index].store = 1;
 #endif
 }
 
@@ -103,11 +105,11 @@ static inline void module_filter_store_match(struct trace_content *content)
 
     for (i = 0; i < info.max_tid_num; i++) {
         if (i != tid) {
-            if (pfilter->thread[i].entry[index].load) {
+            if (pfilter.thread[i].entry[index].load) {
                 module_match_with_load(content, i);
             }
 
-            if (pfilter->thread[i].entry[index].store) {
+            if (pfilter.thread[i].entry[index].store) {
                 module_match_with_store(content, i);
             }
         }

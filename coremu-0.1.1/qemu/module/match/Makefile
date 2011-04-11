@@ -1,4 +1,4 @@
-#################################################################################
+################################################################################
 # Copyright 1993-2006 NVIDIA Corporation.  All rights reserved.
 #
 # NOTICE TO USER:   
@@ -36,7 +36,7 @@
 #EXECUTABLE	:= match
 STATIC_LIB	:= libmatch.a
 # Cuda source files (compiled with cudacc)
-CUFILES		:= main.cu 
+CUFILES		:= match.cu 
 # C/C++ source files (compiled with gcc / c++)
 CCFILES		:= 
 

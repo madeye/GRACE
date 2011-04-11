@@ -7,34 +7,49 @@ struct race_entry {
     uint32_t instance;
 };
 
-#define MAX_RACE_NUM (1 << 20)
+#define MAX_RACE_NUM (1 << 10)
 
 struct race_queue {
     struct race_entry entry[MAX_RACE_NUM];
     uint32_t count;
 };
 
+#define MAX_CUDA_THREAD_NUM (1 << 10)
+
 struct global_race_queue {
-    struct race_queue *thread[MAX_PROCESS_NUM];
-    struct race_queue *remain;
+    struct race_queue thread[MAX_CUDA_THREAD_NUM];
+    uint32_t sum;
+    struct race_queue remain;
 };
+
+/*#define MAX_RACE_NUM (1 << 20)*/
+
+/*struct race_queue {*/
+    /*struct race_entry entry[MAX_RACE_NUM];*/
+    /*uint32_t count;*/
+/*};*/
+
+/*struct global_race_queue {*/
+    /*struct race_queue *thread[MAX_PROCESS_NUM];*/
+    /*struct race_queue *remain;*/
+/*};*/
 
 struct global_race_queue *race;
 
 static inline void module_race_init() 
 {
-    int i;
+    /*int i;*/
 
     race = (struct global_race_queue *)malloc(sizeof(struct global_race_queue));
     memset(race, 0, sizeof(struct global_race_queue));
 
-    for (i = 0; i < MAX_PROCESS_NUM; i++) {
-        race->thread[i] = (struct race_queue *)malloc(sizeof(struct race_queue));		
-        memset(race->thread[i], 0, sizeof(struct race_queue));
-    }
+    /*for (i = 0; i < MAX_PROCESS_NUM; i++) {*/
+        /*race->thread[i] = (struct race_queue *)malloc(sizeof(struct race_queue));		*/
+        /*memset(race->thread[i], 0, sizeof(struct race_queue));*/
+    /*}*/
 
-    race->remain = (struct race_queue *)malloc(sizeof(struct race_queue));
-    memset(race->remain, 0, sizeof(struct race_queue));
+    /*race->remain = (struct race_queue *)malloc(sizeof(struct race_queue));*/
+    /*memset(race->remain, 0, sizeof(struct race_queue));*/
 }
 
 static inline int module_race_equal(struct race_entry *race1, struct race_entry *race2)
@@ -74,11 +89,11 @@ static inline void module_race_print()
     int i, j;
     struct race_queue *remain;
 
-    remain = race->remain;
+    remain = &race->remain;
 
     for (i = 0; i < MAX_PROCESS_NUM; i++) {
-        for (j = 0; j < race->thread[i]->count; j++) {
-            module_race_filter(remain, &race->thread[i]->entry[j]);
+        for (j = 0; j < race->thread[i].count; j++) {
+            module_race_filter(remain, &race->thread[i].entry[j]);
         }
     }
 
@@ -115,9 +130,9 @@ static inline void module_race_collection(struct trace_content *content1, struct
     struct race_queue *temp_queue;
 
 #ifdef PPI_THREE_STAGE
-    temp_queue = race->thread[info.core_id];
+    temp_queue = &race->thread[info.core_id];
 #else
-    temp_queue = race->thread[content2->tid];
+    temp_queue = &race->thread[content2->tid];
 #endif
 
     for (i = 0; i < temp_queue->count; i++) {
