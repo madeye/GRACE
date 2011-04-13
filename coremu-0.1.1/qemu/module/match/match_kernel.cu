@@ -87,7 +87,8 @@ __device__ static inline void module_match_with_load_on_cuda(
         head = 0;
     }
 
-    last_index = gts.thread[other_tid].count;
+    /*last_index = gts.thread[other_tid].count;*/
+    last_index = MAX_TIMESTAMP_NUM;
 
     while (tail != head) {
         if (tail == 0) {
@@ -139,7 +140,8 @@ __device__ static inline void module_match_with_store_on_cuda(
         head = 0;
     }
 
-    last_index = gts.thread[other_tid].count;
+    /*last_index = gts.thread[other_tid].count;*/
+    last_index = MAX_TIMESTAMP_NUM;
 
     while (tail != head) {
         if (tail == 0) {

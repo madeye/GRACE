@@ -39,7 +39,7 @@ struct timestamp {
     uint32_t scalar[MAX_PROCESS_NUM];
 };
 
-#define MAX_TIMESTAMP_NUM (1 << 20)
+#define MAX_TIMESTAMP_NUM (1 << 16)
 
 struct timestamp_queue {
     struct timestamp entry[MAX_TIMESTAMP_NUM];

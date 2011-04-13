@@ -12,6 +12,7 @@ int numBlocks = 512;
 
 struct trace_content *d_trace_buf;
 
+uint32_t old_index[MAX_PROCESS_NUM];
 
 __host__ void module_cuda_tid_update_interface(int h_max_tid_num) {
 
@@ -31,6 +32,8 @@ __host__ void module_cuda_config_register(int _numThreads)
 __host__ void module_cuda_init_interface()
 {
     cudaSetDevice(cutGetMaxGflopsDeviceId());
+
+    memset (old_index, 0, MAX_PROCESS_NUM * sizeof(uint32_t));
 
     cutilSafeCall(cudaMalloc((void **)&d_trace_buf, 
                 sizeof(struct trace_content) * TRACE_BUF_SIZE));
@@ -83,27 +86,44 @@ __host__ void module_cuda_timestamp_queue_fetch_interface(
                 cudaMemcpyDeviceToHost));
 }
 
-uint32_t old_index[MAX_PROCESS_NUM];
+/*__host__ void module_cuda_timestamp_entry_update_interface(*/
+        /*uint8_t tid, uint32_t index, struct timestamp *h_ts_entry)*/
+/*{*/
+    /*cutilSafeCall(cudaMemcpyToSymbol(gts, h_ts_entry,*/
+                /*sizeof(struct timestamp),*/
+                /*tid * sizeof(struct*/
+                    /*timestamp_queue) +*/
+                /*index * sizeof(struct timestamp),*/
+                /*cudaMemcpyHostToDevice));*/
+/*}*/
 
+#if 1
 __host__ void module_cuda_timestamp_entry_update_interface(
-        uint8_t max_tid_num, uint32_t *ctx, struct timestamp *h_ts_entry)
+        uint8_t max_tid_num, uint32_t *ctx, struct timestamp_queue *h_ts_queue)
 {
     int i;
-    for (i = 0; i < max_tid_num; i++) {
+    for (i = 1; i < max_tid_num; i++) {
+    /*for (i = 0; i < MAX_PROCESS_NUM; i++) {*/
+
+        /*cutilSafeCall(cudaMemcpyToSymbol(gts, &h_ts_queue[i].entry, */
+                    /*(MAX_TIMESTAMP_NUM) * sizeof(struct timestamp), */
+                    /*i * sizeof(struct timestamp_queue), */
+                    /*cudaMemcpyHostToDevice));*/
+
         if (ctx[i] > old_index[i]) {
-            cutilSafeCall(cudaMemcpyToSymbol(gts, h_ts_entry, 
-                        (ctx[i] - old_index[i]) * sizeof(struct timestamp), 
+            cutilSafeCall(cudaMemcpyToSymbol(gts, &h_ts_queue[i].entry[old_index[i]], 
+                        (ctx[i] - old_index[i] + 1) * sizeof(struct timestamp), 
                         i * sizeof(struct timestamp_queue) + 
-                        old_index * sizeof(struct timestamp), 
+                        old_index[i] * sizeof(struct timestamp), 
                         cudaMemcpyHostToDevice));
         } else if (ctx[i] < old_index[i]) {
-            cutilSafeCall(cudaMemcpyToSymbol(gts, h_ts_entry, 
-                        (MAX_TIMESTAMP_NUM - old_index[i]) * sizeof(struct timestamp), 
+            cutilSafeCall(cudaMemcpyToSymbol(gts, &h_ts_queue[i].entry[old_index[i]], 
+                        (MAX_TIMESTAMP_NUM - old_index[i] - 1) * sizeof(struct timestamp), 
                         i * sizeof(struct timestamp_queue) + 
-                        old_index * sizeof(struct timestamp), 
+                        old_index[i] * sizeof(struct timestamp), 
                         cudaMemcpyHostToDevice));
-            cutilSafeCall(cudaMemcpyToSymbol(gts, h_ts_entry, 
-                        (ctx[i] - 0) * sizeof(struct timestamp), 
+            cutilSafeCall(cudaMemcpyToSymbol(gts, &h_ts_queue[i].entry[0], 
+                        (ctx[i] - 0 + 1) * sizeof(struct timestamp), 
                         i * sizeof(struct timestamp_queue) + 
                         0,
                         cudaMemcpyHostToDevice));
@@ -111,23 +131,9 @@ __host__ void module_cuda_timestamp_entry_update_interface(
         old_index[i] = ctx[i];
     }
 
-
-    /*cutilSafeCall(cudaMemcpyToSymbol(gts, h_ts_entry, */
-                /*sizeof(struct timestamp), */
-                /*tid * sizeof(struct timestamp_queue) + */
-                /*index * sizeof(struct timestamp), */
-                /*cudaMemcpyHostToDevice));*/
-/*#if 1*/
-    /*tid  = (tid + 1) % MAX_PROCESS_NUM;*/
-    /*index = (index + 1) % MAX_TIMESTAMP_NUM;*/
-
-    /*cutilSafeCall(cudaMemcpyToSymbol(gts, &index, */
-                /*sizeof(uint32_t), */
-                /*tid * sizeof(struct timestamp_queue) - */
-                /*sizeof(uint32_t), */
-                /*cudaMemcpyHostToDevice));*/
-/*#endif*/
 }
+
+#endif
 
 __host__ void module_cuda_timestamp_entry_fetch_interface(
         uint8_t tid, uint32_t index, struct timestamp *h_ts_entry)

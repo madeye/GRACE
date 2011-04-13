@@ -17,8 +17,10 @@ extern "C" void module_cuda_timestamp_queue_update_interface(
         uint8_t tid, struct timestamp_queue *h_ts_queue);
 extern "C" void module_cuda_timestamp_queue_fetch_interface(
         uint8_t tid, struct timestamp_queue *h_ts_queue);
+//extern "C" void module_cuda_timestamp_entry_update_interface(
+        //uint8_t tid, uint32_t index, struct timestamp *h_ts_entry);
 extern "C" void module_cuda_timestamp_entry_update_interface(
-        uint8_t tid, uint32_t index, struct timestamp *h_ts_entry);
+        uint8_t max_tid_num, uint32_t *ctx, struct timestamp_queue *h_ts_queue);
 extern "C" void module_cuda_timestamp_entry_fetch_interface(
         uint8_t tid, uint32_t index, struct timestamp *h_ts_entry);
 

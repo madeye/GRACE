@@ -192,7 +192,7 @@ extern struct global_timestamp_queue ts;
 extern struct global_syn_info syn;
 extern struct statistics_syn_info stat_syn;
 
-static spinlock_t syn_lock = SPIN_LOCK_UNLOCKED;
+spinlock_t syn_lock = SPIN_LOCK_UNLOCKED;
 
 static inline void module_timestamp_save(uint8_t tid)
 {
@@ -201,12 +201,14 @@ static inline void module_timestamp_save(uint8_t tid)
 
     temp_queue = &ts.thread[tid];
     index = temp_queue->count;
+    assert(index < MAX_TIMESTAMP_NUM);
 
     memcpy(&temp_queue->entry[index], &ts.current_ts[tid], sizeof(struct timestamp));
 
-/*#ifdef CUDA*/
+#ifdef CUDA
     /*module_cuda_timestamp_entry_update_interface(tid, index, &ts.current_ts[tid]);*/
-/*#endif*/
+    /*module_cuda_timestamp_entry_update_interface(MAX_PROCESS_NUM, ts.current_ts_index, ts.thread); */
+#endif
 
     ts.current_ts_index[tid] = index;
 
@@ -287,6 +289,7 @@ void helper_syn_lock_trace(target_ulong pc) {
     lock_id = EDI;
 
     index = ts.current_ts_index[tid];
+    assert(index < MAX_TIMESTAMP_NUM);
 
 #if 0
     fprintf(stderr, "lock : tid : %d ; lock id : 0x%lx ; index : %d\n", tid, lock_id, index);
@@ -351,6 +354,7 @@ void helper_syn_unlock_trace(target_ulong pc) {
     lock_id = EDI;
 
     index = ts.current_ts_index[tid];
+    assert(index < MAX_TIMESTAMP_NUM);
 
     ts.current_ts[tid].scalar[tid]++;
 
@@ -402,6 +406,7 @@ void helper_syn_barrier_trace(target_ulong pc) {
     barrier_id = EDI;
 
     index = ts.current_ts_index[tid];
+    assert(index < MAX_TIMESTAMP_NUM);
 
 #if 0
     fprintf(stderr, "barrier : tid : %d ; barrier id : 0x%lx ; index : %d\n", tid, barrier_id, index);
@@ -463,6 +468,7 @@ void helper_syn_create_trace() {
     spin_lock(&syn_lock);
     tid = current_id;
     index = ts.current_ts_index[tid];
+    assert(index < MAX_TIMESTAMP_NUM);
 
 #if 1
     printf("create : tid : %d ; index : %d\n", tid, index);
@@ -485,6 +491,7 @@ void helper_syn_join_trace() {
     spin_lock(&syn_lock);
     tid = current_id;
     index = ts.current_ts_index[tid];
+    assert(index < MAX_TIMESTAMP_NUM);
 
 #if 1
     printf("join : tid : %d ; index : %d\n", tid, index);
@@ -501,6 +508,7 @@ static inline void helper_syn_clone_trace() {
     spin_lock(&syn_lock);
     tid = current_id;
     index = ts.current_ts_index[tid];
+    assert(index < MAX_TIMESTAMP_NUM);
 
 #if 1
     printf("clone : tid : %d ; index : %d\n", tid, index);
@@ -522,6 +530,7 @@ static inline void helper_syn_exit_trace() {
     spin_lock(&syn_lock);
     tid = current_id;
     index = ts.current_ts_index[tid];
+    assert(index < MAX_TIMESTAMP_NUM);
 
 #if 1
     printf("exit : tid : %d ; index : %d\n", tid, index);
@@ -555,6 +564,7 @@ void helper_syn_condwait_trace(target_ulong pc) {
     lock_id = ESI;
 
     index = ts.current_ts_index[tid];
+    assert(index < MAX_TIMESTAMP_NUM);
 
     ts.current_ts[tid].scalar[tid]++;
 
@@ -612,6 +622,7 @@ void helper_syn_condbroad_trace(target_ulong pc) {
     cond_id = EDI;
 
     index = ts.current_ts_index[tid];
+    assert(index < MAX_TIMESTAMP_NUM);
 
 #if 0
     fprintf(stderr, "cond broadcast : tid : %d ; cond id : 0x%lx ; index : %d\n", tid, cond_id, index);
@@ -657,7 +668,10 @@ void helper_syn_condbroad_trace(target_ulong pc) {
 
 #ifdef PPI_DEBUG_TOOL_GUEST
 
+        /*if (total_id <= 2) return; \*/
+
 #define trace_mem_collection(type1, size1, pc1, arg1) { \
+        if (env->trace_mem_ptr - env->debug_info.trace_mem_buf >= TRACE_PRIVATE_BUF_SIZE) env->trace_mem_ptr = env->debug_info.trace_mem_buf; \
         env->trace_mem_ptr->tid = current_id; \
         env->trace_mem_ptr->type = (type1); \
         env->trace_mem_ptr->size = (size1); \
