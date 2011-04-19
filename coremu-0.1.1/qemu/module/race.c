@@ -89,7 +89,7 @@ static inline void module_race_print(void)
             module_race_filter(remain, &race->thread[i].entry[j]);
         }
     }
-#if 1
+#if 0
     for (i = 0; i < remain->count; i++) {
         fprintf(stderr, "No. %d : address : 0x%lx ; same count : %d\n", 
                 i, remain->entry[i].content2.address, remain->entry[i].instance);
@@ -121,6 +121,7 @@ static inline int module_race_content_equal(struct trace_content *content1, stru
     return 0;
 }
 
+#ifdef PPI_THREE_STAGE
 static inline void module_race_collection(struct trace_content *content1, struct trace_content *content2) 
 {
     int i;
@@ -151,4 +152,4 @@ static inline void module_race_collection(struct trace_content *content1, struct
 
     race->sum++;
 }
-
+#endif

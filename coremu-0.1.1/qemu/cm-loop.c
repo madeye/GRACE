@@ -79,6 +79,7 @@ void *cm_cpu_loop(void *args)
     cpu_single_env = (CPUState *)args;
 
 #ifdef PPI_DEBUG_TOOL
+    data_race_cuda_init();
     if (!cpu_single_env->trace_mem_ptr) {
         cpu_single_env->debug_info.trace_mem_buf 
             = (struct trace_content *) qemu_malloc (sizeof(struct trace_content) * TRACE_PRIVATE_BUF_SIZE);

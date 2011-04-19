@@ -184,6 +184,7 @@ int main(int argc, char **argv)
 
 #define PPI_DEBUG_TOOL
 volatile uint32_t max_thread_num = 2;
+int cuda_thread_num = 512;
 #ifdef PPI_DEBUG_TOOL
 #define PPI_PROCESS_INIT
 #define PPI_MONITOR_INIT
@@ -2691,8 +2692,8 @@ int main(int argc, char **argv, char **envp)
     int defconfig = 1;
 
 #ifdef PPI_DEBUG_TOOL
-    data_race_detector_init();
     process_queue_init(&process_queue);
+    data_race_detector_init();
 
     module_timestamp_init(&ts);
     module_syn_init(&syn);
@@ -2844,6 +2845,10 @@ int main(int argc, char **argv, char **envp)
             case QEMU_OPTION_threadnum:
                 max_thread_num = atoi(optarg);
                 printf("max thread num: %d\n", max_thread_num);
+                break;
+            case QEMU_OPTION_cuda_threadnum:
+                cuda_thread_num = atoi(optarg);
+                printf("max thread num: %d\n", cuda_thread_num);
                 break;
 #endif
             case QEMU_OPTION_hda:

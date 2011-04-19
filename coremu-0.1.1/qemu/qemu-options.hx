@@ -2213,6 +2213,12 @@ Normally QEMU loads a configuration file from @var{sysconfdir}/qemu.conf and
 option will prevent QEMU from loading these configuration files at startup.
 ETEXI
 
+DEF("cnum", HAS_ARG, QEMU_OPTION_cuda_threadnum,
+    "-cnum n[CUDA Thread Num]", QEMU_ARCH_ALL)
+STEXI
+Set the max thread num for trace detection.
+ETEXI
+
 DEF("tnum", HAS_ARG, QEMU_OPTION_threadnum,
     "-tnum n[Max Thread Num]", QEMU_ARCH_ALL)
 STEXI

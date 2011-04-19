@@ -206,7 +206,7 @@ static inline void module_timestamp_save(uint8_t tid)
     memcpy(&temp_queue->entry[index], &ts.current_ts[tid], sizeof(struct timestamp));
 
 #ifdef CUDA
-    /*module_cuda_timestamp_entry_update_interface(tid, index, &ts.current_ts[tid]);*/
+    module_cuda_timestamp_entry_update_interface(tid, index, &ts.current_ts[tid]);
     /*module_cuda_timestamp_entry_update_interface(MAX_PROCESS_NUM, ts.current_ts_index, ts.thread); */
 #endif
 

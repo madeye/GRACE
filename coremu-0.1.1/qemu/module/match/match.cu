@@ -86,18 +86,18 @@ __host__ void module_cuda_timestamp_queue_fetch_interface(
                 cudaMemcpyDeviceToHost));
 }
 
-/*__host__ void module_cuda_timestamp_entry_update_interface(*/
-        /*uint8_t tid, uint32_t index, struct timestamp *h_ts_entry)*/
-/*{*/
-    /*cutilSafeCall(cudaMemcpyToSymbol(gts, h_ts_entry,*/
-                /*sizeof(struct timestamp),*/
-                /*tid * sizeof(struct*/
-                    /*timestamp_queue) +*/
-                /*index * sizeof(struct timestamp),*/
-                /*cudaMemcpyHostToDevice));*/
-/*}*/
+__host__ void module_cuda_timestamp_entry_update_interface(
+        uint8_t tid, uint32_t index, struct timestamp *h_ts_entry)
+{
+    cutilSafeCall(cudaMemcpyToSymbol(gts, h_ts_entry,
+                sizeof(struct timestamp),
+                tid * sizeof(struct
+                    timestamp_queue) +
+                index * sizeof(struct timestamp),
+                cudaMemcpyHostToDevice));
+}
 
-#if 1
+#if 0
 __host__ void module_cuda_timestamp_entry_update_interface(
         uint8_t max_tid_num, uint32_t *ctx, struct timestamp_queue *h_ts_queue)
 {
@@ -222,6 +222,7 @@ __host__ void module_cuda_global_race_queue_fetch_interface(
 __host__ void module_cuda_match_with_trace_buf_interface(
         uint8_t tid, uint32_t size, struct trace_content *h_trace_buf)
 {
+    /*printf("cuda : %d, %d, 0x%lx\n", tid, size, h_trace_buf);*/
     cutilSafeCall(cudaMemcpy(d_trace_buf, h_trace_buf, 
                 sizeof(struct trace_content) * size, 
                 cudaMemcpyHostToDevice));

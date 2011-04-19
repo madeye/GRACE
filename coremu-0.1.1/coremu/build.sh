@@ -9,5 +9,5 @@ make
 popd
 #cp -f ../qemu/module/lib/libmatch_x86_64D.a ./obj/libmatch_x86_64.a
 cp -f ../qemu/module/lib/libmatch_x86_64.a ./obj/libmatch_x86_64.a
-make
+make -j4
 make install

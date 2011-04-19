@@ -14,7 +14,7 @@
 // #define TRACE_PC_LIMIT 0x10000000
 
 
-#define TRACE_BUF_SIZE (256 * 1024)
+#define TRACE_BUF_SIZE (64 * 1024)
 
 enum {
     TRACE_MEM_BASE,
