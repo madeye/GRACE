@@ -198,6 +198,8 @@ void *module_pthread_stage_two(void *args)
 }
 
 volatile int last_tid = 0;
+struct trace_content cuda_buf[TRACE_BUF_CUDA_SIZE * 2];
+int cuda_buf_size = 0;
 
 void *module_pthread_stage_three(void *args)
 {
@@ -266,10 +268,17 @@ void *module_pthread_stage_three(void *args)
                     last_tid = tid;
                 }
 
-                module_cuda_timestamp_entry_update_interface(info.max_tid_num, cts.index, gts.thread); 
+                if (cuda_buf_size < TRACE_BUF_CUDA_SIZE) {
 
-                module_cuda_match_with_trace_buf_interface(tid, size, temp_chunk->buf);
+                    memcpy(cuda_buf + cuda_buf_size, temp_chunk->buf, size * sizeof(struct trace_content));
+                    cuda_buf_size += size;
 
+                } else {
+
+                    module_cuda_timestamp_entry_update_interface(info.max_tid_num, cts.index, gts.thread); 
+                    module_cuda_match_with_trace_buf_interface(tid, cuda_buf_size, cuda_buf);
+                    cuda_buf_size = 0;
+                }
             }
 #endif
 
