@@ -68,7 +68,7 @@ static inline void module_timestamp_print(struct global_timestamp_queue *gts)
         fprintf(stderr, "tid : %d ; timestamp count : %d\n", 
                 i, gts->thread[i].count);
 
-        if ((i < 1) || (i > MAX_THREAD_NUM)) {
+        if ((i < 1) || (i > max_thread_num)) {
             if (gts->thread[i].count > 1) {
                 isWrong = 1;
             }

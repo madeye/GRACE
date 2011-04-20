@@ -14,7 +14,9 @@ extern int cuda_thread_num;
 pthread_mutex_t det_lock = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t  det_cond = PTHREAD_COND_INITIALIZER;
 volatile uint8_t stage_three_stop = 0;
+volatile uint8_t stage_three_finish = 0;
 extern volatile uint8_t is_detect_start;
+extern uint32_t max_thread_num;
 
 #ifdef PPI_THREE_STAGE
 static inline void ppi_set_cpu_thread(int cpu_no)
@@ -195,6 +197,8 @@ void *module_pthread_stage_two(void *args)
     }    
 }
 
+volatile int last_tid = 0;
+
 void *module_pthread_stage_three(void *args)
 {
     uint8_t i, j;
@@ -243,25 +247,26 @@ void *module_pthread_stage_three(void *args)
 
                 if (info.max_tid_num < (tid + 1)) {
                     info.max_tid_num = (tid + 1);
+                    module_cuda_tid_update_interface(info.max_tid_num);
                 }
 
                 printf("max tid num: %d\n", info.max_tid_num);
 
                 info.exist[tid] = 1;
+
             }
 
             if (info.max_tid_num > 2) {
 
-                if (info.last_tid != tid) {
+                if (last_tid != tid) {
                     module_cuda_history_hash_queue_update_interface(
-                            info.last_tid, &history->thread[info.last_tid]);
+                            last_tid, &history->thread[last_tid]);
                     module_cuda_page_filter_update_interface(
-                            info.last_tid, &pfilter->thread[info.last_tid]);
-                    module_cuda_tid_update_interface(info.max_tid_num);
-                    info.last_tid = tid;
+                            last_tid, &pfilter->thread[last_tid]);
+                    last_tid = tid;
                 }
 
-                /*module_cuda_timestamp_entry_update_interface(info.max_tid_num, ts.current_ts_index, ts.thread); */
+                module_cuda_timestamp_entry_update_interface(info.max_tid_num, cts.index, gts.thread); 
 
                 module_cuda_match_with_trace_buf_interface(tid, size, temp_chunk->buf);
 
@@ -278,8 +283,9 @@ void *module_pthread_stage_three(void *args)
     }    
 #ifdef CUDA
     module_cuda_global_race_queue_fetch_interface(race);
-    module_cuda_free_interface();                       
+    module_cuda_free_interface(); 
     module_race_print();
+    stage_three_finish = 1;
 #endif
 }
 
@@ -408,7 +414,6 @@ void data_race_detector(uint8_t tid, uint32_t size, struct trace_content *buf)
 #if 1
     if (info.last_tid != tid) {
         module_shared_buf_all_empty();
-
         info.last_tid = tid;
     }
 #endif
@@ -445,6 +450,9 @@ void data_race_detector_report(void)
 #endif
 #endif
     stage_three_stop = 1;
+    while (!stage_three_finish){};
+#ifndef PPI_THREE_STAGE
     module_race_print();
+#endif
 }
 

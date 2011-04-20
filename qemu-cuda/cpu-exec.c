@@ -34,6 +34,7 @@ extern volatile uint8_t is_detect_start;
 extern uint8_t is_process_captured;
 extern struct map_queue map;
 extern struct ProcessQueue process_queue;   // Process queue
+extern uint32_t max_thread_num;
 
 #include "module/copy.h"
 #include "module/process.h"

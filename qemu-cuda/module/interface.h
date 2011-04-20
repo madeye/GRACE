@@ -11,9 +11,8 @@
 #define TRACE_MEM_FLOAT
 
 #define MAX_PROCESS_NUM 16
-#define MAX_THREAD_NUM 2
 
-#define TRACE_BUF_SIZE (1 * 1024)
+#define TRACE_BUF_SIZE (64 * 1024)
 
 #define CUDA
 
@@ -39,9 +38,9 @@ enum {
 };
 
 struct trace_content {
-    uint64_t address;
     uint32_t tid:8, type:2, size:4, index:18;
     uint32_t pc;
+    uint64_t address;
     // uint64_t dummy[2];
 };
 

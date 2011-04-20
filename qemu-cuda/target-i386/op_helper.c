@@ -23,6 +23,8 @@
 
 //#define DEBUG_PCALL
 
+#define CUDA
+
 #ifdef PPI_DEBUG_TOOL
 #include "module/process.h"
 #include <stdlib.h>
@@ -30,7 +32,7 @@
 #define STACK_MASK 0xffff8000
 extern FILE *stderr;
 
-extern uint8_t is_detect_start;             // Detection started flag
+extern volatile uint8_t is_detect_start;             // Detection started flag
 extern uint8_t is_process_captured;         // Process captured flag
 extern uint8_t just_clone;                  // Clone syscalled flag
 extern uint8_t just_exit;                   // Exit syscalled flag
@@ -41,6 +43,7 @@ extern uint32_t current_id;                 // Current thread index
 extern struct ProcessQueue process_queue;   // Process queue
 extern pthread_mutex_t det_lock;
 extern pthread_cond_t  det_cond;
+extern uint32_t max_thread_num;
 #endif
 
 #ifdef DEBUG_PCALL
@@ -156,7 +159,7 @@ void helper_process_enqueue(void) {
 
 void helper_process_dequeue(void) { 
     if (is_detect_start) {
-        is_detect_start = 0;
+        /*is_detect_start = 0;*/
         int index = process_dequeue(&process_queue, env->cr[3], ESP & STACK_MASK);
 #ifdef PPI_PROCESS_INFO
         fprintf(stderr, "process dequeue : cr3 : 0x%lx ; esp : 0x%lx ; index : %d\n", 
@@ -201,7 +204,7 @@ static inline void module_timestamp_save(uint8_t tid)
     memcpy(&temp_queue->entry[index], &cts.ts[tid], sizeof(struct timestamp));
 #ifdef CUDA
 #if 1
-    module_cuda_timestamp_entry_update_interface(tid, index, &cts.ts[tid]);
+    /*module_cuda_timestamp_entry_update_interface(tid, index, &cts.ts[tid]);*/
 #endif
 #endif
     cts.index[tid] = index;
@@ -423,7 +426,7 @@ void helper_syn_barrier_trace(target_ulong pc) {
             syn.barrier.entry[i].last_barrier_ts_index[tid] = index;
             syn.barrier.entry[i].is_barrier++;	     
 
-            if (syn.barrier.entry[i].is_barrier >= MAX_THREAD_NUM) {
+            if (syn.barrier.entry[i].is_barrier >= max_thread_num) {
 #if 0
                 printf("%d threads have reached barriers!\n", syn.barrier.entry[i].is_barrier);
 #endif

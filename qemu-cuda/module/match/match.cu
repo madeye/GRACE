@@ -35,7 +35,7 @@ __host__ void module_cuda_init_interface()
 
     memset (old_index, 0, MAX_PROCESS_NUM * sizeof(uint32_t));
 
-#define TRACE_CUDA_BUF_SIZE (1 << 24)
+#define TRACE_CUDA_BUF_SIZE (16 * 1024 * 1024)
 
     cutilSafeCall(cudaMalloc((void **)&d_trace_buf, 
                 sizeof(struct trace_content) * TRACE_CUDA_BUF_SIZE));
@@ -88,18 +88,18 @@ __host__ void module_cuda_timestamp_queue_fetch_interface(
                 cudaMemcpyDeviceToHost));
 }
 
-__host__ void module_cuda_timestamp_entry_update_interface(
-        uint8_t tid, uint32_t index, struct timestamp *h_ts_entry)
-{
-    cutilSafeCall(cudaMemcpyToSymbol(gts, h_ts_entry,
-                sizeof(struct timestamp),
-                tid * sizeof(struct
-                    timestamp_queue) +
-                index * sizeof(struct timestamp),
-                cudaMemcpyHostToDevice));
-}
+/*__host__ void module_cuda_timestamp_entry_update_interface(*/
+        /*uint8_t tid, uint32_t index, struct timestamp *h_ts_entry)*/
+/*{*/
+    /*cutilSafeCall(cudaMemcpyToSymbol(gts, h_ts_entry,*/
+                /*sizeof(struct timestamp),*/
+                /*tid * sizeof(struct*/
+                    /*timestamp_queue) +*/
+                /*index * sizeof(struct timestamp),*/
+                /*cudaMemcpyHostToDevice));*/
+/*}*/
 
-#if 0
+#if 1
 __host__ void module_cuda_timestamp_entry_update_interface(
         uint8_t max_tid_num, uint32_t *ctx, struct timestamp_queue *h_ts_queue)
 {
@@ -231,6 +231,7 @@ __host__ void module_cuda_match_with_trace_buf_interface(
 
     numBlocks = (size + numThreads - 1) / numThreads;
 
+    cudaFuncSetCacheConfig(module_match_with_trace_buf_on_cuda, cudaFuncCachePreferL1); 
     module_match_with_trace_buf_on_cuda<<<numBlocks, numThreads>>>(size,
             d_trace_buf);
 }
