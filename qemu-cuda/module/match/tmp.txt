@@ -1,0 +1,206 @@
+match.cu(1): error: include is not a template
+
+match.cu(1): error: identifier "stdint" is undefined
+
+match.cu(1): error: this operator is not allowed in a template argument expression
+
+/usr/local/cuda/bin/../include/cuda.h(119): error: linkage specification is not allowed
+
+/usr/local/cuda/bin/../include/cuda.h(119): error: expected an identifier
+
+/usr/local/cuda/bin/../include/cuda.h(119): error: expected a ";"
+
+/usr/local/cuda/bin/../include/cuda.h(140): warning: parsing restarts here after previous syntax error
+
+/usr/local/cuda/bin/../include/cuda.h(762): error: identifier "CUdeviceptr" is undefined
+
+/usr/local/cuda/bin/../include/cuda.h(763): error: identifier "CUarray" is undefined
+
+/usr/local/cuda/bin/../include/cuda.h(771): error: identifier "CUdeviceptr" is undefined
+
+/usr/local/cuda/bin/../include/cuda.h(772): error: identifier "CUarray" is undefined
+
+/usr/local/cuda/bin/../include/cuda.h(789): error: identifier "CUdeviceptr" is undefined
+
+/usr/local/cuda/bin/../include/cuda.h(790): error: identifier "CUarray" is undefined
+
+/usr/local/cuda/bin/../include/cuda.h(801): error: identifier "CUdeviceptr" is undefined
+
+/usr/local/cuda/bin/../include/cuda.h(802): error: identifier "CUarray" is undefined
+
+/usr/local/cuda/bin/../include/cuda.h(982): error: identifier "CUdevice" is undefined
+
+/usr/local/cuda/bin/../include/cuda.h(982): error: identifier "device" is undefined
+
+/usr/local/cuda/bin/../include/cuda.h(982): error: expected a ")"
+
+/usr/local/cuda/bin/../include/cuda.h(1037): error: "CUdevice" is not a type name
+
+/usr/local/cuda/bin/../include/cuda.h(1066): error: "CUdevice" is not a type name
+
+/usr/local/cuda/bin/../include/cuda.h(1094): error: "CUdevice" is not a type name
+
+/usr/local/cuda/bin/../include/cuda.h(1154): error: "CUdevice" is not a type name
+
+/usr/local/cuda/bin/../include/cuda.h(1235): error: "CUdevice" is not a type name
+
+/usr/local/cuda/bin/../include/cuda.h(1333): error: identifier "CUcontext" is undefined
+
+/usr/local/cuda/bin/../include/cuda.h(1333): error: identifier "pctx" is undefined
+
+/usr/local/cuda/bin/../include/cuda.h(1333): error: expected a ")"
+
+/usr/local/cuda/bin/../include/cuda.h(1367): error: expected a ")"
+
+/usr/local/cuda/bin/../include/cuda.h(1403): error: expected a ")"
+
+/usr/local/cuda/bin/../include/cuda.h(1435): error: expected a ")"
+
+/usr/local/cuda/bin/../include/cuda.h(1473): error: expected a ")"
+
+/usr/local/cuda/bin/../include/cuda.h(1803): error: expected a ")"
+
+/usr/local/cuda/bin/../include/cuda.h(1851): error: identifier "CUmodule" is undefined
+
+/usr/local/cuda/bin/../include/cuda.h(1851): error: identifier "module" is undefined
+
+/usr/local/cuda/bin/../include/cuda.h(1851): error: expected a ")"
+
+/usr/local/cuda/bin/../include/cuda.h(1885): error: expected a ")"
+
+/usr/local/cuda/bin/../include/cuda.h(1963): error: expected a ")"
+
+/usr/local/cuda/bin/../include/cuda.h(2000): error: expected a ")"
+
+/usr/local/cuda/bin/../include/cuda.h(2025): error: expected a ")"
+
+/usr/local/cuda/bin/../include/cuda.h(2055): error: identifier "CUfunction" is undefined
+
+/usr/local/cuda/bin/../include/cuda.h(2055): error: identifier "hfunc" is undefined
+
+/usr/local/cuda/bin/../include/cuda.h(2055): error: expected a ")"
+
+/usr/local/cuda/bin/../include/cuda.h(2089): error: identifier "CUdeviceptr" is undefined
+
+/usr/local/cuda/bin/../include/cuda.h(2089): error: identifier "dptr" is undefined
+
+/usr/local/cuda/bin/../include/cuda.h(2089): error: expected a ")"
+
+/usr/local/cuda/bin/../include/cuda.h(2123): error: identifier "CUtexref" is undefined
+
+/usr/local/cuda/bin/../include/cuda.h(2123): error: identifier "pTexRef" is undefined
+
+/usr/local/cuda/bin/../include/cuda.h(2123): error: expected a ")"
+
+/usr/local/cuda/bin/../include/cuda.h(2154): error: "CUmodule" is not a type name
+
+/usr/local/cuda/bin/../include/cuda.h(2230): error: expected a ")"
+
+/usr/local/cuda/bin/../include/cuda.h(2291): error: expected a ")"
+
+/usr/local/cuda/bin/../include/cuda.h(2320): error: expected a ")"
+
+/usr/local/cuda/bin/../include/cuda.h(2353): error: identifier "pbase" is undefined
+
+/usr/local/cuda/bin/../include/cuda.h(2353): error: expected a ")"
+
+/usr/local/cuda/bin/../include/cuda.h(2532): error: identifier "pdptr" is undefined
+
+/usr/local/cuda/bin/../include/cuda.h(2532): error: expected a ")"
+
+/usr/local/cuda/bin/../include/cuda.h(2591): error: expected a ")"
+
+/usr/local/cuda/bin/../include/cuda.h(2624): error: "CUdeviceptr" is not a type name
+
+/usr/local/cuda/bin/../include/cuda.h(2657): error: expected a ")"
+
+/usr/local/cuda/bin/../include/cuda.h(2691): error: identifier "CUarray" is undefined
+
+/usr/local/cuda/bin/../include/cuda.h(2691): error: "CUdeviceptr" is not a type name
+
+/usr/local/cuda/bin/../include/cuda.h(2727): error: expected a ")"
+
+/usr/local/cuda/bin/../include/cuda.h(2761): error: identifier "CUarray" is undefined
+
+/usr/local/cuda/bin/../include/cuda.h(2795): error: identifier "CUarray" is undefined
+
+/usr/local/cuda/bin/../include/cuda.h(2833): error: identifier "CUarray" is undefined
+
+/usr/local/cuda/bin/../include/cuda.h(2833): error: identifier "CUarray" is undefined
+
+/usr/local/cuda/bin/../include/cuda.h(3313): error: expected a ")"
+
+/usr/local/cuda/bin/../include/cuda.h(3353): error: "CUdeviceptr" is not a type name
+
+/usr/local/cuda/bin/../include/cuda.h(3390): error: expected a ")"
+
+/usr/local/cuda/bin/../include/cuda.h(3432): error: identifier "CUarray" is undefined
+
+/usr/local/cuda/bin/../include/cuda.h(3474): error: identifier "CUarray" is undefined
+
+/usr/local/cuda/bin/../include/cuda.h(3823): error: expected a ")"
+
+/usr/local/cuda/bin/../include/cuda.h(3856): error: expected a ")"
+
+/usr/local/cuda/bin/../include/cuda.h(3889): error: expected a ")"
+
+/usr/local/cuda/bin/../include/cuda.h(3927): error: expected a ")"
+
+/usr/local/cuda/bin/../include/cuda.h(3965): error: expected a ")"
+
+/usr/local/cuda/bin/../include/cuda.h(4003): error: expected a ")"
+
+/usr/local/cuda/bin/../include/cuda.h(4040): error: expected a ")"
+
+/usr/local/cuda/bin/../include/cuda.h(4077): error: expected a ")"
+
+/usr/local/cuda/bin/../include/cuda.h(4113): error: expected a ")"
+
+/usr/local/cuda/bin/../include/cuda.h(4155): error: expected a ")"
+
+/usr/local/cuda/bin/../include/cuda.h(4197): error: expected a ")"
+
+/usr/local/cuda/bin/../include/cuda.h(4239): error: expected a ")"
+
+/usr/local/cuda/bin/../include/cuda.h(4342): error: identifier "CUarray" is undefined
+
+/usr/local/cuda/bin/../include/cuda.h(4342): error: identifier "pHandle" is undefined
+
+/usr/local/cuda/bin/../include/cuda.h(4342): error: expected a ")"
+
+/usr/local/cuda/bin/../include/cuda.h(4375): error: "CUarray" is not a type name
+
+/usr/local/cuda/bin/../include/cuda.h(4406): error: expected a ")"
+
+/usr/local/cuda/bin/../include/cuda.h(4508): error: expected a ")"
+
+/usr/local/cuda/bin/../include/cuda.h(4544): error: "CUarray" is not a type name
+
+/usr/local/cuda/bin/../include/cuda.h(4954): error: expected a ")"
+
+/usr/local/cuda/bin/../include/cuda.h(4985): error: expected a ")"
+
+/usr/local/cuda/bin/../include/cuda.h(5042): error: "CUfunction" is not a type name
+
+/usr/local/cuda/bin/../include/cuda.h(5090): error: expected a ")"
+
+/usr/local/cuda/bin/../include/cuda.h(5119): error: expected a ")"
+
+/usr/local/cuda/bin/../include/cuda.h(5149): error: expected a ")"
+
+/usr/local/cuda/bin/../include/cuda.h(5179): error: expected a ")"
+
+/usr/local/cuda/bin/../include/cuda.h(5211): error: expected a ")"
+
+/usr/local/cuda/bin/../include/cuda.h(5245): error: expected a ")"
+
+/usr/local/cuda/bin/../include/cuda.h(5281): error: expected a ")"
+
+/usr/local/cuda/bin/../include/cuda.h(5321): error: expected a ")"
+
+/usr/local/cuda/bin/../include/cuda.h(5354): error: expected a ")"
+
+Error limit reached.
+100 errors detected in the compilation of "/tmp/tmpxft_00001de1_00000000-4_match.cpp1.ii".
+Compilation terminated.
+make: *** [obj/x86_64/release/match.cu.o] Error 4
