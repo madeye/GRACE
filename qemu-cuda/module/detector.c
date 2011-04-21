@@ -3,8 +3,6 @@
 #include <string.h>
 #include <assert.h>
 
-#define PPI_THREE_STAGE
-
 #include <unistd.h>
 #include <pthread.h>
 #include <sys/syscall.h>
@@ -18,6 +16,8 @@ volatile uint8_t stage_three_finish = 0;
 extern volatile uint8_t is_detect_start;
 extern uint32_t max_thread_num;
 
+#include "interface.h"
+
 #ifdef PPI_THREE_STAGE
 static inline void ppi_set_cpu_thread(int cpu_no)
 {
@@ -29,8 +29,6 @@ static inline void ppi_set_cpu_thread(int cpu_no)
             sizeof(unsigned long int), (cpu_set_t *)(&cpumask));
 }
 #endif
-
-#include "interface.h"
 
 #include "info.c"
 
@@ -197,9 +195,15 @@ void *module_pthread_stage_two(void *args)
     }    
 }
 
+#ifdef CUDA
+#ifdef PPI_THREE_STAGE
 volatile int last_tid = 0;
 struct trace_content cuda_buf[TRACE_BUF_CUDA_SIZE * 2];
 int cuda_buf_size = 0;
+uint32_t old_ts_index[MAX_PROCESS_NUM];
+//pthread_mutex_t syn_lock = PTHREAD_MUTEX_INITIALIZER;
+#endif
+#endif
 
 void *module_pthread_stage_three(void *args)
 {
@@ -223,6 +227,7 @@ void *module_pthread_stage_three(void *args)
 
     /* module_cuda_init();*/
     /* ts.thread = h_gtq;*/
+    memset(old_ts_index, 0, MAX_PROCESS_NUM * sizeof(uint32_t));
 #endif
 
     while(1) {
@@ -257,29 +262,41 @@ void *module_pthread_stage_three(void *args)
                 info.exist[tid] = 1;
 
             }
-
+#if 0
+            uint32_t k = 0, tmp_index = 0;
+            for (k = 0; k < size; k++) {
+                tmp_index = temp_chunk->buf[k].index;
+                if (old_ts_index[tid] != tmp_index) {
+                    module_cuda_timestamp_entry_update_interface_old(tid, 
+                            tmp_index, &gts.thread[tid].entry[tmp_index]);
+                    old_ts_index[tid] = tmp_index;
+                    //fprintf(stderr, "%d : %d\n", tid, tmp_index);
+                }
+            }
+#endif
             if (info.max_tid_num > 2) {
-
                 if (last_tid != tid) {
+                    //pthread_mutex_lock(&syn_lock);
                     module_cuda_history_hash_queue_update_interface(
                             last_tid, &history->thread[last_tid]);
                     module_cuda_page_filter_update_interface(
                             last_tid, &pfilter->thread[last_tid]);
+                    //pthread_mutex_unlock(&syn_lock);
                     last_tid = tid;
                 }
 
-                if (cuda_buf_size < TRACE_BUF_CUDA_SIZE) {
+                memcpy(cuda_buf + cuda_buf_size, temp_chunk->buf, size * sizeof(struct trace_content));
+                cuda_buf_size += size;
 
-                    memcpy(cuda_buf + cuda_buf_size, temp_chunk->buf, size * sizeof(struct trace_content));
-                    cuda_buf_size += size;
-
-                } else {
-
+                if (cuda_buf_size >= TRACE_BUF_CUDA_SIZE) {
+                    //pthread_mutex_lock(&syn_lock);
                     module_cuda_timestamp_entry_update_interface(info.max_tid_num, cts.index, gts.thread); 
                     module_cuda_match_with_trace_buf_interface(tid, cuda_buf_size, cuda_buf);
+                    //pthread_mutex_unlock(&syn_lock);
                     cuda_buf_size = 0;
                 }
             }
+
 #endif
 
             temp_chunk->info->thread_id = 0;
@@ -292,10 +309,19 @@ void *module_pthread_stage_three(void *args)
     }    
 #ifdef CUDA
     module_cuda_global_race_queue_fetch_interface(race);
-    module_cuda_free_interface(); 
-    module_race_print();
-    stage_three_finish = 1;
+#if 0
+    struct timestamp *tmp_ts;
+    tmp_ts = (struct timestamp *)malloc(sizeof(struct timestamp));
+    memset(tmp_ts, 0, sizeof(struct timestamp));
+    module_cuda_timestamp_entry_fetch_interface(1, 1000, tmp_ts);
+    module_timestamp_print_entry(&gts.thread[1].entry[1000]);
+    module_timestamp_print_entry(tmp_ts);
+    free(tmp_ts);
 #endif
+    module_cuda_free_interface(); 
+    //module_race_print();
+#endif
+    stage_three_finish = 1;
 }
 
 pthread_t pid[MAX_CORE_NUM];
@@ -447,6 +473,7 @@ void data_race_detector(uint8_t tid, uint32_t size, struct trace_content *buf)
 #endif
 }
 
+
 void data_race_detector_report(void) 
 {
 #ifdef PPI_THREE_STAGE
@@ -458,10 +485,12 @@ void data_race_detector_report(void)
     module_cuda_free_interface();
 #endif
 #endif
+#ifdef PPI_THREE_STAGE
     stage_three_stop = 1;
     while (!stage_three_finish){};
-#ifndef PPI_THREE_STAGE
-    module_race_print();
 #endif
+    //#ifndef PPI_THREE_STAGE
+    module_race_print();
+    //#endif
 }
 

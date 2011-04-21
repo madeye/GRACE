@@ -12,10 +12,22 @@
 
 #define MAX_PROCESS_NUM 16
 
+#define CUDA
+#define PPI_THREE_STAGE
+
+#ifdef CUDA
+#ifdef PPI_THREE_STAGE
+/* cuda + 3-stage */
 #define TRACE_BUF_SIZE (1 * 1024)
 #define TRACE_BUF_CUDA_SIZE (256 * 1024)
-
-#define CUDA
+#else
+/* cuda + 1-stage */
+#define TRACE_BUF_SIZE (256 * 1024)
+#endif
+#else
+/* 1-stage / 3-stage */
+#define TRACE_BUF_SIZE (1 * 1024)
+#endif
 
 enum {
     TRACE_TYPE_BASE,

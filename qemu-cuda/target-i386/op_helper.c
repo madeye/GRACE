@@ -203,8 +203,8 @@ static inline void module_timestamp_save(uint8_t tid)
 
     memcpy(&temp_queue->entry[index], &cts.ts[tid], sizeof(struct timestamp));
 #ifdef CUDA
-#if 1
-    /*module_cuda_timestamp_entry_update_interface(tid, index, &cts.ts[tid]);*/
+#ifndef PPI_THREE_STAGE
+    module_cuda_timestamp_entry_update_interface_old(tid, index, &cts.ts[tid]);
 #endif
 #endif
     cts.index[tid] = index;

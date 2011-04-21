@@ -197,7 +197,7 @@ uint8_t last_id = 0;
 struct ProcessQueue process_queue;
 struct map_queue map;
 uint32_t max_thread_num = 2;
-int cuda_thread_num = 512;
+int cuda_thread_num = 256;
 
 #define PPI_TIMESTAMP_INIT
 #define PPI_SYNC_INIT

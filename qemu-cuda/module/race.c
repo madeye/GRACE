@@ -7,14 +7,14 @@ struct race_entry {
     uint32_t instance;
 };
 
-#define MAX_RACE_NUM (1 << 10)
+#define MAX_RACE_NUM (1 << 16)
 
 struct race_queue {
     struct race_entry entry[MAX_RACE_NUM];
     uint32_t count;
 };
 
-#define MAX_CUDA_THREAD_NUM (1 << 10)
+#define MAX_CUDA_THREAD_NUM (1 << 4)
 
 struct global_race_queue {
     struct race_queue thread[MAX_CUDA_THREAD_NUM];
