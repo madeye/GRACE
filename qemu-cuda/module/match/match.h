@@ -53,7 +53,12 @@ extern "C" void module_cuda_global_race_queue_fetch_interface(
 
 /* trace */
 
+#ifndef PPI_THREE_STAGE
 extern "C" void module_cuda_match_with_trace_buf_interface(
         uint8_t tid, uint32_t size, struct trace_content *h_trace_buf);
+#else
+extern "C" void module_cuda_match_with_trace_buf_interface(
+        uint8_t tid, uint32_t size);
+#endif
 
 #endif /* _MATCH_H_ */

@@ -198,7 +198,8 @@ void *module_pthread_stage_two(void *args)
 #ifdef CUDA
 #ifdef PPI_THREE_STAGE
 volatile int last_tid = 0;
-struct trace_content cuda_buf[TRACE_BUF_CUDA_SIZE * 2];
+/*struct trace_content cuda_buf[TRACE_BUF_CUDA_SIZE * 2];*/
+extern struct trace_content *cuda_buf;
 int cuda_buf_size = 0;
 uint32_t old_ts_index[MAX_PROCESS_NUM];
 //pthread_mutex_t syn_lock = PTHREAD_MUTEX_INITIALIZER;
@@ -291,7 +292,8 @@ void *module_pthread_stage_three(void *args)
                 if (cuda_buf_size >= TRACE_BUF_CUDA_SIZE) {
                     //pthread_mutex_lock(&syn_lock);
                     module_cuda_timestamp_entry_update_interface(info.max_tid_num, cts.index, gts.thread); 
-                    module_cuda_match_with_trace_buf_interface(tid, cuda_buf_size, cuda_buf);
+                    /*module_cuda_match_with_trace_buf_interface(tid, cuda_buf_size, cuda_buf);*/
+                    module_cuda_match_with_trace_buf_interface(tid, cuda_buf_size);
                     //pthread_mutex_unlock(&syn_lock);
                     cuda_buf_size = 0;
                 }

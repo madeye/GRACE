@@ -11,6 +11,9 @@ int numThreads = 256;
 int numBlocks = 1024;
 
 struct trace_content *d_trace_buf;
+#ifdef PPI_THREE_STAGE
+struct trace_content *cuda_buf;
+#endif
 
 uint32_t old_index[MAX_PROCESS_NUM];
 
@@ -39,6 +42,13 @@ __host__ void module_cuda_init_interface()
 
     cutilSafeCall(cudaMalloc((void **)&d_trace_buf, 
                 sizeof(struct trace_content) * TRACE_CUDA_BUF_SIZE));
+
+#ifdef PPI_THREE_STAGE
+    cutilSafeCall(cudaHostAlloc((void **)&cuda_buf, sizeof(struct trace_content) * TRACE_BUF_CUDA_SIZE * 2, cudaHostAllocWriteCombined));
+#else
+    cutilSafeCall(cudaHostAlloc((void **)&cuda_buf, sizeof(struct trace_content) * TRACE_BUF_SIZE * 2, cudaHostAllocWriteCombined));
+#endif
+
 #if 1
     printf("\ncuda : global timestamp queue size : 0x%lx\n", 
             sizeof(struct global_timestamp_queue));
@@ -54,6 +64,7 @@ __host__ void module_cuda_init_interface()
 __host__ void module_cuda_free_interface()
 {
     cutilSafeCall(cudaFree(d_trace_buf));
+    cutilSafeCall(cudaFreeHost(cuda_buf));
 }
 
 __host__ void module_cuda_global_timestamp_queue_update_interface(
@@ -222,6 +233,7 @@ __host__ void module_cuda_timestamp_entry_update_interface(
 #endif
     }
 
+#ifndef PPI_THREE_STAGE
     __host__ void module_cuda_match_with_trace_buf_interface(
             uint8_t tid, uint32_t size, struct trace_content *h_trace_buf)
     {
@@ -237,3 +249,19 @@ __host__ void module_cuda_timestamp_entry_update_interface(
                 d_trace_buf);
     }
 
+#else
+    __host__ void module_cuda_match_with_trace_buf_interface(
+            uint8_t tid, uint32_t size)
+    {
+        /*printf("cuda : %d, %d, 0x%lx\n", tid, size, h_trace_buf);*/
+        cutilSafeCall(cudaMemcpyAsync(d_trace_buf, cuda_buf, 
+                    sizeof(struct trace_content) * size, 
+                    cudaMemcpyHostToDevice, 0));
+
+        numBlocks = (size + numThreads - 1) / numThreads;
+
+        cudaFuncSetCacheConfig(module_match_with_trace_buf_on_cuda, cudaFuncCachePreferL1); 
+        module_match_with_trace_buf_on_cuda<<<numBlocks, numThreads, 0, 0>>>(size,
+                d_trace_buf);
+    }
+#endif
