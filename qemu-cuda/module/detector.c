@@ -145,82 +145,6 @@ void *module_pthread_stage_two(void *args)
 
     j = 0;
 
-    while(1) {
-
-        pthread_mutex_lock(&det_lock);
-        if (!is_detect_start)
-            pthread_cond_wait(&det_cond, &det_lock);
-        pthread_mutex_unlock(&det_lock);
-
-        temp_chunk = &shared_buf.stage[0].core[i].chunk[j];
-
-        if (temp_chunk->info->is_buf_full) {
-            tid = temp_chunk->info->thread_id;
-            size = temp_chunk->info->buf_size;
-
-            module_detector_stage_two(tid, size, temp_chunk->buf);
-
-#if 1
-#if 1
-            next_chunk = &shared_buf.stage[1].core[cid].chunk[kid[cid]];
-
-            while (next_chunk->info->is_buf_full) {
-                cid = (cid + 1) % MAX_CORE_NUM;
-
-                next_chunk = &shared_buf.stage[1].core[cid].chunk[kid[cid]];
-            }
-#endif
-
-            module_shared_buf_copy(1, cid, kid[cid], tid, size, temp_chunk->buf);
-
-            kid[cid] = (kid[cid] + 1) % MAX_CHUNK_NUM;
-            cid = (cid + 1) % MAX_CORE_NUM;
-#endif
-#if 0
-            module_shared_buf_copy(1, cid, kid, tid, size, temp_chunk->buf);
-
-            cid = (cid + 1) % MAX_CORE_NUM;
-            if (cid == 0) {
-                kid = (kid + 1) % MAX_CHUNK_NUM;
-            }
-#endif
-
-            temp_chunk->info->thread_id = 0;
-            temp_chunk->info->buf_size = 0;				
-
-            temp_chunk->info->is_buf_full = 0;	
-
-            j = (j + 1) % MAX_CHUNK_NUM;
-        }
-    }    
-}
-
-#ifdef CUDA
-#ifdef PPI_THREE_STAGE
-volatile int last_tid = 0;
-/*struct trace_content cuda_buf[TRACE_BUF_CUDA_SIZE * 2];*/
-extern struct trace_content *cuda_buf;
-int cuda_buf_size = 0;
-uint32_t old_ts_index[MAX_PROCESS_NUM];
-//pthread_mutex_t syn_lock = PTHREAD_MUTEX_INITIALIZER;
-#endif
-#endif
-
-void *module_pthread_stage_three(void *args)
-{
-    uint8_t i, j;
-    volatile uint8_t tid;
-    volatile uint32_t size;
-    struct shared_trace_chunk *temp_chunk;
-
-    i = ((int *)args)[0];
-    fprintf(stderr, "stage three : core %d start!\n", i);
-
-    info.core_id = i;
-    ppi_set_cpu_thread(STAGE_THREE_BASE_CPU_ID + i);
-
-    j = 0;
-
 #ifdef CUDA
     printf("CUDA Init.\n");
     module_cuda_config_register(cuda_thread_num);
@@ -241,11 +165,13 @@ void *module_pthread_stage_three(void *args)
             pthread_cond_wait(&det_cond, &det_lock);
         pthread_mutex_unlock(&det_lock);
 
-        temp_chunk = &shared_buf.stage[1].core[i].chunk[j];
+        temp_chunk = &shared_buf.stage[0].core[i].chunk[j];
 
         if (temp_chunk->info->is_buf_full) {
             tid = temp_chunk->info->thread_id;
             size = temp_chunk->info->buf_size;
+
+            module_detector_stage_two(tid, size, temp_chunk->buf);
 
 #ifndef CUDA
             module_detector_stage_three(tid, size, temp_chunk->buf);            
@@ -263,18 +189,7 @@ void *module_pthread_stage_three(void *args)
                 info.exist[tid] = 1;
 
             }
-#if 0
-            uint32_t k = 0, tmp_index = 0;
-            for (k = 0; k < size; k++) {
-                tmp_index = temp_chunk->buf[k].index;
-                if (old_ts_index[tid] != tmp_index) {
-                    module_cuda_timestamp_entry_update_interface_old(tid, 
-                            tmp_index, &gts.thread[tid].entry[tmp_index]);
-                    old_ts_index[tid] = tmp_index;
-                    //fprintf(stderr, "%d : %d\n", tid, tmp_index);
-                }
-            }
-#endif
+
             if (info.max_tid_num > 2) {
                 if (last_tid != tid) {
                     //pthread_mutex_lock(&syn_lock);
@@ -290,11 +205,8 @@ void *module_pthread_stage_three(void *args)
                 cuda_buf_size += size;
 
                 if (cuda_buf_size >= TRACE_BUF_CUDA_SIZE) {
-                    //pthread_mutex_lock(&syn_lock);
                     module_cuda_timestamp_entry_update_interface(info.max_tid_num, cts.index, gts.thread); 
-                    /*module_cuda_match_with_trace_buf_interface(tid, cuda_buf_size, cuda_buf);*/
                     module_cuda_match_with_trace_buf_interface(tid, cuda_buf_size);
-                    //pthread_mutex_unlock(&syn_lock);
                     cuda_buf_size = 0;
                 }
             }
@@ -326,6 +238,17 @@ void *module_pthread_stage_three(void *args)
     stage_three_finish = 1;
 }
 
+#ifdef CUDA
+#ifdef PPI_THREE_STAGE
+volatile int last_tid = 0;
+/*struct trace_content cuda_buf[TRACE_BUF_CUDA_SIZE * 2];*/
+extern struct trace_content *cuda_buf;
+int cuda_buf_size = 0;
+uint32_t old_ts_index[MAX_PROCESS_NUM];
+//pthread_mutex_t syn_lock = PTHREAD_MUTEX_INITIALIZER;
+#endif
+#endif
+
 pthread_t pid[MAX_CORE_NUM];
 int cid[MAX_CORE_NUM];
 
@@ -344,9 +267,9 @@ static inline void data_race_detector_stage(void)
     pthread_create(&pid[0], NULL, module_pthread_stage_two, (void *)&cid[0]);
 
     /* STAGE THREE */
-    for (i = 0; i < MAX_CORE_NUM; i++) {
-        pthread_create(&pid[i], NULL, module_pthread_stage_three, (void *)&cid[i]);
-    }
+    /*for (i = 0; i < MAX_CORE_NUM; i++) {*/
+        /*pthread_create(&pid[i], NULL, module_pthread_stage_three, (void *)&cid[i]);*/
+    /*}*/
 }
 #else
 static inline void module_detector_start(uint8_t tid, 

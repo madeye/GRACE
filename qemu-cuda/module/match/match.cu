@@ -32,9 +32,20 @@ __host__ void module_cuda_config_register(int _numThreads)
 #endif
 }
 
+#ifdef KERNEL_TIME
+    cudaEvent_t start;
+    cudaEvent_t stop;
+    float cuda_time = 0.f;
+#endif
+
 __host__ void module_cuda_init_interface()
 {
     cudaSetDevice(cutGetMaxGflopsDeviceId());
+
+#ifdef KERNEL_TIME
+    cudaEventCreate(&start);
+    cudaEventCreate(&stop);
+#endif
 
     memset (old_index, 0, MAX_PROCESS_NUM * sizeof(uint32_t));
 
@@ -44,9 +55,10 @@ __host__ void module_cuda_init_interface()
                 sizeof(struct trace_content) * TRACE_CUDA_BUF_SIZE));
 
 #ifdef PPI_THREE_STAGE
-    cutilSafeCall(cudaHostAlloc((void **)&cuda_buf, sizeof(struct trace_content) * TRACE_BUF_CUDA_SIZE * 2, cudaHostAllocWriteCombined));
+    cutilSafeCall(cudaHostAlloc((void **)&cuda_buf, sizeof(struct trace_content) * TRACE_BUF_CUDA_SIZE * 2, cudaHostAllocDefault));
 #else
-    cutilSafeCall(cudaHostAlloc((void **)&cuda_buf, sizeof(struct trace_content) * TRACE_BUF_SIZE * 2, cudaHostAllocWriteCombined));
+    cuda_buf = (struct trace_content *) malloc (sizeof(struct trace_content) *
+            TRACE_BUF_SIZE * 2);
 #endif
 
 #if 1
@@ -65,6 +77,8 @@ __host__ void module_cuda_free_interface()
 {
     cutilSafeCall(cudaFree(d_trace_buf));
     cutilSafeCall(cudaFreeHost(cuda_buf));
+
+    printf("CUDA Time: %.2fs\n", cuda_time / 1000.0);
 }
 
 __host__ void module_cuda_global_timestamp_queue_update_interface(
@@ -253,7 +267,14 @@ __host__ void module_cuda_timestamp_entry_update_interface(
     __host__ void module_cuda_match_with_trace_buf_interface(
             uint8_t tid, uint32_t size)
     {
-        /*printf("cuda : %d, %d, 0x%lx\n", tid, size, h_trace_buf);*/
+
+#ifdef KERNEL_TIME
+        float elapsed = 0.f;
+        
+        cudaEventRecord(start, 0);
+#endif
+
+        /*printf("cuda : %d, %d\n", tid, size);*/
         cutilSafeCall(cudaMemcpyAsync(d_trace_buf, cuda_buf, 
                     sizeof(struct trace_content) * size, 
                     cudaMemcpyHostToDevice, 0));
@@ -263,5 +284,13 @@ __host__ void module_cuda_timestamp_entry_update_interface(
         cudaFuncSetCacheConfig(module_match_with_trace_buf_on_cuda, cudaFuncCachePreferL1); 
         module_match_with_trace_buf_on_cuda<<<numBlocks, numThreads, 0, 0>>>(size,
                 d_trace_buf);
+
+#ifdef KERNEL_TIME
+        cudaEventRecord(stop, 0);
+        cudaEventSynchronize(stop);
+        cudaEventElapsedTime(&elapsed, start, stop);
+        cuda_time += elapsed;
+#endif
+
     }
 #endif
