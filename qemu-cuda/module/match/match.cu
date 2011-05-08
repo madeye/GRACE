@@ -77,8 +77,9 @@ __host__ void module_cuda_free_interface()
 {
     cutilSafeCall(cudaFree(d_trace_buf));
     cutilSafeCall(cudaFreeHost(cuda_buf));
-
+#ifdef KERNEL_TIME
     printf("CUDA Time: %.2fs\n", cuda_time / 1000.0);
+#endif
 }
 
 __host__ void module_cuda_global_timestamp_queue_update_interface(

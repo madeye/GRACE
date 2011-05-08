@@ -61,6 +61,9 @@ static inline void module_detector_stage_two(uint8_t tid,
 
         if (info.max_tid_num < (tid + 1)) {
             info.max_tid_num = (tid + 1);
+#ifdef CUDA
+            module_cuda_tid_update_interface(info.max_tid_num);
+#endif
         }
 
         info.exist[tid] = 1;
@@ -111,6 +114,17 @@ static inline void module_detector_stage_three(uint8_t tid,
         }
     }
 }
+
+#ifdef CUDA
+#ifdef PPI_THREE_STAGE
+volatile int last_tid = 0;
+/*struct trace_content cuda_buf[TRACE_BUF_CUDA_SIZE * 2];*/
+extern struct trace_content *cuda_buf;
+int cuda_buf_size = 0;
+uint32_t old_ts_index[MAX_PROCESS_NUM];
+//pthread_mutex_t syn_lock = PTHREAD_MUTEX_INITIALIZER;
+#endif
+#endif
 
 void *module_pthread_stage_two(void *args)
 {
@@ -176,28 +190,13 @@ void *module_pthread_stage_two(void *args)
 #ifndef CUDA
             module_detector_stage_three(tid, size, temp_chunk->buf);            
 #else
-            if (!info.exist[tid]) {
-                printf("\tnew tid: %d\n", tid);
-
-                if (info.max_tid_num < (tid + 1)) {
-                    info.max_tid_num = (tid + 1);
-                    module_cuda_tid_update_interface(info.max_tid_num);
-                }
-
-                printf("max tid num: %d\n", info.max_tid_num);
-
-                info.exist[tid] = 1;
-
-            }
 
             if (info.max_tid_num > 2) {
                 if (last_tid != tid) {
-                    //pthread_mutex_lock(&syn_lock);
                     module_cuda_history_hash_queue_update_interface(
                             last_tid, &history->thread[last_tid]);
                     module_cuda_page_filter_update_interface(
                             last_tid, &pfilter->thread[last_tid]);
-                    //pthread_mutex_unlock(&syn_lock);
                     last_tid = tid;
                 }
 
@@ -223,31 +222,11 @@ void *module_pthread_stage_two(void *args)
     }    
 #ifdef CUDA
     module_cuda_global_race_queue_fetch_interface(race);
-#if 0
-    struct timestamp *tmp_ts;
-    tmp_ts = (struct timestamp *)malloc(sizeof(struct timestamp));
-    memset(tmp_ts, 0, sizeof(struct timestamp));
-    module_cuda_timestamp_entry_fetch_interface(1, 1000, tmp_ts);
-    module_timestamp_print_entry(&gts.thread[1].entry[1000]);
-    module_timestamp_print_entry(tmp_ts);
-    free(tmp_ts);
-#endif
     module_cuda_free_interface(); 
     //module_race_print();
 #endif
     stage_three_finish = 1;
 }
-
-#ifdef CUDA
-#ifdef PPI_THREE_STAGE
-volatile int last_tid = 0;
-/*struct trace_content cuda_buf[TRACE_BUF_CUDA_SIZE * 2];*/
-extern struct trace_content *cuda_buf;
-int cuda_buf_size = 0;
-uint32_t old_ts_index[MAX_PROCESS_NUM];
-//pthread_mutex_t syn_lock = PTHREAD_MUTEX_INITIALIZER;
-#endif
-#endif
 
 pthread_t pid[MAX_CORE_NUM];
 int cid[MAX_CORE_NUM];
