@@ -111,7 +111,7 @@ static inline void module_history_store_record(struct trace_content *content)
 
 /* match */
 
-static inline void module_match_with_load(struct trace_content *content, uint8_t other_tid) 
+static inline int module_match_with_load(struct trace_content *content, uint8_t other_tid) 
 {
 #ifdef MOD_MATCH
     uint8_t tid;
@@ -120,6 +120,7 @@ static inline void module_match_with_load(struct trace_content *content, uint8_t
     struct history_queue *temp_queue;
     uint32_t head, tail;
     struct history_entry *temp_entry;
+    int count;
 
     tid = content->tid;
     address = content->address;
@@ -135,7 +136,12 @@ static inline void module_match_with_load(struct trace_content *content, uint8_t
 
     last_index = ts.thread[other_tid]->count;
 
+    count = 0;
+
     while (tail != head) {
+
+        count++;
+
         if (tail == 0) {
             tail = MAX_LOAD_QUEUE_SIZE;
         }
@@ -161,10 +167,11 @@ static inline void module_match_with_load(struct trace_content *content, uint8_t
             break;
         }
     }
+    return count;
 #endif
 }
 
-static inline void module_match_with_store(struct trace_content *content, uint8_t other_tid) 
+static inline int module_match_with_store(struct trace_content *content, uint8_t other_tid) 
 {
 #ifdef MOD_MATCH
     uint8_t tid;
@@ -173,6 +180,7 @@ static inline void module_match_with_store(struct trace_content *content, uint8_
     struct history_queue *temp_queue;
     uint32_t head, tail;
     struct history_entry *temp_entry;
+    int count;
 
     tid = content->tid;
     address = content->address;
@@ -187,8 +195,10 @@ static inline void module_match_with_store(struct trace_content *content, uint8_
     }
 
     last_index = ts.thread[other_tid]->count;
+    count = 0;
 
     while (tail != head) {
+        count++;
         if (tail == 0) {
             tail = MAX_STORE_QUEUE_SIZE;
         }
@@ -214,6 +224,7 @@ static inline void module_match_with_store(struct trace_content *content, uint8_
             break;
         } 
     }
+    return count;
 #endif
 }
 

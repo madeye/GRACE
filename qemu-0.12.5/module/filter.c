@@ -48,26 +48,30 @@ static inline void module_filter_load_record(struct trace_content *content)
 #endif
 }
 
-static inline void module_filter_load_match(struct trace_content *content) 
+static inline int module_filter_load_match(struct trace_content *content) 
 {
 #ifdef MOD_FILTER
     uint8_t i;
     uint8_t tid;
     uint64_t address;
     uint32_t index;
+    int count;
 
     tid = content->tid;
     address = content->address;
+    count = 0;
 
     index = (address >> FILTER_BASE_BIT) & FILTER_ENTRY_MASK;
 
     for (i = 0; i < info.max_tid_num; i++) {
         if (i != tid) {
             if (pfilter->thread[i]->entry[index].store) {
-                module_match_with_store(content, i);
+                count += module_match_with_store(content, i);
             }
         }
     }
+
+    return count;
 #endif
 }
 
@@ -87,30 +91,33 @@ static inline void module_filter_store_record(struct trace_content *content)
 #endif
 }
 
-static inline void module_filter_store_match(struct trace_content *content) 
+static inline int module_filter_store_match(struct trace_content *content) 
 {
 #ifdef MOD_FILTER
     uint8_t i;
     uint8_t tid;
     uint64_t address;
     uint32_t index;
+    int count;
 
     tid = content->tid;
     address = content->address;
 
     index = (address >> FILTER_BASE_BIT) & FILTER_ENTRY_MASK;
 
+    count = 0;
     for (i = 0; i < info.max_tid_num; i++) {
         if (i != tid) {
             if (pfilter->thread[i]->entry[index].load) {
-                module_match_with_load(content, i);
+                count += module_match_with_load(content, i);
             }
 
             if (pfilter->thread[i]->entry[index].store) {
-                module_match_with_store(content, i);
+                count += module_match_with_store(content, i);
             }
         }
     }
+    return count;
 #endif
 }
 
