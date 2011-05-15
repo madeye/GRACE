@@ -57,7 +57,9 @@ extern "C" void module_cuda_global_race_queue_fetch_interface(
 extern "C" void module_cuda_match_with_trace_buf_interface(
         uint8_t tid, uint32_t size, struct trace_content *h_trace_buf);
 #else
-extern "C" void module_cuda_match_with_trace_buf_interface(
+extern "C" void module_cuda_match_with_trace_buf_read_interface(
+        uint8_t tid, uint32_t size);
+extern "C" void module_cuda_match_with_trace_buf_write_interface(
         uint8_t tid, uint32_t size);
 #endif
 

@@ -119,8 +119,10 @@ static inline void module_detector_stage_three(uint8_t tid,
 #ifdef PPI_THREE_STAGE
 volatile int last_tid = 0;
 /*struct trace_content cuda_buf[TRACE_BUF_CUDA_SIZE * 2];*/
-extern struct trace_content *cuda_buf;
-int cuda_buf_size = 0;
+extern struct trace_content *cuda_buf_r;
+extern struct trace_content *cuda_buf_w;
+volatile int cuda_buf_r_size = 0;
+volatile int cuda_buf_w_size = 0;
 uint32_t old_ts_index[MAX_PROCESS_NUM];
 //pthread_mutex_t syn_lock = PTHREAD_MUTEX_INITIALIZER;
 #endif
@@ -129,6 +131,7 @@ uint32_t old_ts_index[MAX_PROCESS_NUM];
 void *module_pthread_stage_two(void *args)
 {
     uint8_t i, j;
+    int n;
 #if 0
     uint8_t cid, kid;
 #endif
@@ -200,13 +203,23 @@ void *module_pthread_stage_two(void *args)
                     last_tid = tid;
                 }
 
-                memcpy(cuda_buf + cuda_buf_size, temp_chunk->buf, size * sizeof(struct trace_content));
-                cuda_buf_size += size;
+                for (n = 0; n < size; n++) {
+                    if (temp_chunk->buf[n].type == TRACE_MEM_LOAD)
+                        cuda_buf_r[cuda_buf_r_size++] = temp_chunk->buf[n];
+                    else if (temp_chunk->buf[n].type == TRACE_MEM_STORE)
+                        cuda_buf_w[cuda_buf_w_size++] = temp_chunk->buf[n];
+                }
 
-                if (cuda_buf_size >= TRACE_BUF_CUDA_SIZE) {
+                if (cuda_buf_r_size >= TRACE_BUF_CUDA_SIZE) {
                     module_cuda_timestamp_entry_update_interface(info.max_tid_num, cts.index, gts.thread); 
-                    module_cuda_match_with_trace_buf_interface(tid, cuda_buf_size);
-                    cuda_buf_size = 0;
+                    module_cuda_match_with_trace_buf_read_interface(tid, cuda_buf_r_size);
+                    cuda_buf_r_size = 0;
+                }
+
+                if (cuda_buf_w_size >= TRACE_BUF_CUDA_SIZE) {
+                    module_cuda_timestamp_entry_update_interface(info.max_tid_num, cts.index, gts.thread); 
+                    module_cuda_match_with_trace_buf_write_interface(tid, cuda_buf_w_size);
+                    cuda_buf_w_size = 0;
                 }
             }
 
@@ -247,7 +260,7 @@ static inline void data_race_detector_stage(void)
 
     /* STAGE THREE */
     /*for (i = 0; i < MAX_CORE_NUM; i++) {*/
-        /*pthread_create(&pid[i], NULL, module_pthread_stage_three, (void *)&cid[i]);*/
+    /*pthread_create(&pid[i], NULL, module_pthread_stage_three, (void *)&cid[i]);*/
     /*}*/
 }
 #else

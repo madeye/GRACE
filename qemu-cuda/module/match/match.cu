@@ -12,7 +12,8 @@ int numBlocks = 1024;
 
 struct trace_content *d_trace_buf;
 #ifdef PPI_THREE_STAGE
-struct trace_content *cuda_buf;
+struct trace_content *cuda_buf_r;
+struct trace_content *cuda_buf_w;
 #endif
 
 uint32_t old_index[MAX_PROCESS_NUM];
@@ -55,10 +56,13 @@ __host__ void module_cuda_init_interface()
                 sizeof(struct trace_content) * TRACE_CUDA_BUF_SIZE));
 
 #ifdef PPI_THREE_STAGE
-    cutilSafeCall(cudaHostAlloc((void **)&cuda_buf, sizeof(struct trace_content) * TRACE_BUF_CUDA_SIZE * 2, cudaHostAllocDefault));
+    cutilSafeCall(cudaHostAlloc((void **)&cuda_buf_r, sizeof(struct trace_content) * TRACE_CUDA_BUF_SIZE, cudaHostAllocDefault));
+    cutilSafeCall(cudaHostAlloc((void **)&cuda_buf_w, sizeof(struct trace_content) * TRACE_CUDA_BUF_SIZE, cudaHostAllocDefault));
 #else
-    cuda_buf = (struct trace_content *) malloc (sizeof(struct trace_content) *
-            TRACE_BUF_SIZE * 2);
+    cuda_buf_r = (struct trace_content *) malloc (sizeof(struct trace_content) *
+            TRACE_CUDA_BUF_SIZE);
+    cuda_buf_w = (struct trace_content *) malloc (sizeof(struct trace_content) *
+            TRACE_CUDA_BUF_SIZE);
 #endif
 
 #if 1
@@ -76,7 +80,8 @@ __host__ void module_cuda_init_interface()
 __host__ void module_cuda_free_interface()
 {
     cutilSafeCall(cudaFree(d_trace_buf));
-    cutilSafeCall(cudaFreeHost(cuda_buf));
+    cutilSafeCall(cudaFreeHost(cuda_buf_r));
+    cutilSafeCall(cudaFreeHost(cuda_buf_w));
 #ifdef KERNEL_TIME
     printf("CUDA Time: %.2fs\n", cuda_time / 1000.0);
 #endif
@@ -265,7 +270,7 @@ __host__ void module_cuda_timestamp_entry_update_interface(
     }
 
 #else
-    __host__ void module_cuda_match_with_trace_buf_interface(
+    __host__ void module_cuda_match_with_trace_buf_read_interface(
             uint8_t tid, uint32_t size)
     {
 
@@ -276,7 +281,36 @@ __host__ void module_cuda_timestamp_entry_update_interface(
 #endif
 
         /*printf("cuda : %d, %d\n", tid, size);*/
-        cutilSafeCall(cudaMemcpyAsync(d_trace_buf, cuda_buf, 
+        cutilSafeCall(cudaMemcpyAsync(d_trace_buf, cuda_buf_r, 
+                    sizeof(struct trace_content) * size, 
+                    cudaMemcpyHostToDevice, 0));
+
+        numBlocks = (size + numThreads - 1) / numThreads;
+
+        cudaFuncSetCacheConfig(module_match_with_trace_buf_on_cuda, cudaFuncCachePreferL1); 
+        module_match_with_trace_buf_on_cuda<<<numBlocks, numThreads, 0, 0>>>(size,
+                d_trace_buf);
+
+#ifdef KERNEL_TIME
+        cudaEventRecord(stop, 0);
+        cudaEventSynchronize(stop);
+        cudaEventElapsedTime(&elapsed, start, stop);
+        cuda_time += elapsed;
+#endif
+
+    }
+    __host__ void module_cuda_match_with_trace_buf_write_interface(
+            uint8_t tid, uint32_t size)
+    {
+
+#ifdef KERNEL_TIME
+        float elapsed = 0.f;
+        
+        cudaEventRecord(start, 0);
+#endif
+
+        /*printf("cuda : %d, %d\n", tid, size);*/
+        cutilSafeCall(cudaMemcpyAsync(d_trace_buf, cuda_buf_w, 
                     sizeof(struct trace_content) * size, 
                     cudaMemcpyHostToDevice, 0));
 
