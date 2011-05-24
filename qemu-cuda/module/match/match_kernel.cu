@@ -208,6 +208,29 @@ __device__ static inline void module_filter_store_before_match_on_cuda(
     }
 }
 
+__global__ static void module_match_with_trace_buf_on_cuda_r(
+        int size, struct trace_content *trace_buf)
+{
+    const int i = blockIdx.x * blockDim.x + threadIdx.x;
+    if (i >= size)
+        return;
+
+    struct trace_content *content = &trace_buf[i];
+	module_filter_load_before_match_on_cuda(content);
+}
+
+__global__ static void module_match_with_trace_buf_on_cuda_w(
+        int size, struct trace_content *trace_buf)
+{
+    const int i = blockIdx.x * blockDim.x + threadIdx.x;
+    if (i >= size)
+        return;
+
+    struct trace_content *content = &trace_buf[i];
+
+    module_filter_store_before_match_on_cuda(content);
+
+}
 __global__ static void module_match_with_trace_buf_on_cuda(
         int size, struct trace_content *trace_buf)
 {

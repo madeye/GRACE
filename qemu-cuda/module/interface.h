@@ -12,6 +12,7 @@
 
 #define MAX_PROCESS_NUM 16
 
+#define KERNEL_TIME
 #define CUDA
 #define PPI_THREE_STAGE
 

@@ -288,7 +288,7 @@ __host__ void module_cuda_timestamp_entry_update_interface(
         numBlocks = (size + numThreads - 1) / numThreads;
 
         cudaFuncSetCacheConfig(module_match_with_trace_buf_on_cuda, cudaFuncCachePreferL1); 
-        module_match_with_trace_buf_on_cuda<<<numBlocks, numThreads, 0, 0>>>(size,
+        module_match_with_trace_buf_on_cuda_r<<<numBlocks, numThreads, 0, 0>>>(size,
                 d_trace_buf);
 
 #ifdef KERNEL_TIME
@@ -317,7 +317,7 @@ __host__ void module_cuda_timestamp_entry_update_interface(
         numBlocks = (size + numThreads - 1) / numThreads;
 
         cudaFuncSetCacheConfig(module_match_with_trace_buf_on_cuda, cudaFuncCachePreferL1); 
-        module_match_with_trace_buf_on_cuda<<<numBlocks, numThreads, 0, 0>>>(size,
+        module_match_with_trace_buf_on_cuda_w<<<numBlocks, numThreads, 0, 0>>>(size,
                 d_trace_buf);
 
 #ifdef KERNEL_TIME

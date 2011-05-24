@@ -1,7 +1,7 @@
 #!/bin/bash
 export LDFLAGS="$LDFLAGS -ldl"
 make distclean
-./configure --prefix=/root/qemu --target-list=x86_64-softmmu
+./configure --prefix=/home/aza/qemu --target-list=x86_64-softmmu
 pushd ./module/match
 make clean
 #make dbg=1
