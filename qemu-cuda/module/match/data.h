@@ -3,7 +3,7 @@
 
 /* thread */
 
-#define MAX_PROCESS_NUM 16
+//#define MAX_PROCESS_NUM 16
 
 /* history */
 

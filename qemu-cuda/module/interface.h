@@ -10,7 +10,7 @@
 #define TRACE_MEM_INT
 #define TRACE_MEM_FLOAT
 
-#define MAX_PROCESS_NUM 16
+#define MAX_PROCESS_NUM 8
 
 #define CUDA
 #define PPI_THREE_STAGE
@@ -19,7 +19,7 @@
 #ifdef PPI_THREE_STAGE
 /* cuda + 3-stage */
 #define TRACE_BUF_SIZE (1 * 1024)
-#define TRACE_BUF_CUDA_SIZE (256 * 1024)
+#define TRACE_BUF_CUDA_SIZE (64 * 1024)
 #else
 /* cuda + 1-stage */
 #define TRACE_BUF_SIZE (256 * 1024)
@@ -44,6 +44,11 @@ enum {
 };
 
 enum {
+    TRACE_FLAG_LOAD = 1,
+    TRACE_FLAG_STORE = 2,
+};
+
+enum {
     TRACE_MEM_SIZE_BYTE = 1,
     TRACE_MEM_SIZE_WORD = 2,
     TRACE_MEM_SIZE_LONG = 4,
@@ -54,6 +59,7 @@ struct trace_content {
     uint32_t tid:8, type:2, size:4, index:18;
     uint32_t pc;
     uint64_t address;
+    uint8_t  flag[MAX_PROCESS_NUM];
     // uint64_t dummy[2];
 };
 

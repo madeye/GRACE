@@ -212,16 +212,26 @@ __global__ static void module_match_with_trace_buf_on_cuda(
         int size, struct trace_content *trace_buf)
 {
     const int i = blockIdx.x * blockDim.x + threadIdx.x;
+    int n;
+
     if (i >= size)
         return;
 
+
     struct trace_content *content = &trace_buf[i];
 
-    if (content->type == TRACE_MEM_LOAD) {
-        module_filter_load_before_match_on_cuda(content);
-    } else if (content->type == TRACE_MEM_STORE) {
-        module_filter_store_before_match_on_cuda(content);
+    for (n = 0; n < d_max_tid_num; n++) {
+        if (content->flag[n] & TRACE_FLAG_LOAD)
+            module_match_with_load_on_cuda(content, n);
+        if (content->flag[n] & TRACE_FLAG_STORE)
+            module_match_with_store_on_cuda(content, n);
     }
+
+    /*if (content->type == TRACE_MEM_LOAD) {*/
+        /*module_filter_load_before_match_on_cuda(content);*/
+    /*} else if (content->type == TRACE_MEM_STORE) {*/
+        /*module_filter_store_before_match_on_cuda(content);*/
+    /*}*/
 }
 
 #endif /* _HISTORY_KERNEL_H_ */

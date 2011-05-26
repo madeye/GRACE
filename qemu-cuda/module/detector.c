@@ -50,11 +50,13 @@ static inline void ppi_set_cpu_thread(int cpu_no)
 /* interface */
 
 #ifdef PPI_THREE_STAGE
-static inline void module_detector_stage_two(uint8_t tid, 
-        uint32_t size, struct trace_content *buf)
+static inline int module_detector_stage_two(uint8_t tid, 
+        uint32_t size, struct trace_content *buf, struct trace_content *tmp_buf)
 {
-    uint32_t i;
+    uint32_t i, buf_size;
     struct trace_content *content;
+
+    buf_size = 0;
 
     if (!info.exist[tid]) {
         printf("\tnew tid: %d\n", tid);
@@ -72,14 +74,24 @@ static inline void module_detector_stage_two(uint8_t tid,
         if (content->type == TRACE_MEM_LOAD) {
             module_history_load_record(content);
             module_filter_load_record(content);
+            if (module_filter_load_flag(content)) {
+                memcpy(tmp_buf + buf_size, content, sizeof(struct trace_content));
+                buf_size++;
+            }
         } else if (content->type == TRACE_MEM_STORE) {
             module_history_store_record(content);
             module_filter_store_record(content);
+            if (module_filter_store_flag(content)) {
+                memcpy(tmp_buf + buf_size, content, sizeof(struct trace_content));
+                buf_size++;
+            }
         } else {
             fprintf(stderr, "unknown type : %d\n", content->type);
             assert(0);
         }
     }
+
+    return buf_size;
 }
 
 static inline void module_detector_stage_three(uint8_t tid, 
@@ -128,6 +140,10 @@ void *module_pthread_stage_two(void *args)
     struct shared_trace_chunk *next_chunk;
 #endif
 
+    uint32_t buf_size;
+
+    struct trace_content tmp_buf[TRACE_BUF_SIZE];
+
     i = ((int *)args)[0];
     fprintf(stderr, "stage two : core %d start!\n", i);
 
@@ -158,7 +174,7 @@ void *module_pthread_stage_two(void *args)
             tid = temp_chunk->info->thread_id;
             size = temp_chunk->info->buf_size;
 
-            module_detector_stage_two(tid, size, temp_chunk->buf);
+            buf_size = module_detector_stage_two(tid, size, temp_chunk->buf, tmp_buf);
 
 #if 1
 #if 1
@@ -171,7 +187,7 @@ void *module_pthread_stage_two(void *args)
             }
 #endif
 
-            module_shared_buf_copy(1, cid, kid[cid], tid, size, temp_chunk->buf);
+            module_shared_buf_copy(1, cid, kid[cid], tid, buf_size, tmp_buf);
 
             kid[cid] = (kid[cid] + 1) % MAX_CHUNK_NUM;
             cid = (cid + 1) % MAX_CORE_NUM;
@@ -212,6 +228,8 @@ void *module_pthread_stage_three(void *args)
     volatile uint8_t tid;
     volatile uint32_t size;
     struct shared_trace_chunk *temp_chunk;
+    struct trace_content *content;
+    int n;
 
     i = ((int *)args)[0];
     fprintf(stderr, "stage three : core %d start!\n", i);
@@ -280,11 +298,30 @@ void *module_pthread_stage_three(void *args)
                     //pthread_mutex_lock(&syn_lock);
                     module_cuda_history_hash_queue_update_interface(
                             last_tid, &history->thread[last_tid]);
-                    module_cuda_page_filter_update_interface(
-                            last_tid, &pfilter->thread[last_tid]);
+                    /*module_cuda_page_filter_update_interface(*/
+                            /*last_tid, &pfilter->thread[last_tid]);*/
                     //pthread_mutex_unlock(&syn_lock);
                     last_tid = tid;
                 }
+
+                /*for (n = 0; n < size; n++) {*/
+                    /*content = &temp_chunk->buf[n];*/
+
+                    /*if (content->type == TRACE_MEM_LOAD) {*/
+                        /*if (module_filter_load_flag(content)) {*/
+                            /*memcpy(cuda_buf + cuda_buf_size, content, sizeof(struct trace_content));*/
+                            /*cuda_buf_size++;*/
+                        /*}*/
+                    /*} else if (content->type == TRACE_MEM_STORE) {*/
+                        /*if (module_filter_store_flag(content)) {*/
+                            /*memcpy(cuda_buf + cuda_buf_size, content, sizeof(struct trace_content));*/
+                            /*cuda_buf_size++;*/
+                        /*}*/
+                    /*} else {*/
+                        /*fprintf(stderr, "unknown type : %d\n", content->type);*/
+                        /*assert(0);*/
+                    /*}*/
+                /*}*/
 
                 memcpy(cuda_buf + cuda_buf_size, temp_chunk->buf, size * sizeof(struct trace_content));
                 cuda_buf_size += size;

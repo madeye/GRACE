@@ -58,6 +58,39 @@ static inline void module_filter_load_record(struct trace_content *content)
 #endif
 }
 
+// flag edition
+static inline uint8_t module_filter_load_flag(struct trace_content *content) 
+{
+#ifdef MOD_FILTER
+    uint8_t i;
+    uint8_t tid;
+    uint64_t address;
+    uint32_t index;
+    uint8_t flag;
+
+    flag = 0;
+
+    tid = content->tid;
+    address = content->address;
+
+    index = (address >> FILTER_BASE_BIT) & FILTER_ENTRY_MASK;
+
+    for (i = 0; i < info.max_tid_num; i++) {
+
+        content->flag[i] = 0;
+
+        if (i != tid) {
+            if (pfilter->thread[i].entry[index].store) {
+                content->flag[i] |= TRACE_FLAG_STORE;
+                flag = 1;
+            }
+        }
+    }
+
+    return flag;
+#endif
+}
+
 static inline void module_filter_load_match(struct trace_content *content) 
 {
 #ifdef MOD_FILTER
@@ -94,6 +127,44 @@ static inline void module_filter_store_record(struct trace_content *content)
     index = (address >> FILTER_BASE_BIT) & FILTER_ENTRY_MASK;
 
     pfilter->thread[tid].entry[index].store = 1;
+#endif
+}
+
+// flag edition
+static inline uint8_t module_filter_store_flag(struct trace_content *content) 
+{
+#ifdef MOD_FILTER
+    uint8_t i;
+    uint8_t tid;
+    uint64_t address;
+    uint32_t index;
+    uint8_t flag;
+
+    flag = 0;
+
+    tid = content->tid;
+    address = content->address;
+
+    index = (address >> FILTER_BASE_BIT) & FILTER_ENTRY_MASK;
+
+
+    for (i = 0; i < info.max_tid_num; i++) {
+
+        content->flag[i] = 0;
+
+        if (i != tid) {
+            if (pfilter->thread[i].entry[index].load) {
+                content->flag[i] |= TRACE_FLAG_LOAD;
+                flag = 1;
+            }
+
+            if (pfilter->thread[i].entry[index].store) {
+                content->flag[i] |= TRACE_FLAG_STORE;
+                flag = 1;
+            }
+        }
+    }
+    return flag;
 #endif
 }
 
