@@ -240,12 +240,17 @@ __global__ static void module_match_with_trace_buf_on_cuda(
     if (i >= size)
         return;
 
-    struct trace_content *content = &trace_buf[i];
+    __shared__ struct trace_content content;
 
-    if (content->type == TRACE_MEM_LOAD) {
-        module_filter_load_before_match_on_cuda(content);
-    } else if (content->type == TRACE_MEM_STORE) {
-        module_filter_store_before_match_on_cuda(content);
+    if (threadIdx.x == 0)
+        content = trace_buf[i];
+
+    __syncthreads();
+
+    if (content.type == TRACE_MEM_LOAD) {
+        module_filter_load_before_match_on_cuda(&content);
+    } else if (content.type == TRACE_MEM_STORE) {
+        module_filter_store_before_match_on_cuda(&content);
     }
 }
 

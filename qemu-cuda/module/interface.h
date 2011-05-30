@@ -19,7 +19,7 @@
 #ifdef PPI_THREE_STAGE
 /* cuda + 3-stage */
 #define TRACE_BUF_SIZE (1 * 1024)
-#define TRACE_BUF_CUDA_SIZE (256 * 1024)
+#define TRACE_BUF_CUDA_SIZE (64 * 1024)
 #else
 /* cuda + 1-stage */
 #define TRACE_BUF_SIZE (256 * 1024)
