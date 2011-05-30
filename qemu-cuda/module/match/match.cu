@@ -278,18 +278,31 @@ __host__ void module_cuda_timestamp_entry_update_interface(
         cudaEventRecord(start, 0);
 #endif
 
+        int i = 0;
+
         /*printf("cuda : %d, %d\n", tid, size);*/
         cutilSafeCall(cudaMemcpyAsync(d_trace_buf, cuda_buf, 
                     sizeof(struct trace_content) * size, 
                     cudaMemcpyHostToDevice, 0));
 
         /*numBlocks = (size + numThreads - 1) / numThreads;*/
-        numBlocks = size;
+        /*numBlocks = size;*/
+
+        numBlocks = NUM_BLOCKS;
         numThreads = HISTORY_QUEUE_SIZE;
 
         cudaFuncSetCacheConfig(module_match_with_trace_buf_on_cuda, cudaFuncCachePreferL1); 
-        module_match_with_trace_buf_on_cuda<<<numBlocks, numThreads, 0, 0>>>(size,
-                d_trace_buf);
+        for (i = 0; i < size / numBlocks; i++)
+            module_match_with_trace_buf_on_cuda
+                <<<numBlocks, numThreads, 0, 0>>>
+                (NUM_BLOCKS, d_trace_buf, i);
+
+        int remain = size - i * NUM_BLOCKS;
+
+        if (remain > 0)
+            module_match_with_trace_buf_on_cuda
+                <<<remain, numThreads, 0, 0>>>
+                (remain, d_trace_buf, i);
 
 #ifdef KERNEL_TIME
         cudaEventRecord(stop, 0);

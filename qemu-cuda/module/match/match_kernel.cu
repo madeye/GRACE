@@ -8,6 +8,9 @@ __device__ struct global_race_queue gr;
 
 __constant__ int d_max_tid_num;
 
+#define cudaAssert(condition) \
+    if (!(condition)) { asm("trap;"); }
+
 __device__ static inline int module_timestamp_order_on_cuda(
         uint8_t tid1, uint32_t index1, uint8_t tid2, uint32_t index2) 
 {
@@ -82,19 +85,20 @@ __device__ static inline void module_match_with_load_on_cuda(
     temp_queue = &gh.thread[other_tid].hash[(
             address >> HASH_BASE_BIT) % MAX_HASH_NUM];
 
-    tail = temp_queue->load_tail;
-    head = tail + 1;
-    if (head == MAX_LOAD_QUEUE_SIZE) {
-        head = 0;
-    }
+    /*tail = temp_queue->load_tail;*/
+    /*head = tail + 1;*/
+    /*if (head == MAX_LOAD_QUEUE_SIZE) {*/
+        /*head = 0;*/
+    /*}*/
 
     /*last_index = gts.thread[other_tid].count;*/
-    last_index = MAX_TIMESTAMP_NUM;
+    /*last_index = MAX_TIMESTAMP_NUM;*/
 
-    tail = head + j;
-    if (tail >= MAX_LOAD_QUEUE_SIZE) {
-        tail = tail - MAX_LOAD_QUEUE_SIZE;
-    }
+    tail = j;
+
+    /*if (tail >= MAX_LOAD_QUEUE_SIZE) {*/
+        /*tail = tail - MAX_LOAD_QUEUE_SIZE;*/
+    /*}*/
 
     /*while (tail != head) {*/
 
@@ -142,24 +146,21 @@ __device__ static inline void module_match_with_store_on_cuda(
     const uint8_t tid = content->tid;
     const uint64_t address = content->address;
     const uint32_t index = content->index;
-    const int j = threadIdx.x;
+    int j = threadIdx.x;
 
     temp_queue = &gh.thread[other_tid].hash[(
             address >> HASH_BASE_BIT) % MAX_HASH_NUM];
 
-    tail = temp_queue->store_tail;
-    head = tail + 1;
-    if (head == MAX_STORE_QUEUE_SIZE) {
-        head = 0;
-    }
+    /*tail = temp_queue->store_tail;*/
+    /*head = tail + 1;*/
+    /*if (head == MAX_STORE_QUEUE_SIZE) {*/
+        /*head = 0;*/
+    /*}*/
 
     /*last_index = gts.thread[other_tid].count;*/
     /*last_index = MAX_TIMESTAMP_NUM;*/
 
-    tail = head + j;
-    if (tail >= MAX_STORE_QUEUE_SIZE) {
-        tail = tail - MAX_STORE_QUEUE_SIZE;
-    }
+    tail = j;
 
     /*while (tail != head) {*/
 
@@ -202,9 +203,13 @@ __device__ static inline void module_filter_load_before_match_on_cuda(
     const uint32_t index = (address >> FILTER_BASE_BIT) & FILTER_ENTRY_MASK;
 
     for (uint8_t i = 0; i < d_max_tid_num; i++) {
+
+        /*flag[i] = 0;*/
+
         if (i != tid) {
             if (gpf.thread[i].entry[index].store) {
                 module_match_with_store_on_cuda(content, i);
+                /*flag[i] |= TRACE_FLAG_STORE;*/
             }
         }
     }
@@ -219,39 +224,59 @@ __device__ static inline void module_filter_store_before_match_on_cuda(
     const uint32_t index = (address >> FILTER_BASE_BIT) & FILTER_ENTRY_MASK;
 
     for (uint8_t i = 0; i < d_max_tid_num; i++) {
+
+        /*flag[i] = 0;*/
+
         if (i != tid) {
             if (gpf.thread[i].entry[index].load) {
                 module_match_with_load_on_cuda(content, i);
+                /*flag[i] |= TRACE_FLAG_LOAD;*/
             }
 
             if (gpf.thread[i].entry[index].store) {
                 module_match_with_store_on_cuda(content, i);
+                /*flag[i] |= TRACE_FLAG_STORE;*/
             }
         }
     }
 }
 
 __global__ static void module_match_with_trace_buf_on_cuda(
-        int size, struct trace_content *trace_buf)
+        int size, struct trace_content *trace_buf, int offset)
 {
     /*const int i = blockIdx.x * blockDim.x + threadIdx.x;*/
-    const int i = blockIdx.x;
+    int i = blockIdx.x;
+    uint8_t n;
 
-    if (i >= size)
-        return;
+    /*if (i >= size)*/
+        /*return;*/
 
-    __shared__ struct trace_content content;
+   i += offset * NUM_BLOCKS; 
 
-    if (threadIdx.x == 0)
-        content = trace_buf[i];
+   struct trace_content *content = &trace_buf[i];
+    /*__shared__ struct trace_content content;*/
+    /*__shared__ uint8_t flag[MAX_PROCESS_NUM];*/
 
-    __syncthreads();
+    /*if (threadIdx.x == 0) {*/
+        /*content = trace_buf[i];*/
+    /*}*/
 
-    if (content.type == TRACE_MEM_LOAD) {
-        module_filter_load_before_match_on_cuda(&content);
-    } else if (content.type == TRACE_MEM_STORE) {
-        module_filter_store_before_match_on_cuda(&content);
+    /*__syncthreads();*/
+
+    if (content->type == TRACE_MEM_LOAD) {
+        module_filter_load_before_match_on_cuda(content);
+    } else if (content->type == TRACE_MEM_STORE) {
+        module_filter_store_before_match_on_cuda(content);
     }
+
+
+    /*for (n = 0; n < d_max_tid_num; n++) {*/
+    /*if (flag[n] & TRACE_FLAG_LOAD)*/
+    /*module_match_with_load_on_cuda(&content, n);*/
+    /*if (flag[n] & TRACE_FLAG_STORE)*/
+    /*module_match_with_store_on_cuda(&content, n);*/
+    /*}*/
+
 }
 
 #endif /* _HISTORY_KERNEL_H_ */

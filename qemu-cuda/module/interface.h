@@ -10,16 +10,19 @@
 #define TRACE_MEM_INT
 #define TRACE_MEM_FLOAT
 
-#define MAX_PROCESS_NUM 16
+#define MAX_PROCESS_NUM 8
 
 #define CUDA
 #define PPI_THREE_STAGE
 
 #ifdef CUDA
+
+#define NUM_BLOCKS 8 * 1024
+
 #ifdef PPI_THREE_STAGE
 /* cuda + 3-stage */
 #define TRACE_BUF_SIZE (1 * 1024)
-#define TRACE_BUF_CUDA_SIZE (64 * 1024)
+#define TRACE_BUF_CUDA_SIZE (256 * 1024)
 #else
 /* cuda + 1-stage */
 #define TRACE_BUF_SIZE (256 * 1024)
@@ -41,6 +44,11 @@ enum {
     TRACE_SYN_COND_WAIT,
     TRACE_SYN_COND_BROADCAST,
     TRACE_TYPE_LIMIT,
+};
+
+enum {
+    TRACE_FLAG_LOAD = 1,
+    TRACE_FLAG_STORE = 2,
 };
 
 enum {

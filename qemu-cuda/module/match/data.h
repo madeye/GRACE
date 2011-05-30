@@ -1,10 +1,6 @@
 #ifndef _DATA_H_
 #define _DATA_H_
 
-/* thread */
-
-#define MAX_PROCESS_NUM 16
-
 /* history */
 
 struct history_entry {

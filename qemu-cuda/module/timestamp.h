@@ -64,7 +64,7 @@ static inline void module_timestamp_print(struct global_timestamp_queue *gts)
 {
     uint32_t i, isWrong = 0;
 
-    for (i = 0; i < MAX_PROCESS_NUM / 2; i++) {
+    for (i = 0; i < MAX_PROCESS_NUM; i++) {
         fprintf(stderr, "tid : %d ; timestamp count : %d\n", 
                 i, gts->thread[i].count);
 
