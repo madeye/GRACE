@@ -97,21 +97,27 @@ __device__ static inline void module_match_with_load_on_cuda(
         tail--;
 
         temp_entry= &temp_queue->load_entry[tail];
-        other_index = temp_entry->content.index;
 
-        if (last_index != other_index) {
-            if (module_timestamp_order_on_cuda(
-                        other_tid, other_index, tid, index)) {
-                break;
-            }
+        /*if (last_index != other_index) {*/
+            /*if (module_timestamp_order_on_cuda(*/
+                        /*other_tid, other_index, tid, index)) {*/
+                /*break;*/
+            /*}*/
 
-            last_index = other_index;
-        }
+            /*last_index = other_index;*/
+        /*}*/
 
         other_address = temp_entry->content.address;
 
         if (address == other_address) {
-            module_race_collection_on_cuda(&temp_entry->content, content);
+
+            other_index = temp_entry->content.index;
+
+            if (!module_timestamp_order_on_cuda(
+                        other_tid, other_index, tid, index)) {
+                module_race_collection_on_cuda(&temp_entry->content, content);
+            }
+
 
             break;
         }
@@ -150,21 +156,26 @@ __device__ static inline void module_match_with_store_on_cuda(
         tail--;
 
         temp_entry = &temp_queue->store_entry[tail];
-        other_index = temp_entry->content.index;
 
-        if (last_index != other_index) {
-            if (module_timestamp_order_on_cuda(
-                        other_tid, other_index, tid, index)) {
-                break;
-            }
+        /*if (last_index != other_index) {*/
+            /*if (module_timestamp_order_on_cuda(*/
+                        /*other_tid, other_index, tid, index)) {*/
+                /*break;*/
+            /*}*/
 
-            last_index = other_index;
-        }
+            /*last_index = other_index;*/
+        /*}*/
 
         other_address = temp_entry->content.address;
 
         if (address == other_address) {
-            module_race_collection_on_cuda(&temp_entry->content, content);
+
+            other_index = temp_entry->content.index;
+
+            if (!module_timestamp_order_on_cuda(
+                        other_tid, other_index, tid, index)) {
+                module_race_collection_on_cuda(&temp_entry->content, content);
+            }
 
             break;
         }
