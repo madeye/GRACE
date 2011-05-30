@@ -77,6 +77,7 @@ __device__ static inline void module_match_with_load_on_cuda(
     const uint8_t tid = content->tid;
     const uint64_t address = content->address;
     const uint32_t index = content->index;
+    const int j = threadIdx.x; 
 
     temp_queue = &gh.thread[other_tid].hash[(
             address >> HASH_BASE_BIT) % MAX_HASH_NUM];
@@ -90,38 +91,42 @@ __device__ static inline void module_match_with_load_on_cuda(
     /*last_index = gts.thread[other_tid].count;*/
     last_index = MAX_TIMESTAMP_NUM;
 
-    while (tail != head) {
-        if (tail == 0) {
-            tail = MAX_LOAD_QUEUE_SIZE;
+    tail = head + j;
+    if (tail >= MAX_LOAD_QUEUE_SIZE)
+        tail = tail - MAX_LOAD_QUEUE_SIZE;
+
+    /*while (tail != head) {*/
+    /*if (tail == 0) {*/
+    /*tail = MAX_LOAD_QUEUE_SIZE;*/
+    /*}*/
+    /*tail--;*/
+
+    temp_entry= &temp_queue->load_entry[tail];
+
+    /*if (last_index != other_index) {*/
+    /*if (module_timestamp_order_on_cuda(*/
+    /*other_tid, other_index, tid, index)) {*/
+    /*break;*/
+    /*}*/
+
+    /*last_index = other_index;*/
+    /*}*/
+
+    other_address = temp_entry->content.address;
+
+    if (address == other_address) {
+
+        other_index = temp_entry->content.index;
+
+        if (!module_timestamp_order_on_cuda(
+                    other_tid, other_index, tid, index)) {
+            module_race_collection_on_cuda(&temp_entry->content, content);
         }
-        tail--;
-
-        temp_entry= &temp_queue->load_entry[tail];
-
-        /*if (last_index != other_index) {*/
-            /*if (module_timestamp_order_on_cuda(*/
-                        /*other_tid, other_index, tid, index)) {*/
-                /*break;*/
-            /*}*/
-
-            /*last_index = other_index;*/
-        /*}*/
-
-        other_address = temp_entry->content.address;
-
-        if (address == other_address) {
-
-            other_index = temp_entry->content.index;
-
-            if (!module_timestamp_order_on_cuda(
-                        other_tid, other_index, tid, index)) {
-                module_race_collection_on_cuda(&temp_entry->content, content);
-            }
 
 
-            break;
-        }
+        /*break;*/
     }
+    /*}*/
 }
 
 __device__ static inline void module_match_with_store_on_cuda(
@@ -136,6 +141,7 @@ __device__ static inline void module_match_with_store_on_cuda(
     const uint8_t tid = content->tid;
     const uint64_t address = content->address;
     const uint32_t index = content->index;
+    const int j = threadIdx.x;
 
     temp_queue = &gh.thread[other_tid].hash[(
             address >> HASH_BASE_BIT) % MAX_HASH_NUM];
@@ -146,40 +152,44 @@ __device__ static inline void module_match_with_store_on_cuda(
         head = 0;
     }
 
+    tail = head + j;
+    if (tail >= MAX_LOAD_QUEUE_SIZE)
+        tail = tail - MAX_LOAD_QUEUE_SIZE;
+
     /*last_index = gts.thread[other_tid].count;*/
     last_index = MAX_TIMESTAMP_NUM;
 
-    while (tail != head) {
-        if (tail == 0) {
-            tail = MAX_STORE_QUEUE_SIZE;
+    /*while (tail != head) {*/
+    /*if (tail == 0) {*/
+    /*tail = MAX_STORE_QUEUE_SIZE;*/
+    /*}*/
+    /*tail--;*/
+
+    temp_entry = &temp_queue->store_entry[tail];
+
+    /*if (last_index != other_index) {*/
+    /*if (module_timestamp_order_on_cuda(*/
+    /*other_tid, other_index, tid, index)) {*/
+    /*break;*/
+    /*}*/
+
+    /*last_index = other_index;*/
+    /*}*/
+
+    other_address = temp_entry->content.address;
+
+    if (address == other_address) {
+
+        other_index = temp_entry->content.index;
+
+        if (!module_timestamp_order_on_cuda(
+                    other_tid, other_index, tid, index)) {
+            module_race_collection_on_cuda(&temp_entry->content, content);
         }
-        tail--;
 
-        temp_entry = &temp_queue->store_entry[tail];
-
-        /*if (last_index != other_index) {*/
-            /*if (module_timestamp_order_on_cuda(*/
-                        /*other_tid, other_index, tid, index)) {*/
-                /*break;*/
-            /*}*/
-
-            /*last_index = other_index;*/
-        /*}*/
-
-        other_address = temp_entry->content.address;
-
-        if (address == other_address) {
-
-            other_index = temp_entry->content.index;
-
-            if (!module_timestamp_order_on_cuda(
-                        other_tid, other_index, tid, index)) {
-                module_race_collection_on_cuda(&temp_entry->content, content);
-            }
-
-            break;
-        }
+        /*break;*/
     }
+    /*}*/
 }
 
 __device__ static inline void module_filter_load_before_match_on_cuda(
@@ -222,7 +232,8 @@ __device__ static inline void module_filter_store_before_match_on_cuda(
 __global__ static void module_match_with_trace_buf_on_cuda(
         int size, struct trace_content *trace_buf)
 {
-    const int i = blockIdx.x * blockDim.x + threadIdx.x;
+    /*const int i = blockIdx.x * blockDim.x + threadIdx.x;*/
+    const int i = blockIdx.x;
     int n;
 
     if (i >= size)
@@ -239,9 +250,9 @@ __global__ static void module_match_with_trace_buf_on_cuda(
     }
 
     /*if (content->type == TRACE_MEM_LOAD) {*/
-        /*module_filter_load_before_match_on_cuda(content);*/
+    /*module_filter_load_before_match_on_cuda(content);*/
     /*} else if (content->type == TRACE_MEM_STORE) {*/
-        /*module_filter_store_before_match_on_cuda(content);*/
+    /*module_filter_store_before_match_on_cuda(content);*/
     /*}*/
 }
 
