@@ -82,18 +82,16 @@ __device__ static inline void module_match_with_load_on_cuda(
     temp_queue = &gh.thread[other_tid].hash[(
             address >> HASH_BASE_BIT) % MAX_HASH_NUM];
 
-    tail = temp_queue->load_tail;
-    head = tail + 1;
-    if (head == MAX_LOAD_QUEUE_SIZE) {
-        head = 0;
-    }
+    /*tail = temp_queue->load_tail;*/
+    /*head = tail + 1;*/
+    /*if (head == MAX_LOAD_QUEUE_SIZE) {*/
+        /*head = 0;*/
+    /*}*/
 
     /*last_index = gts.thread[other_tid].count;*/
-    last_index = MAX_TIMESTAMP_NUM;
+    /*last_index = MAX_TIMESTAMP_NUM;*/
 
-    tail = head + j;
-    if (tail >= MAX_LOAD_QUEUE_SIZE)
-        tail = tail - MAX_LOAD_QUEUE_SIZE;
+    tail = j;
 
     /*while (tail != head) {*/
     /*if (tail == 0) {*/
@@ -146,18 +144,16 @@ __device__ static inline void module_match_with_store_on_cuda(
     temp_queue = &gh.thread[other_tid].hash[(
             address >> HASH_BASE_BIT) % MAX_HASH_NUM];
 
-    tail = temp_queue->store_tail;
-    head = tail + 1;
-    if (head == MAX_STORE_QUEUE_SIZE) {
-        head = 0;
-    }
+    /*tail = temp_queue->store_tail;*/
+    /*head = tail + 1;*/
+    /*if (head == MAX_STORE_QUEUE_SIZE) {*/
+        /*head = 0;*/
+    /*}*/
 
-    tail = head + j;
-    if (tail >= MAX_STORE_QUEUE_SIZE)
-        tail = tail - MAX_STORE_QUEUE_SIZE;
+    tail = j;
 
     /*last_index = gts.thread[other_tid].count;*/
-    last_index = MAX_TIMESTAMP_NUM;
+    /*last_index = MAX_TIMESTAMP_NUM;*/
 
     /*while (tail != head) {*/
     /*if (tail == 0) {*/
