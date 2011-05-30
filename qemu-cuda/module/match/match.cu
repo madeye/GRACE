@@ -257,7 +257,10 @@ __host__ void module_cuda_timestamp_entry_update_interface(
                     sizeof(struct trace_content) * size, 
                     cudaMemcpyHostToDevice));
 
-        numBlocks = (size + numThreads - 1) / numThreads;
+        /*numBlocks = (size + numThreads - 1) / numThreads;*/
+        
+        numBlocks = size;
+        numThreads = HISTORY_QUEUE_SIZE;
 
         cudaFuncSetCacheConfig(module_match_with_trace_buf_on_cuda, cudaFuncCachePreferL1); 
         module_match_with_trace_buf_on_cuda<<<numBlocks, numThreads>>>(size,
@@ -280,7 +283,9 @@ __host__ void module_cuda_timestamp_entry_update_interface(
                     sizeof(struct trace_content) * size, 
                     cudaMemcpyHostToDevice, 0));
 
-        numBlocks = (size + numThreads - 1) / numThreads;
+        /*numBlocks = (size + numThreads - 1) / numThreads;*/
+        numBlocks = size;
+        numThreads = HISTORY_QUEUE_SIZE;
 
         cudaFuncSetCacheConfig(module_match_with_trace_buf_on_cuda, cudaFuncCachePreferL1); 
         module_match_with_trace_buf_on_cuda<<<numBlocks, numThreads, 0, 0>>>(size,
