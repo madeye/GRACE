@@ -153,8 +153,8 @@ __device__ static inline void module_match_with_store_on_cuda(
     }
 
     tail = head + j;
-    if (tail >= MAX_LOAD_QUEUE_SIZE)
-        tail = tail - MAX_LOAD_QUEUE_SIZE;
+    if (tail >= MAX_STORE_QUEUE_SIZE)
+        tail = tail - MAX_STORE_QUEUE_SIZE;
 
     /*last_index = gts.thread[other_tid].count;*/
     last_index = MAX_TIMESTAMP_NUM;
