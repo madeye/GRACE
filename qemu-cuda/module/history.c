@@ -11,9 +11,9 @@ struct history_entry {
 
 struct history_queue {
     struct history_entry load_entry[MAX_LOAD_QUEUE_SIZE];
-    uint64_t address_ld[MAX_LOAD_QUEUE_SIZE];
+    uint32_t address_ld[MAX_LOAD_QUEUE_SIZE];
     struct history_entry store_entry[MAX_STORE_QUEUE_SIZE];
-    uint64_t address_st[MAX_LOAD_QUEUE_SIZE];
+    uint32_t address_st[MAX_LOAD_QUEUE_SIZE];
     uint32_t load_tail;
     uint32_t store_tail;
 };
@@ -60,13 +60,13 @@ static inline void module_history_load_record(struct trace_content *content)
 {
 #ifdef MOD_HISTORY
     uint8_t tid;
-    uint64_t address;
+    uint32_t address;
     struct history_queue *temp_queue;
     uint32_t tail;
     struct history_entry *temp_entry;
 
     tid = content->tid;
-    address = (content->address);
+    address =(uint32_t) (content->address);
 
     temp_queue = &history->thread[tid].hash[(address >> HASH_BASE_BIT) % MAX_HASH_NUM];
 
@@ -90,13 +90,13 @@ static inline void module_history_store_record(struct trace_content *content)
 {
 #ifdef MOD_HISTORY
     uint8_t tid;
-    uint64_t address;
+    uint32_t address;
     struct history_queue *temp_queue;
     uint32_t tail;
     struct history_entry *temp_entry;
 
     tid = content->tid;
-    address = (content->address);
+    address = (uint32_t)(content->address);
 
     temp_queue = &history->thread[tid].hash[(address >> HASH_BASE_BIT) % MAX_HASH_NUM];
 
