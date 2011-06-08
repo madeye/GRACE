@@ -17,9 +17,9 @@ struct history_entry {
 
 struct history_queue {
     struct history_entry load_entry[MAX_LOAD_QUEUE_SIZE];
-    uint32_t address_ld[MAX_LOAD_QUEUE_SIZE];
+    uint64_t address_ld[MAX_LOAD_QUEUE_SIZE];
     struct history_entry store_entry[MAX_STORE_QUEUE_SIZE];
-    uint32_t address_st[MAX_LOAD_QUEUE_SIZE];
+    uint64_t address_st[MAX_LOAD_QUEUE_SIZE];
     uint32_t load_tail;
     uint32_t store_tail;
 };

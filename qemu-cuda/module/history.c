@@ -60,13 +60,13 @@ static inline void module_history_load_record(struct trace_content *content)
 {
 #ifdef MOD_HISTORY
     uint8_t tid;
-    uint32_t address;
+    uint64_t address;
     struct history_queue *temp_queue;
     uint32_t tail;
     struct history_entry *temp_entry;
 
     tid = content->tid;
-    address = (uint32_t)(content->address);
+    address = (content->address);
 
     temp_queue = &history->thread[tid].hash[(address >> HASH_BASE_BIT) % MAX_HASH_NUM];
 
@@ -90,13 +90,13 @@ static inline void module_history_store_record(struct trace_content *content)
 {
 #ifdef MOD_HISTORY
     uint8_t tid;
-    uint32_t address;
+    uint64_t address;
     struct history_queue *temp_queue;
     uint32_t tail;
     struct history_entry *temp_entry;
 
     tid = content->tid;
-    address = (uint32_t)(content->address);
+    address = (content->address);
 
     temp_queue = &history->thread[tid].hash[(address >> HASH_BASE_BIT) % MAX_HASH_NUM];
 
@@ -122,14 +122,14 @@ static inline void module_match_with_load(struct trace_content *content, uint8_t
 {
 #ifdef MOD_MATCH
     uint8_t tid;
-    uint32_t address, other_address;
+    uint64_t address, other_address;
     uint32_t index, other_index, last_index;
     struct history_queue *temp_queue;
     uint32_t head, tail;
     struct history_entry *temp_entry;
 
     tid = content->tid;
-    address = (uint32_t)content->address;
+    address = content->address;
     index = content->index;
 
     temp_queue = &history->thread[other_tid].hash[(address >> HASH_BASE_BIT) % MAX_HASH_NUM];
@@ -175,14 +175,14 @@ static inline void module_match_with_store(struct trace_content *content, uint8_
 {
 #ifdef MOD_MATCH
     uint8_t tid;
-    uint32_t address, other_address;
+    uint64_t address, other_address;
     uint32_t index, other_index, last_index;
     struct history_queue *temp_queue;
     uint32_t head, tail;
     struct history_entry *temp_entry;
 
     tid = content->tid;
-    address = (uint32_t)(content->address);
+    address = (content->address);
     index = content->index;
 
     temp_queue = &history->thread[other_tid].hash[(address >> HASH_BASE_BIT) % MAX_HASH_NUM];
