@@ -37,15 +37,18 @@ struct timestamp_queue {
 #define HASH_BASE_BIT 2
 
 struct history_entry {
-    struct trace_content content;
+    struct trace_content_no_addr content;
 };
 
 struct history_queue {
     struct history_entry load_entry[MAX_LOAD_QUEUE_SIZE];
+    uint32_t address_ld[MAX_LOAD_QUEUE_SIZE];
     struct history_entry store_entry[MAX_STORE_QUEUE_SIZE];
+    uint32_t address_st[MAX_LOAD_QUEUE_SIZE];
     uint32_t load_tail;
     uint32_t store_tail;
 };
+
 
 struct history_hash_queue {
     struct history_queue hash[MAX_HASH_NUM];

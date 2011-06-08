@@ -79,14 +79,14 @@ __device__ static inline void module_race_collection_on_cuda(
 __device__ static inline void module_match_with_load_on_cuda(
         struct trace_content *content, const uint8_t other_tid)
 {
-    uint64_t other_address;
+    uint32_t other_address;
     uint32_t other_index, last_index;
     struct history_queue *temp_queue;
     uint32_t head, tail;
     struct history_entry *temp_entry;
 
     const uint8_t tid = content->tid;
-    const uint64_t address = content->address;
+    const uint32_t address = (uint32_t)content->address;
     const uint32_t index = content->index;
 
     temp_queue = &gh.thread[other_tid].hash[(
@@ -145,7 +145,7 @@ __device__ static inline void module_match_with_store_on_cuda(
     struct history_entry *temp_entry;
 
     const uint8_t tid = content->tid;
-    const uint64_t address = content->address;
+    const uint32_t address = (uint32_t)content->address;
     const uint32_t index = content->index;
 
     temp_queue = &gh.thread[other_tid].hash[(
