@@ -8,7 +8,7 @@
 /* history */
 
 struct history_entry {
-    struct trace_content content;
+    struct trace_content_no_addr content;
 };
 
 #define HISTORY_QUEUE_SIZE ((1 << 7))
@@ -17,10 +17,13 @@ struct history_entry {
 
 struct history_queue {
     struct history_entry load_entry[MAX_LOAD_QUEUE_SIZE];
+    uint32_t address_ld[MAX_LOAD_QUEUE_SIZE];
     struct history_entry store_entry[MAX_STORE_QUEUE_SIZE];
+    uint32_t address_st[MAX_LOAD_QUEUE_SIZE];
     uint32_t load_tail;
     uint32_t store_tail;
 };
+
 
 #define MAX_HASH_NUM 1024
 #define HASH_BASE_BIT 2
@@ -71,7 +74,7 @@ struct global_page_filter {
 /* race */
 
 struct race_entry {
-    struct trace_content content1;
+    struct trace_content_no_addr content1;
     struct trace_content content2;
     uint32_t instance;
 };

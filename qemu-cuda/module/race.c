@@ -2,7 +2,7 @@
 /* race */
 
 struct race_entry {
-    struct trace_content content1;
+    struct trace_content_no_addr content1;
     struct trace_content content2;
     uint32_t instance;
 };
@@ -108,7 +108,19 @@ static inline void module_race_print(void)
     fprintf(stderr, "race remain count : %d\n\n", remain->count);
 }
 
-static inline int module_race_content_equal(struct trace_content *content1, struct trace_content *content2)
+static inline int module_race_content_equal(struct trace_content_no_addr *content1, struct trace_content_no_addr *content2)
+{
+    if ((content1->type == content2->type) 
+            && (content1->size == content2->size) 
+            && (content1->pc == content2->pc)
+            /* && (content1->tid == content2->tid) */ 
+            /* && (content1->address == content2->address) */ ) {
+        return 1;
+    }
+
+    return 0;
+}
+static inline int module_race_content_equal2(struct trace_content *content1, struct trace_content *content2)
 {
     if ((content1->type == content2->type) 
             && (content1->size == content2->size) 
@@ -121,7 +133,7 @@ static inline int module_race_content_equal(struct trace_content *content1, stru
     return 0;
 }
 
-static inline void module_race_collection(struct trace_content *content1, struct trace_content *content2) 
+static inline void module_race_collection(struct trace_content_no_addr *content1, struct trace_content *content2) 
 {
     int i;
     struct race_queue *temp_queue;
@@ -130,7 +142,7 @@ static inline void module_race_collection(struct trace_content *content1, struct
 
     for (i = 0; i < temp_queue->count; i++) {
         if (module_race_content_equal(content1, &temp_queue->entry[i].content1) 
-                && module_race_content_equal(content2, &temp_queue->entry[i].content2)) {
+                && module_race_content_equal2(content2, &temp_queue->entry[i].content2)) {
             temp_queue->entry[i].instance++;
 
             break;
@@ -138,7 +150,7 @@ static inline void module_race_collection(struct trace_content *content1, struct
     }
 
     if (i >= temp_queue->count) {
-        memcpy(&temp_queue->entry[i].content1, content1, sizeof(struct trace_content));
+        memcpy(&temp_queue->entry[i].content1, content1, sizeof(struct trace_content_no_addr));
         memcpy(&temp_queue->entry[i].content2, content2, sizeof(struct trace_content));
         temp_queue->entry[i].instance++;
 

@@ -46,7 +46,7 @@ static inline void module_filter_load_record(struct trace_content *content)
 {
 #ifdef MOD_FILTER
     uint8_t tid;
-    uint64_t address;
+    uint32_t address;
     uint32_t index;
 
     tid = content->tid;

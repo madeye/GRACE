@@ -12,6 +12,7 @@
 
 #define MAX_PROCESS_NUM 16
 
+#define KERNEL_TIME
 #define CUDA
 #define PPI_THREE_STAGE
 
@@ -54,6 +55,13 @@ struct trace_content {
     uint32_t tid:8, type:2, size:4, index:18;
     uint32_t pc;
     uint64_t address;
+    // uint64_t dummy[2];
+};
+
+struct trace_content_no_addr {
+    uint32_t tid:8, type:2, size:4, index:18;
+    uint32_t pc;
+    //uint64_t address;
     // uint64_t dummy[2];
 };
 

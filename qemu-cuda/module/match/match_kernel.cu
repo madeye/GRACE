@@ -21,7 +21,7 @@ __device__ static inline int module_timestamp_order_on_cuda(
 }
 
 __device__ static inline int module_race_content_equal(
-        struct trace_content *content1, struct trace_content *content2)
+        struct trace_content_no_addr *content1, struct trace_content_no_addr *content2)
 {
     if ((content1->type == content2->type) && 
             (content1->size == content2->size) && 
@@ -33,8 +33,19 @@ __device__ static inline int module_race_content_equal(
 }
 
 
-__device__ static inline void module_race_collection_on_cuda(
+__device__ static inline int module_race_content_equal2(
         struct trace_content *content1, struct trace_content *content2)
+{
+    if ((content1->type == content2->type) && 
+            (content1->size == content2->size) && 
+            (content1->pc == content2->pc)) {
+        return 1;
+    }
+
+    return 0;
+}
+__device__ static inline void module_race_collection_on_cuda(
+        struct trace_content_no_addr *content1, struct trace_content *content2)
 {
     uint32_t i;
     struct race_queue *temp_queue;
@@ -44,7 +55,7 @@ __device__ static inline void module_race_collection_on_cuda(
     for (i = 0; i < temp_queue->count; i++) {
         if (module_race_content_equal(content1, 
                     &temp_queue->entry[i].content1) && 
-                module_race_content_equal(content2, 
+                module_race_content_equal2(content2, 
                     &temp_queue->entry[i].content2)) {
             temp_queue->entry[i].instance++;
 
@@ -54,7 +65,7 @@ __device__ static inline void module_race_collection_on_cuda(
 
     if (i >= temp_queue->count) {
         memcpy(&temp_queue->entry[i].content1, 
-                content1, sizeof(struct trace_content));
+                content1, sizeof(struct trace_content_no_addr));
         memcpy(&temp_queue->entry[i].content2, 
                 content2, sizeof(struct trace_content));
         temp_queue->entry[i].instance++;
@@ -108,7 +119,7 @@ __device__ static inline void module_match_with_load_on_cuda(
             /*last_index = other_index;*/
         /*}*/
 
-        other_address = temp_entry->content.address;
+        other_address = temp_queue->address_ld[tail];
 
         if (address == other_address) {
 
@@ -167,7 +178,7 @@ __device__ static inline void module_match_with_store_on_cuda(
             /*last_index = other_index;*/
         /*}*/
 
-        other_address = temp_entry->content.address;
+        other_address = temp_queue->address_st[tail];
 
         if (address == other_address) {
 
