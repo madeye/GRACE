@@ -11,7 +11,7 @@ struct history_entry {
     struct trace_content_no_addr content;
 };
 
-#define HISTORY_QUEUE_SIZE ((1 << 7))
+#define HISTORY_QUEUE_SIZE ((1 <<3))
 #define MAX_LOAD_QUEUE_SIZE HISTORY_QUEUE_SIZE
 #define MAX_STORE_QUEUE_SIZE HISTORY_QUEUE_SIZE
 
@@ -25,7 +25,7 @@ struct history_queue {
 };
 
 
-#define MAX_HASH_NUM 1024
+#define MAX_HASH_NUM 16384
 #define HASH_BASE_BIT 2
 
 struct history_hash_queue {

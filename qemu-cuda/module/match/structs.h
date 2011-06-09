@@ -30,10 +30,10 @@ struct timestamp_queue {
 ///////////////////////////////////////////////
 // History Data Structure 
 
-#define MAX_STORE_QUEUE_SIZE 128
+#define MAX_STORE_QUEUE_SIZE 8
 #define MAX_LOAD_QUEUE_SIZE (MAX_STORE_QUEUE_SIZE * 1)
 
-#define MAX_HASH_NUM 1024
+#define MAX_HASH_NUM 16384
 #define HASH_BASE_BIT 2
 
 struct history_entry {
