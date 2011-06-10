@@ -13,7 +13,7 @@ struct history_queue {
     struct history_entry load_entry[MAX_LOAD_QUEUE_SIZE];
     uint32_t address_ld[MAX_LOAD_QUEUE_SIZE];
     struct history_entry store_entry[MAX_STORE_QUEUE_SIZE];
-    uint32_t address_st[MAX_LOAD_QUEUE_SIZE];
+    uint32_t address_st[MAX_STORE_QUEUE_SIZE];
     uint32_t load_tail;
     uint32_t store_tail;
 };
@@ -77,6 +77,8 @@ static inline void module_history_load_record(struct trace_content *content)
     temp_entry->content.tid = content->tid;
     temp_entry->content.type = content->type;
     temp_entry->content.size = content->size;
+    uint32_t subTail=tail/2;
+    //temp_queue->address_ld[subTail]= tail%2==0? (temp_queue->address_ld[subTail]&0xffff0000)|( address>>16):(temp_queue->address_ld[subTail]&0xffff)|( address&0xffff0000);
     temp_queue->address_ld[tail]= address;
     //temp_entry->content.address = content->address;
     temp_entry->content.index = content->index;
@@ -107,6 +109,8 @@ static inline void module_history_store_record(struct trace_content *content)
     temp_entry->content.tid = content->tid;
     temp_entry->content.type = content->type;
     temp_entry->content.size = content->size;
+    uint32_t subTail=tail/2;
+    //temp_queue->address_st[subTail]= tail%2==0? (temp_queue->address_st[subTail]&0xffff0000)|( address>>16):(temp_queue->address_st[subTail]&0x0000ffff)|( address&0xffff0000);
     temp_queue->address_st[tail]= address;
     //temp_entry->content.address = content->address;
     temp_entry->content.index = content->index;
