@@ -11,9 +11,9 @@ struct history_entry {
 
 struct history_queue {
     struct history_entry load_entry[MAX_LOAD_QUEUE_SIZE];
-    uint64_t address_ld[MAX_LOAD_QUEUE_SIZE];
+    uint32_t address_ld[MAX_LOAD_QUEUE_SIZE/2];
     struct history_entry store_entry[MAX_STORE_QUEUE_SIZE];
-    uint64_t address_st[MAX_STORE_QUEUE_SIZE];
+    uint32_t address_st[MAX_STORE_QUEUE_SIZE/2];
     uint32_t load_tail;
     uint32_t store_tail;
 };
@@ -81,11 +81,11 @@ static inline void module_history_load_record(struct trace_content *content)
     //temp_queue->address_ld[subTail]= tail%2==0? (temp_queue->address_ld[subTail]&0xffff0000)|( address>>16):(temp_queue->address_ld[subTail]&0xffff)|( address&0xffff0000);
     if(tail%2==0)
     {
-    	temp_queue->address_ld[subTail]=(temp_queue->address_ld[subTail]&0xffffffff00000000)+ address;
+    	temp_queue->address_ld[subTail]=(temp_queue->address_ld[subTail]&0xffff0000)+ ((address>>16)&0xffff);
     }
     else
     {
-    	temp_queue->address_ld[subTail]=(temp_queue->address_ld[subTail]&0xffffffff)+( address<<32);
+    	temp_queue->address_ld[subTail]=(temp_queue->address_ld[subTail]&0xffff)+( address&0xffff0000);
     }
     //temp_queue->address_ld[tail]= address;
     //temp_entry->content.address = content->address;
@@ -120,11 +120,11 @@ static inline void module_history_store_record(struct trace_content *content)
     uint32_t subTail=tail/2;
     if(tail%2==0)
     {
-    	temp_queue->address_st[subTail]=(temp_queue->address_st[subTail]&0xffffffff00000000)+ address;
+    	temp_queue->address_st[subTail]=(temp_queue->address_st[subTail]&0xffff0000)+ ((address>>16)&0xffff);
     }
     else
     {
-    	temp_queue->address_st[subTail]=(temp_queue->address_st[subTail]&0xffffffff)+( address<<32);
+    	temp_queue->address_st[subTail]=(temp_queue->address_st[subTail]&0xffff)+( address&0xffff0000);
     }
 
     //temp_queue->address_st[subTail]= tail%2==0? (temp_queue->address_st[subTail]&0xffff0000)|( address>>16):(temp_queue->address_st[subTail]&0x0000ffff)|( address&0xffff0000);
