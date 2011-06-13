@@ -79,7 +79,7 @@ __device__ static inline void module_race_collection_on_cuda(
 __device__ static inline void module_match_with_load_on_cuda(
         struct trace_content *content, const uint8_t other_tid)
 {
-    uint32_t double_address;
+    uint64_t double_address;
     uint32_t other_address;
     uint32_t other_index, last_index;
     struct history_queue *temp_queue;
@@ -112,21 +112,21 @@ __device__ static inline void module_match_with_load_on_cuda(
             tail = MAX_LOAD_QUEUE_SIZE;
         }
         tail--;
-        subTail=tail/2;
         
         temp_entry= &temp_queue->load_entry[tail];
-        
-        /*if(tail%2==1)
+
+        subTail=tail/2;
+        if(tail%2==1)
         {
         	double_address=  temp_queue->address_ld[subTail];
-        	other_address = double_address>>16;
+        	other_address = double_address>>32;
         }
         else
         {
         	double_address=  temp_queue->address_ld[subTail];
-        	other_address = double_address & 0xffff;
-        }*/
-	other_address = temp_queue->address_ld[tail];
+        	other_address =uint32_t (double_address & 0xffffffff);
+        }
+	//other_address = temp_queue->address_ld[tail];
         /*if (last_index != other_index) {*/
             /*if (module_timestamp_order_on_cuda(*/
                         /*other_tid, other_index, tid, index)) {*/
@@ -136,7 +136,7 @@ __device__ static inline void module_match_with_load_on_cuda(
             /*last_index = other_index;*/
         /*}*/
 
-        uint32_t address_m = address>>16;
+        //uint32_t address_m = address;
         if (address == other_address) {
 
             other_index = temp_entry->content.index;
@@ -154,7 +154,7 @@ __device__ static inline void module_match_with_load_on_cuda(
 __device__ static inline void module_match_with_store_on_cuda(
         struct trace_content *content, const uint8_t other_tid)
 {
-    uint32_t double_address;
+    uint64_t double_address;
     uint32_t other_address;
     uint32_t other_index, last_index;
     struct history_queue *temp_queue;
@@ -198,18 +198,18 @@ __device__ static inline void module_match_with_store_on_cuda(
             /*last_index = other_index;*/
         /*}*/
         subTail = tail/2;
-        /*if(tail%2==1)
+        if(tail%2==1)
         {
         	double_address= temp_queue->address_st[subTail];
-        	other_address = double_address>>16;
+        	other_address = double_address>>32;
         }
         else
         {
         	double_address= temp_queue->address_st[subTail];
-        	other_address = double_address & 0xffff;
-        }*/
-        other_address= temp_queue->address_st[tail];
-        uint32_t address_m = address>>16;
+        	other_address = uint32_t(double_address & 0xffffffff);
+        }
+        //other_address= temp_queue->address_st[tail];
+        //uint32_t address_m = address;
         
         if (address == other_address) {
 
