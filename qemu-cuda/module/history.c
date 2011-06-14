@@ -51,9 +51,9 @@ static inline void module_history_init(void)
 
 static inline void module_history_print_entry(struct history_entry *entry)
 {
-    /*fprintf(stderr, "\t%d\t%d\t%d\t0x%lx\t%d\t0x%x\n", 
-            entry->content.tid, entry->content.type, entry->content.size, 
-            entry->content.address, entry->content.index, entry->content.pc);*/
+    //fprintf(stderr, "\t%d\t%d\t%d\t0x%lx\t%d\t0x%x\n", 
+            //entry->content.tid, entry->content.type, entry->content.size, 
+            //entry->content.address, entry->content.index, entry->content.pc);
 }
 
 static inline void module_history_load_record(struct trace_content *content) 
@@ -137,7 +137,6 @@ static inline void module_history_store_record(struct trace_content *content)
 #endif
 }
 
-/* match */
 
 static inline void module_match_with_load(struct trace_content *content, uint8_t other_tid) 
 {

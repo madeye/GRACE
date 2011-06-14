@@ -96,8 +96,14 @@ __device__ static inline void module_match_with_load_on_cuda(
 
     tail = temp_queue->load_tail;
     head = tail + 1;
+
+    if (tail == 0) {
+         double_address=  temp_queue->address_ld[(MAX_LOAD_QUEUE_SIZE-1)/2];
+    }else
+    {
+    	 double_address=  temp_queue->address_ld[(tail-1)/2];
+    }
     
-    double_address=  temp_queue->address_ld[(tail-1)/2];
     
     if (head == MAX_LOAD_QUEUE_SIZE) {
         head = 0;
@@ -123,7 +129,7 @@ __device__ static inline void module_match_with_load_on_cuda(
         }
         else
         {
-        	double_address=  temp_queue->address_ld[subTail];
+        	//double_address=  temp_queue->address_ld[subTail];
         	other_address = double_address & 0xffff;
         }
 	//other_address = temp_queue->address_ld[tail];
@@ -170,7 +176,12 @@ __device__ static inline void module_match_with_store_on_cuda(
 
     tail = temp_queue->store_tail;
     head = tail + 1;
-    double_address= temp_queue->address_st[(tail-1)/2];
+    if (tail == 0) {
+         double_address=  temp_queue->address_st[(MAX_LOAD_QUEUE_SIZE-1)/2];
+    }else
+    {
+    	 double_address=  temp_queue->address_st[(tail-1)/2];
+    }
     
     if (head == MAX_STORE_QUEUE_SIZE) {
         head = 0;
@@ -204,7 +215,7 @@ __device__ static inline void module_match_with_store_on_cuda(
         }
         else
         {
-        	double_address= temp_queue->address_st[subTail];
+        	//double_address= temp_queue->address_st[subTail];
         	other_address = double_address & 0xffff;
         }
         //other_address= temp_queue->address_st[tail];

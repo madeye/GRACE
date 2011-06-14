@@ -1,11 +1,10 @@
 #ifndef _DATA_H_
 #define _DATA_H_
-
-/* thread */
+// thread 
 
 #define MAX_PROCESS_NUM 16
 
-/* history */
+// history 
 
 struct history_entry {
     struct trace_content_no_addr content;
@@ -36,7 +35,7 @@ struct global_history_queue {
     struct history_hash_queue thread[MAX_PROCESS_NUM];
 };
 
-/* timestamp */
+// timestamp 
 
 struct timestamp {
     uint32_t scalar[MAX_PROCESS_NUM];
@@ -53,7 +52,7 @@ struct global_timestamp_queue {
     struct timestamp_queue thread[MAX_PROCESS_NUM];
 };
 
-/* filter */
+// filter 
 
 #define MAX_ENTRY_NUM (1 << 20)
 #define FILTER_BASE_BIT 12
@@ -71,7 +70,7 @@ struct global_page_filter {
     struct page_filter thread[MAX_PROCESS_NUM];
 };
 
-/* race */
+// race 
 
 struct race_entry {
     struct trace_content_no_addr content1;
@@ -92,5 +91,5 @@ struct global_race_queue {
     struct race_queue thread[MAX_CUDA_THREAD_NUM];
     uint32_t sum;
 };
-
-#endif /* _DATA_H_ */
+#endif 
+/* _DATA_H_ */
