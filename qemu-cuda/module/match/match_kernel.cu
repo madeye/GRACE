@@ -79,8 +79,8 @@ __device__ static inline void module_race_collection_on_cuda(
 __device__ static inline void module_match_with_load_on_cuda(
         struct trace_content *content, const uint8_t other_tid)
 {
+    uint16_t other_address,address_m;
     uint32_t double_address;
-    uint32_t other_address;
     uint32_t other_index, last_index;
     struct history_queue *temp_queue;
     uint32_t head, tail;
@@ -91,19 +91,12 @@ __device__ static inline void module_match_with_load_on_cuda(
     const uint32_t address = (uint32_t)content->address;
     const uint32_t index = content->index;
 
-    temp_queue = &gh.thread[other_tid].hash[(
-            address >> HASH_BASE_BIT) % MAX_HASH_NUM];
+    temp_queue = &gh.thread[other_tid].hash[(address >> HASH_BASE_BIT) &0x3fff];
 
     tail = temp_queue->load_tail;
     head = tail + 1;
 
-    if (tail == 0) {
-         double_address=  temp_queue->address_ld[(MAX_LOAD_QUEUE_SIZE-1)/2];
-    }else
-    {
-    	 double_address=  temp_queue->address_ld[(tail-1)/2];
-    }
-    
+    double_address= tail == 0?  temp_queue->address_ld[(MAX_LOAD_QUEUE_SIZE-1)/2]:temp_queue->address_ld[(tail-1)/2];
     
     if (head == MAX_LOAD_QUEUE_SIZE) {
         head = 0;
@@ -125,12 +118,12 @@ __device__ static inline void module_match_with_load_on_cuda(
         if(tail%2==1)
         {
         	double_address=  temp_queue->address_ld[subTail];
-        	other_address = (double_address>>16)&0xffff;
+        	other_address = (uint16_t)(double_address>>16);
         }
         else
         {
         	//double_address=  temp_queue->address_ld[subTail];
-        	other_address = double_address & 0xffff;
+        	other_address = (uint16_t)double_address;
         }
 	//other_address = temp_queue->address_ld[tail];
         /*if (last_index != other_index) {*/
@@ -142,7 +135,8 @@ __device__ static inline void module_match_with_load_on_cuda(
             /*last_index = other_index;*/
         /*}*/
 
-        uint32_t address_m = (address>>16)&0xffff;
+        address_m = (uint16_t)(address>>16);
+        
         if (address_m == other_address) {
 
             other_index = temp_entry->content.index;
@@ -160,8 +154,8 @@ __device__ static inline void module_match_with_load_on_cuda(
 __device__ static inline void module_match_with_store_on_cuda(
         struct trace_content *content, const uint8_t other_tid)
 {
+    uint16_t other_address, address_m;
     uint32_t double_address;
-    uint32_t other_address;
     uint32_t other_index, last_index;
     struct history_queue *temp_queue;
     uint32_t head, tail;
@@ -172,16 +166,12 @@ __device__ static inline void module_match_with_store_on_cuda(
     const uint32_t address = (uint32_t)content->address;
     const uint32_t index = content->index;
 
-    temp_queue = &gh.thread[other_tid].hash[(address >> HASH_BASE_BIT) % MAX_HASH_NUM];
+    temp_queue = &gh.thread[other_tid].hash[(address >> HASH_BASE_BIT) &0x3fff];
 
     tail = temp_queue->store_tail;
     head = tail + 1;
-    if (tail == 0) {
-         double_address=  temp_queue->address_st[(MAX_LOAD_QUEUE_SIZE-1)/2];
-    }else
-    {
-    	 double_address=  temp_queue->address_st[(tail-1)/2];
-    }
+
+    double_address= tail == 0?  temp_queue->address_st[(MAX_LOAD_QUEUE_SIZE-1)/2]:temp_queue->address_st[(tail-1)/2];
     
     if (head == MAX_STORE_QUEUE_SIZE) {
         head = 0;
@@ -211,15 +201,15 @@ __device__ static inline void module_match_with_store_on_cuda(
         if(tail%2==1)
         {
         	double_address= temp_queue->address_st[subTail];
-        	other_address = (double_address>>16)&0xffff;
+        	other_address = (uint16_t)(double_address>>16);
         }
         else
         {
         	//double_address= temp_queue->address_st[subTail];
-        	other_address = double_address & 0xffff;
+        	other_address = (uint16_t) double_address;
         }
         //other_address= temp_queue->address_st[tail];
-        uint32_t address_m = (address>>16)&0xffff;
+        address_m = (uint16_t)(address>>16);
         
         if (address_m == other_address) {
 
