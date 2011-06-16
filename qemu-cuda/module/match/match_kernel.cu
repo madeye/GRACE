@@ -79,7 +79,7 @@ __device__ static inline void module_race_collection_on_cuda(
 __device__ static inline void module_match_with_load_on_cuda(
         struct trace_content *content, const uint8_t other_tid)
 {
-    uint16_t other_address,address_m;
+    uint16_t other_address[2],address_m;
     uint32_t double_address;
     uint32_t other_index, last_index;
     struct history_queue *temp_queue;
@@ -89,139 +89,98 @@ __device__ static inline void module_match_with_load_on_cuda(
 
     const uint8_t tid = content->tid;
     const uint32_t address = (uint32_t)content->address;
+    address_m = (uint16_t)(address>>16);    
+    
     const uint32_t index = content->index;
 
     temp_queue = &gh.thread[other_tid].hash[(address >> HASH_BASE_BIT) &0x3fff];
 
-    tail = temp_queue->load_tail;
-    head = tail + 1;
+    head = temp_queue->load_tail;
+    tail = (head + 1)%2;
 
-    double_address= tail == 0?  temp_queue->address_ld[(MAX_LOAD_QUEUE_SIZE-1)/2]:temp_queue->address_ld[(tail-1)/2];
+    double_address=temp_queue->address_ld[0];
+    other_address[0] = (uint16_t)double_address;
+    other_address[1] = (uint16_t)(double_address>>16);
+
+    temp_entry= &temp_queue->load_entry[tail];
+    if (address_m == other_address[tail]) {
+
+        other_index = temp_entry->content.index;
+
+        if (!module_timestamp_order_on_cuda(
+                    other_tid, other_index, tid, index)) {
+            module_race_collection_on_cuda(&temp_entry->content, content);
+        }
+
+        return;
+    }
     
-    if (head == MAX_LOAD_QUEUE_SIZE) {
-        head = 0;
+    temp_entry= &temp_queue->load_entry[head];
+    if (address_m == other_address[head]) {
+
+        other_index = temp_entry->content.index;
+
+        if (!module_timestamp_order_on_cuda(
+                    other_tid, other_index, tid, index)) {
+            module_race_collection_on_cuda(&temp_entry->content, content);
+        }
+
+        return;
     }
-
-    /*last_index = gts.thread[other_tid].count;*/
-    last_index = MAX_TIMESTAMP_NUM;
-
-    while (tail != head) {
-
-        if (tail == 0) {
-            tail = MAX_LOAD_QUEUE_SIZE;
-        }
-        tail--;
-        
-        temp_entry= &temp_queue->load_entry[tail];
-
-        subTail=tail/2;
-        if(tail%2==1)
-        {
-        	double_address=  temp_queue->address_ld[subTail];
-        	other_address = (uint16_t)(double_address>>16);
-        }
-        else
-        {
-        	//double_address=  temp_queue->address_ld[subTail];
-        	other_address = (uint16_t)double_address;
-        }
-	//other_address = temp_queue->address_ld[tail];
-        /*if (last_index != other_index) {*/
-            /*if (module_timestamp_order_on_cuda(*/
-                        /*other_tid, other_index, tid, index)) {*/
-                /*break;*/
-            /*}*/
-
-            /*last_index = other_index;*/
-        /*}*/
-
-        address_m = (uint16_t)(address>>16);
-        
-        if (address_m == other_address) {
-
-            other_index = temp_entry->content.index;
-
-            if (!module_timestamp_order_on_cuda(
-                        other_tid, other_index, tid, index)) {
-                module_race_collection_on_cuda(&temp_entry->content, content);
-            }
-
-            break;
-        }
-    }
+    
 }
 
 __device__ static inline void module_match_with_store_on_cuda(
         struct trace_content *content, const uint8_t other_tid)
 {
-    uint16_t other_address, address_m;
+    uint16_t other_address[2], address_m;
     uint32_t double_address;
     uint32_t other_index, last_index;
     struct history_queue *temp_queue;
     uint32_t head, tail;
     uint32_t subTail;
     struct history_entry *temp_entry;
-
     const uint8_t tid = content->tid;
+    
     const uint32_t address = (uint32_t)content->address;
+    address_m = (uint16_t)(address>>16);
+    
     const uint32_t index = content->index;
-
+    
     temp_queue = &gh.thread[other_tid].hash[(address >> HASH_BASE_BIT) &0x3fff];
 
-    tail = temp_queue->store_tail;
-    head = tail + 1;
+    head = temp_queue->store_tail;
+    tail = (head + 1)%2;
 
-    double_address= tail == 0?  temp_queue->address_st[(MAX_LOAD_QUEUE_SIZE-1)/2]:temp_queue->address_st[(tail-1)/2];
-    
-    if (head == MAX_STORE_QUEUE_SIZE) {
-        head = 0;
-    }
-  
-    /*last_index = gts.thread[other_tid].count;*/
-    /*last_index = MAX_TIMESTAMP_NUM;*/
 
-    while (tail != head) {
-
-        if (tail == 0) {
-            tail = MAX_STORE_QUEUE_SIZE;
-        }
-        tail--;
-
-        temp_entry = &temp_queue->store_entry[tail];
-
-        /*if (last_index != other_index) {*/
-            /*if (module_timestamp_order_on_cuda(*/
-                        /*other_tid, other_index, tid, index)) {*/
-                /*break;*/
-            /*}*/
-
-            /*last_index = other_index;*/
-        /*}*/
-        subTail = tail/2;
-        if(tail%2==1)
-        {
-        	double_address= temp_queue->address_st[subTail];
-        	other_address = (uint16_t)(double_address>>16);
-        }
-        else
-        {
-        	//double_address= temp_queue->address_st[subTail];
-        	other_address = (uint16_t) double_address;
-        }
-        //other_address= temp_queue->address_st[tail];
-        address_m = (uint16_t)(address>>16);
+    double_address= temp_queue->address_st[0];
+    other_address[0] = (uint16_t) double_address;
+    other_address[1] = (uint16_t)(double_address>>16);
         
-        if (address_m == other_address) {
+    temp_entry = &temp_queue->store_entry[tail];
+    
+    if (address_m == other_address[tail]) {
 
-            other_index = temp_entry->content.index;
+        other_index = temp_entry->content.index;
 
-            if (!module_timestamp_order_on_cuda(
-                        other_tid, other_index, tid, index)) {
-                module_race_collection_on_cuda(&temp_entry->content, content);
-            }
-            break;
+        if (!module_timestamp_order_on_cuda(
+                    other_tid, other_index, tid, index)) {
+            module_race_collection_on_cuda(&temp_entry->content, content);
+        }
+        return;
+    }
+    
+    temp_entry = &temp_queue->store_entry[head];
+    if (address_m == other_address[head]) {
+
+        other_index = temp_entry->content.index;
+
+        if (!module_timestamp_order_on_cuda(
+                    other_tid, other_index, tid, index)) {
+            module_race_collection_on_cuda(&temp_entry->content, content);
         }
     }
+    
 }
 
 __device__ static inline void module_filter_load_before_match_on_cuda(
