@@ -83,8 +83,8 @@ __device__ static inline void module_match_with_load_on_cuda(
     uint32_t double_address;
     uint32_t other_index, last_index;
     struct history_queue *temp_queue;
-    uint32_t head, tail;
-    uint32_t subTail;
+    uint16_t head, tail;
+
     struct history_entry *temp_entry;
 
     const uint8_t tid = content->tid;
@@ -124,8 +124,6 @@ __device__ static inline void module_match_with_load_on_cuda(
                     other_tid, other_index, tid, index)) {
             module_race_collection_on_cuda(&temp_entry->content, content);
         }
-
-        return;
     }
     
 }
@@ -137,8 +135,8 @@ __device__ static inline void module_match_with_store_on_cuda(
     uint32_t double_address;
     uint32_t other_index, last_index;
     struct history_queue *temp_queue;
-    uint32_t head, tail;
-    uint32_t subTail;
+    uint16_t head, tail;
+
     struct history_entry *temp_entry;
     const uint8_t tid = content->tid;
     

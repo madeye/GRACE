@@ -19,8 +19,8 @@ struct history_queue {
     uint32_t address_ld[MAX_LOAD_QUEUE_SIZE/2];
     struct history_entry store_entry[MAX_STORE_QUEUE_SIZE];
     uint32_t address_st[MAX_STORE_QUEUE_SIZE/2];
-    uint32_t load_tail;
-    uint32_t store_tail;
+    uint16_t load_tail;
+    uint16_t store_tail;
 };
 
 
