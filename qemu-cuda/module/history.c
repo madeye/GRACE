@@ -9,11 +9,13 @@ struct history_entry {
 #define MAX_STORE_QUEUE_SIZE HISTORY_QUEUE_SIZE
 #define MAX_LOAD_QUEUE_SIZE HISTORY_QUEUE_SIZE
 
+
+
 struct history_queue {
     struct history_entry load_entry[MAX_LOAD_QUEUE_SIZE];
-    uint32_t address_ld[MAX_LOAD_QUEUE_SIZE/2];
+    union addr_u address_ld[MAX_LOAD_QUEUE_SIZE/2];
     struct history_entry store_entry[MAX_STORE_QUEUE_SIZE];
-    uint32_t address_st[MAX_STORE_QUEUE_SIZE/2];
+    union addr_u address_st[MAX_STORE_QUEUE_SIZE/2];
     uint16_t load_tail;
     uint16_t store_tail;
 };
@@ -60,15 +62,15 @@ static inline void module_history_load_record(struct trace_content *content)
 {
 #ifdef MOD_HISTORY
     uint8_t tid;
-    uint32_t address;
+    union addr_u address;
     struct history_queue *temp_queue;
     uint16_t tail;
     struct history_entry *temp_entry;
 
     tid = content->tid;
-    address =(uint32_t) (content->address);
+    address.address_f=(uint32_t) (content->address);
 
-    temp_queue = &history->thread[tid].hash[(address >> HASH_BASE_BIT) &0x3fff];
+    temp_queue = &history->thread[tid].hash[(address.address_d.address_l>> HASH_BASE_BIT)];
 
     tail = temp_queue->load_tail;	
     temp_entry = &temp_queue->load_entry[tail];
@@ -82,12 +84,12 @@ static inline void module_history_load_record(struct trace_content *content)
     //temp_queue->address_ld[subTail]= tail%2==0? (temp_queue->address_ld[subTail]&0xffff0000)|( address>>16):(temp_queue->address_ld[subTail]&0xffff)|( address&0xffff0000);
     if(tail%2==0)
     {
-    	temp_queue->address_ld[0]=(temp_queue->address_ld[0]&0xffff0000)+ (uint16_t)((address>>16));
+    	temp_queue->address_ld[0].address_d.address_l=address.address_d.address_h;
     	temp_queue->load_tail=1;
     }
     else
     {
-    	temp_queue->address_ld[0]=(uint16_t)(temp_queue->address_ld[0])+( address&0xffff0000);
+    	temp_queue->address_ld[0].address_d.address_h= address.address_d.address_h;
     	temp_queue->load_tail=0;
     }
     //temp_queue->address_ld[tail]= address;
@@ -102,15 +104,15 @@ static inline void module_history_store_record(struct trace_content *content)
 {
 #ifdef MOD_HISTORY
     uint8_t tid;
-    uint32_t address;
+    union addr_u address;
     struct history_queue *temp_queue;
     uint16_t tail;
     struct history_entry *temp_entry;
 
     tid = content->tid;
-    address = (uint32_t)(content->address);
+    address.address_f = (uint32_t)(content->address);
 
-    temp_queue = &history->thread[tid].hash[(address >> HASH_BASE_BIT)&0x3fff];
+    temp_queue = &history->thread[tid].hash[(address.address_d.address_l >> HASH_BASE_BIT)];
 
     tail = temp_queue->store_tail;
     temp_entry = &temp_queue->store_entry[tail];
@@ -123,12 +125,12 @@ static inline void module_history_store_record(struct trace_content *content)
     temp_entry->content.pc = content->pc;
     if(tail%2==0)
     {
-    	temp_queue->address_st[0]=(temp_queue->address_st[0]&0xffff0000)+ (uint16_t)(address>>16);
+    	temp_queue->address_st[0].address_d.address_l=address.address_d.address_h;
     	temp_queue->store_tail=1;
     }
     else
     {
-    	temp_queue->address_st[0]=(uint16_t)(temp_queue->address_st[0])+( address&0xffff0000);
+    	temp_queue->address_st[0].address_d.address_h=address.address_d.address_h;
     	temp_queue->store_tail=0;
     }
 
@@ -184,7 +186,7 @@ static inline void module_match_with_load(struct trace_content *content, uint8_t
             last_index = other_index;
         }
 
-        other_address = temp_queue->address_ld[tail];
+        //other_address = temp_queue->address_ld[tail];
 
         if (address == other_address) {
             module_race_collection(&temp_entry->content, content);
@@ -237,7 +239,7 @@ static inline void module_match_with_store(struct trace_content *content, uint8_
             last_index = other_index;
         }
 
-        other_address = temp_queue->address_st[tail];
+        //other_address = temp_queue->address_st[tail];
 
         if (address == other_address) {
             module_race_collection(&temp_entry->content, content);

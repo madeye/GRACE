@@ -14,11 +14,13 @@ struct history_entry {
 #define MAX_LOAD_QUEUE_SIZE HISTORY_QUEUE_SIZE
 #define MAX_STORE_QUEUE_SIZE HISTORY_QUEUE_SIZE
 
+
+
 struct history_queue {
     struct history_entry load_entry[MAX_LOAD_QUEUE_SIZE];
-    uint32_t address_ld[MAX_LOAD_QUEUE_SIZE/2];
+    addr_u address_ld[MAX_LOAD_QUEUE_SIZE/2];
     struct history_entry store_entry[MAX_STORE_QUEUE_SIZE];
-    uint32_t address_st[MAX_STORE_QUEUE_SIZE/2];
+    addr_u address_st[MAX_STORE_QUEUE_SIZE/2];
     uint16_t load_tail;
     uint16_t store_tail;
 };

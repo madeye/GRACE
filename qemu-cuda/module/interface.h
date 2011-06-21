@@ -51,6 +51,21 @@ enum {
     TRACE_MEM_SIZE_QUAD = 8,
 };
 
+
+struct addr16_d
+{
+	uint16_t address_l;
+	uint16_t address_h;
+} ;
+
+
+union addr_u
+{
+	uint32_t address_f;
+	struct addr16_d address_d;
+};
+
+
 struct trace_content {
     uint32_t tid:8, type:2, size:4, index:18;
     uint32_t pc;

@@ -80,7 +80,7 @@ __device__ static inline void module_match_with_load_on_cuda(
         struct trace_content *content, const uint8_t other_tid)
 {
     uint16_t other_address[2],address_m;
-    uint32_t double_address;
+    union addr_u double_address;
     uint32_t other_index, last_index;
     struct history_queue *temp_queue;
     uint16_t head, tail;
@@ -88,19 +88,20 @@ __device__ static inline void module_match_with_load_on_cuda(
     struct history_entry *temp_entry;
 
     const uint8_t tid = content->tid;
-    const uint32_t address = (uint32_t)content->address;
-    address_m = (uint16_t)(address>>16);    
+    union addr_u address;
+    address.address_f = (uint32_t)content->address;
+    address_m = address.address_d.address_h;    
     
     const uint32_t index = content->index;
 
-    temp_queue = &gh.thread[other_tid].hash[(address >> HASH_BASE_BIT) &0x3fff];
+    temp_queue = &gh.thread[other_tid].hash[(address.address_d.address_l>> HASH_BASE_BIT) ];
 
     head = temp_queue->load_tail;
     tail = (head + 1)%2;
 
     double_address=temp_queue->address_ld[0];
-    other_address[0] = (uint16_t)double_address;
-    other_address[1] = (uint16_t)(double_address>>16);
+    other_address[0] = double_address.address_d.address_l;
+    other_address[1] = double_address.address_d.address_h;
 
     temp_entry= &temp_queue->load_entry[tail];
     if (address_m == other_address[tail]) {
@@ -132,7 +133,7 @@ __device__ static inline void module_match_with_store_on_cuda(
         struct trace_content *content, const uint8_t other_tid)
 {
     uint16_t other_address[2], address_m;
-    uint32_t double_address;
+    union addr_u double_address;
     uint32_t other_index, last_index;
     struct history_queue *temp_queue;
     uint16_t head, tail;
@@ -140,20 +141,21 @@ __device__ static inline void module_match_with_store_on_cuda(
     struct history_entry *temp_entry;
     const uint8_t tid = content->tid;
     
-    const uint32_t address = (uint32_t)content->address;
-    address_m = (uint16_t)(address>>16);
+    union addr_u address;
+    address.address_f = (uint32_t)content->address;
+    address_m =  address.address_d.address_h;
     
     const uint32_t index = content->index;
     
-    temp_queue = &gh.thread[other_tid].hash[(address >> HASH_BASE_BIT) &0x3fff];
+    temp_queue = &gh.thread[other_tid].hash[(address.address_d.address_l>> HASH_BASE_BIT)];
 
     head = temp_queue->store_tail;
     tail = (head + 1)%2;
 
 
     double_address= temp_queue->address_st[0];
-    other_address[0] = (uint16_t) double_address;
-    other_address[1] = (uint16_t)(double_address>>16);
+    other_address[0] = double_address.address_d.address_l;
+    other_address[1] = double_address.address_d.address_h;
         
     temp_entry = &temp_queue->store_entry[tail];
     
