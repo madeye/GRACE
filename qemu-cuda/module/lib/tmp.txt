@@ -1,0 +1,1647 @@
+In archive libmatch_x86_64.a:
+
+match.cu.o:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000000000 <min>:
+       0:	39 fe                	cmp    %edi,%esi
+       2:	89 f8                	mov    %edi,%eax
+       4:	0f 4e c6             	cmovle %esi,%eax
+       7:	c3                   	retq   
+       8:	0f 1f 84 00 00 00 00 	nopl   0x0(%rax,%rax,1)
+       f:	00 
+
+0000000000000010 <umin>:
+      10:	39 fe                	cmp    %edi,%esi
+      12:	89 f8                	mov    %edi,%eax
+      14:	0f 46 c6             	cmovbe %esi,%eax
+      17:	c3                   	retq   
+      18:	0f 1f 84 00 00 00 00 	nopl   0x0(%rax,%rax,1)
+      1f:	00 
+
+0000000000000020 <llmin>:
+      20:	48 39 fe             	cmp    %rdi,%rsi
+      23:	48 89 f8             	mov    %rdi,%rax
+      26:	48 0f 4e c6          	cmovle %rsi,%rax
+      2a:	c3                   	retq   
+      2b:	0f 1f 44 00 00       	nopl   0x0(%rax,%rax,1)
+
+0000000000000030 <ullmin>:
+      30:	48 39 fe             	cmp    %rdi,%rsi
+      33:	48 89 f8             	mov    %rdi,%rax
+      36:	48 0f 46 c6          	cmovbe %rsi,%rax
+      3a:	c3                   	retq   
+      3b:	0f 1f 44 00 00       	nopl   0x0(%rax,%rax,1)
+
+0000000000000040 <max>:
+      40:	39 fe                	cmp    %edi,%esi
+      42:	89 f8                	mov    %edi,%eax
+      44:	0f 4d c6             	cmovge %esi,%eax
+      47:	c3                   	retq   
+      48:	0f 1f 84 00 00 00 00 	nopl   0x0(%rax,%rax,1)
+      4f:	00 
+
+0000000000000050 <umax>:
+      50:	39 fe                	cmp    %edi,%esi
+      52:	89 f8                	mov    %edi,%eax
+      54:	0f 43 c6             	cmovae %esi,%eax
+      57:	c3                   	retq   
+      58:	0f 1f 84 00 00 00 00 	nopl   0x0(%rax,%rax,1)
+      5f:	00 
+
+0000000000000060 <llmax>:
+      60:	48 39 fe             	cmp    %rdi,%rsi
+      63:	48 89 f8             	mov    %rdi,%rax
+      66:	48 0f 4d c6          	cmovge %rsi,%rax
+      6a:	c3                   	retq   
+      6b:	0f 1f 44 00 00       	nopl   0x0(%rax,%rax,1)
+
+0000000000000070 <ullmax>:
+      70:	48 39 fe             	cmp    %rdi,%rsi
+      73:	48 89 f8             	mov    %rdi,%rax
+      76:	48 0f 43 c6          	cmovae %rsi,%rax
+      7a:	c3                   	retq   
+      7b:	0f 1f 44 00 00       	nopl   0x0(%rax,%rax,1)
+
+0000000000000080 <_ZL77__sti____cudaRegisterAll_40_tmpxft_00000512_00000000_4_match_cpp1_ii_e021b47av>:
+      80:	48 83 ec 28          	sub    $0x28,%rsp
+      84:	bf 00 00 00 00       	mov    $0x0,%edi
+      89:	e8 00 00 00 00       	callq  8e <_ZL77__sti____cudaRegisterAll_40_tmpxft_00000512_00000000_4_match_cpp1_ii_e021b47av+0xe>
+      8e:	bf 00 00 00 00       	mov    $0x0,%edi
+      93:	48 89 05 00 00 00 00 	mov    %rax,0x0(%rip)        # 9a <_ZL77__sti____cudaRegisterAll_40_tmpxft_00000512_00000000_4_match_cpp1_ii_e021b47av+0x1a>
+      9a:	e8 00 00 00 00       	callq  9f <_ZL77__sti____cudaRegisterAll_40_tmpxft_00000512_00000000_4_match_cpp1_ii_e021b47av+0x1f>
+      9f:	48 8b 3d 00 00 00 00 	mov    0x0(%rip),%rdi        # a6 <_ZL77__sti____cudaRegisterAll_40_tmpxft_00000512_00000000_4_match_cpp1_ii_e021b47av+0x26>
+      a6:	b9 00 00 00 00       	mov    $0x0,%ecx
+      ab:	45 31 c9             	xor    %r9d,%r9d
+      ae:	48 89 ca             	mov    %rcx,%rdx
+      b1:	41 b8 ff ff ff ff    	mov    $0xffffffff,%r8d
+      b7:	be 00 00 00 00       	mov    $0x0,%esi
+      bc:	48 c7 44 24 18 00 00 	movq   $0x0,0x18(%rsp)
+      c3:	00 00 
+      c5:	48 c7 44 24 10 00 00 	movq   $0x0,0x10(%rsp)
+      cc:	00 00 
+      ce:	48 c7 44 24 08 00 00 	movq   $0x0,0x8(%rsp)
+      d5:	00 00 
+      d7:	48 c7 04 24 00 00 00 	movq   $0x0,(%rsp)
+      de:	00 
+      df:	e8 00 00 00 00       	callq  e4 <_ZL77__sti____cudaRegisterAll_40_tmpxft_00000512_00000000_4_match_cpp1_ii_e021b47av+0x64>
+      e4:	48 8b 3d 00 00 00 00 	mov    0x0(%rip),%rdi        # eb <_ZL77__sti____cudaRegisterAll_40_tmpxft_00000512_00000000_4_match_cpp1_ii_e021b47av+0x6b>
+      eb:	b9 00 00 00 00       	mov    $0x0,%ecx
+      f0:	41 b9 40 00 00 04    	mov    $0x4000040,%r9d
+      f6:	48 89 ca             	mov    %rcx,%rdx
+      f9:	45 31 c0             	xor    %r8d,%r8d
+      fc:	be 00 00 00 00       	mov    $0x0,%esi
+     101:	c7 44 24 08 00 00 00 	movl   $0x0,0x8(%rsp)
+     108:	00 
+     109:	c7 04 24 00 00 00 00 	movl   $0x0,(%rsp)
+     110:	e8 00 00 00 00       	callq  115 <_ZL77__sti____cudaRegisterAll_40_tmpxft_00000512_00000000_4_match_cpp1_ii_e021b47av+0x95>
+     115:	48 8b 3d 00 00 00 00 	mov    0x0(%rip),%rdi        # 11c <_ZL77__sti____cudaRegisterAll_40_tmpxft_00000512_00000000_4_match_cpp1_ii_e021b47av+0x9c>
+     11c:	b9 00 00 00 00       	mov    $0x0,%ecx
+     121:	41 b9 00 00 02 04    	mov    $0x4020000,%r9d
+     127:	48 89 ca             	mov    %rcx,%rdx
+     12a:	45 31 c0             	xor    %r8d,%r8d
+     12d:	be 00 00 00 00       	mov    $0x0,%esi
+     132:	c7 44 24 08 00 00 00 	movl   $0x0,0x8(%rsp)
+     139:	00 
+     13a:	c7 04 24 00 00 00 00 	movl   $0x0,(%rsp)
+     141:	e8 00 00 00 00       	callq  146 <_ZL77__sti____cudaRegisterAll_40_tmpxft_00000512_00000000_4_match_cpp1_ii_e021b47av+0xc6>
+     146:	48 8b 3d 00 00 00 00 	mov    0x0(%rip),%rdi        # 14d <_ZL77__sti____cudaRegisterAll_40_tmpxft_00000512_00000000_4_match_cpp1_ii_e021b47av+0xcd>
+     14d:	b9 00 00 00 00       	mov    $0x0,%ecx
+     152:	41 b9 00 00 00 01    	mov    $0x1000000,%r9d
+     158:	48 89 ca             	mov    %rcx,%rdx
+     15b:	45 31 c0             	xor    %r8d,%r8d
+     15e:	be 00 00 00 00       	mov    $0x0,%esi
+     163:	c7 44 24 08 00 00 00 	movl   $0x0,0x8(%rsp)
+     16a:	00 
+     16b:	c7 04 24 00 00 00 00 	movl   $0x0,(%rsp)
+     172:	e8 00 00 00 00       	callq  177 <_ZL77__sti____cudaRegisterAll_40_tmpxft_00000512_00000000_4_match_cpp1_ii_e021b47av+0xf7>
+     177:	48 8b 3d 00 00 00 00 	mov    0x0(%rip),%rdi        # 17e <_ZL77__sti____cudaRegisterAll_40_tmpxft_00000512_00000000_4_match_cpp1_ii_e021b47av+0xfe>
+     17e:	b9 00 00 00 00       	mov    $0x0,%ecx
+     183:	41 b9 08 20 80 02    	mov    $0x2802008,%r9d
+     189:	48 89 ca             	mov    %rcx,%rdx
+     18c:	45 31 c0             	xor    %r8d,%r8d
+     18f:	be 00 00 00 00       	mov    $0x0,%esi
+     194:	c7 44 24 08 00 00 00 	movl   $0x0,0x8(%rsp)
+     19b:	00 
+     19c:	c7 04 24 00 00 00 00 	movl   $0x0,(%rsp)
+     1a3:	e8 00 00 00 00       	callq  1a8 <_ZL77__sti____cudaRegisterAll_40_tmpxft_00000512_00000000_4_match_cpp1_ii_e021b47av+0x128>
+     1a8:	48 8b 3d 00 00 00 00 	mov    0x0(%rip),%rdi        # 1af <_ZL77__sti____cudaRegisterAll_40_tmpxft_00000512_00000000_4_match_cpp1_ii_e021b47av+0x12f>
+     1af:	b9 00 00 00 00       	mov    $0x0,%ecx
+     1b4:	41 b9 04 00 00 00    	mov    $0x4,%r9d
+     1ba:	45 31 c0             	xor    %r8d,%r8d
+     1bd:	48 89 ca             	mov    %rcx,%rdx
+     1c0:	be 00 00 00 00       	mov    $0x0,%esi
+     1c5:	c7 44 24 08 00 00 00 	movl   $0x0,0x8(%rsp)
+     1cc:	00 
+     1cd:	c7 04 24 01 00 00 00 	movl   $0x1,(%rsp)
+     1d4:	e8 00 00 00 00       	callq  1d9 <_ZL77__sti____cudaRegisterAll_40_tmpxft_00000512_00000000_4_match_cpp1_ii_e021b47av+0x159>
+     1d9:	48 83 c4 28          	add    $0x28,%rsp
+     1dd:	c3                   	retq   
+     1de:	66 90                	xchg   %ax,%ax
+
+00000000000001e0 <_ZL35module_match_with_trace_buf_on_cudaiP13trace_content>:
+     1e0:	48 83 ec 18          	sub    $0x18,%rsp
+     1e4:	31 d2                	xor    %edx,%edx
+     1e6:	89 7c 24 0c          	mov    %edi,0xc(%rsp)
+     1ea:	48 8d 7c 24 0c       	lea    0xc(%rsp),%rdi
+     1ef:	48 89 34 24          	mov    %rsi,(%rsp)
+     1f3:	be 04 00 00 00       	mov    $0x4,%esi
+     1f8:	e8 00 00 00 00       	callq  1fd <_ZL35module_match_with_trace_buf_on_cudaiP13trace_content+0x1d>
+     1fd:	85 c0                	test   %eax,%eax
+     1ff:	74 0f                	je     210 <_ZL35module_match_with_trace_buf_on_cudaiP13trace_content+0x30>
+     201:	48 83 c4 18          	add    $0x18,%rsp
+     205:	c3                   	retq   
+     206:	66 2e 0f 1f 84 00 00 	nopw   %cs:0x0(%rax,%rax,1)
+     20d:	00 00 00 
+     210:	48 89 e7             	mov    %rsp,%rdi
+     213:	ba 08 00 00 00       	mov    $0x8,%edx
+     218:	be 08 00 00 00       	mov    $0x8,%esi
+     21d:	e8 00 00 00 00       	callq  222 <_ZL35module_match_with_trace_buf_on_cudaiP13trace_content+0x42>
+     222:	85 c0                	test   %eax,%eax
+     224:	75 db                	jne    201 <_ZL35module_match_with_trace_buf_on_cudaiP13trace_content+0x21>
+     226:	bf 00 00 00 00       	mov    $0x0,%edi
+     22b:	48 c7 05 00 00 00 00 	movq   $0x0,0x0(%rip)        # 236 <_ZL35module_match_with_trace_buf_on_cudaiP13trace_content+0x56>
+     232:	00 00 00 00 
+     236:	e8 00 00 00 00       	callq  23b <_ZL35module_match_with_trace_buf_on_cudaiP13trace_content+0x5b>
+     23b:	48 83 c4 18          	add    $0x18,%rsp
+     23f:	c3                   	retq   
+
+0000000000000240 <_ZL26__cudaUnregisterBinaryUtilv>:
+     240:	48 8b 3d 00 00 00 00 	mov    0x0(%rip),%rdi        # 247 <_ZL26__cudaUnregisterBinaryUtilv+0x7>
+     247:	e9 00 00 00 00       	jmpq   24c <_ZL26__cudaUnregisterBinaryUtilv+0xc>
+     24c:	0f 1f 40 00          	nopl   0x0(%rax)
+
+0000000000000250 <rsqrt>:
+     250:	48 83 ec 08          	sub    $0x8,%rsp
+     254:	f2 0f 51 c8          	sqrtsd %xmm0,%xmm1
+     258:	66 0f 2e c9          	ucomisd %xmm1,%xmm1
+     25c:	7a 02                	jp     260 <rsqrt+0x10>
+     25e:	74 09                	je     269 <rsqrt+0x19>
+     260:	e8 00 00 00 00       	callq  265 <rsqrt+0x15>
+     265:	66 0f 28 c8          	movapd %xmm0,%xmm1
+     269:	f2 0f 10 05 00 00 00 	movsd  0x0(%rip),%xmm0        # 271 <rsqrt+0x21>
+     270:	00 
+     271:	48 83 c4 08          	add    $0x8,%rsp
+     275:	f2 0f 5e c1          	divsd  %xmm1,%xmm0
+     279:	c3                   	retq   
+     27a:	66 0f 1f 44 00 00    	nopw   0x0(%rax,%rax,1)
+
+0000000000000280 <rsqrtf>:
+     280:	0f 14 c0             	unpcklps %xmm0,%xmm0
+     283:	48 83 ec 08          	sub    $0x8,%rsp
+     287:	0f 5a c0             	cvtps2pd %xmm0,%xmm0
+     28a:	e8 00 00 00 00       	callq  28f <rsqrtf+0xf>
+     28f:	66 0f 14 c0          	unpcklpd %xmm0,%xmm0
+     293:	48 83 c4 08          	add    $0x8,%rsp
+     297:	66 0f 5a c0          	cvtpd2ps %xmm0,%xmm0
+     29b:	c3                   	retq   
+     29c:	0f 1f 40 00          	nopl   0x0(%rax)
+
+00000000000002a0 <erfinv>:
+     2a0:	48 83 ec 48          	sub    $0x48,%rsp
+     2a4:	66 0f 28 c8          	movapd %xmm0,%xmm1
+     2a8:	f2 0f 10 25 00 00 00 	movsd  0x0(%rip),%xmm4        # 2b0 <erfinv+0x10>
+     2af:	00 
+     2b0:	f2 0f 10 15 00 00 00 	movsd  0x0(%rip),%xmm2        # 2b8 <erfinv+0x18>
+     2b7:	00 
+     2b8:	66 0f 54 e1          	andpd  %xmm1,%xmm4
+     2bc:	66 0f 2e e2          	ucomisd %xmm2,%xmm4
+     2c0:	72 2e                	jb     2f0 <erfinv+0x50>
+     2c2:	48 b8 00 00 00 00 00 	mov    $0xfff8000000000000,%rax
+     2c9:	00 f8 ff 
+     2cc:	66 0f 2e e2          	ucomisd %xmm2,%xmm4
+     2d0:	48 89 44 24 30       	mov    %rax,0x30(%rsp)
+     2d5:	f2 0f 10 44 24 30    	movsd  0x30(%rsp),%xmm0
+     2db:	0f 84 77 02 00 00    	je     558 <erfinv+0x2b8>
+     2e1:	48 83 c4 48          	add    $0x48,%rsp
+     2e5:	c3                   	retq   
+     2e6:	66 2e 0f 1f 84 00 00 	nopw   %cs:0x0(%rax,%rax,1)
+     2ed:	00 00 00 
+     2f0:	66 0f 2e 25 00 00 00 	ucomisd 0x0(%rip),%xmm4        # 2f8 <erfinv+0x58>
+     2f7:	00 
+     2f8:	0f 83 d2 00 00 00    	jae    3d0 <erfinv+0x130>
+     2fe:	66 0f 2e 25 00 00 00 	ucomisd 0x0(%rip),%xmm4        # 306 <erfinv+0x66>
+     305:	00 
+     306:	0f 83 74 02 00 00    	jae    580 <erfinv+0x2e0>
+     30c:	66 0f 28 d8          	movapd %xmm0,%xmm3
+     310:	f2 0f 59 d8          	mulsd  %xmm0,%xmm3
+     314:	f2 0f 10 05 00 00 00 	movsd  0x0(%rip),%xmm0        # 31c <erfinv+0x7c>
+     31b:	00 
+     31c:	f2 0f 5c 1d 00 00 00 	subsd  0x0(%rip),%xmm3        # 324 <erfinv+0x84>
+     323:	00 
+     324:	66 0f 28 d3          	movapd %xmm3,%xmm2
+     328:	f2 0f 59 c3          	mulsd  %xmm3,%xmm0
+     32c:	f2 0f 5c 15 00 00 00 	subsd  0x0(%rip),%xmm2        # 334 <erfinv+0x94>
+     333:	00 
+     334:	f2 0f 58 05 00 00 00 	addsd  0x0(%rip),%xmm0        # 33c <erfinv+0x9c>
+     33b:	00 
+     33c:	f2 0f 59 d3          	mulsd  %xmm3,%xmm2
+     340:	f2 0f 59 c3          	mulsd  %xmm3,%xmm0
+     344:	f2 0f 58 15 00 00 00 	addsd  0x0(%rip),%xmm2        # 34c <erfinv+0xac>
+     34b:	00 
+     34c:	f2 0f 5c 05 00 00 00 	subsd  0x0(%rip),%xmm0        # 354 <erfinv+0xb4>
+     353:	00 
+     354:	f2 0f 59 d3          	mulsd  %xmm3,%xmm2
+     358:	f2 0f 59 c3          	mulsd  %xmm3,%xmm0
+     35c:	f2 0f 5c 15 00 00 00 	subsd  0x0(%rip),%xmm2        # 364 <erfinv+0xc4>
+     363:	00 
+     364:	f2 0f 58 05 00 00 00 	addsd  0x0(%rip),%xmm0        # 36c <erfinv+0xcc>
+     36b:	00 
+     36c:	f2 0f 59 d3          	mulsd  %xmm3,%xmm2
+     370:	f2 0f 59 c3          	mulsd  %xmm3,%xmm0
+     374:	f2 0f 58 15 00 00 00 	addsd  0x0(%rip),%xmm2        # 37c <erfinv+0xdc>
+     37b:	00 
+     37c:	f2 0f 5c 05 00 00 00 	subsd  0x0(%rip),%xmm0        # 384 <erfinv+0xe4>
+     383:	00 
+     384:	f2 0f 59 d3          	mulsd  %xmm3,%xmm2
+     388:	f2 0f 59 c3          	mulsd  %xmm3,%xmm0
+     38c:	f2 0f 5c 15 00 00 00 	subsd  0x0(%rip),%xmm2        # 394 <erfinv+0xf4>
+     393:	00 
+     394:	f2 0f 58 05 00 00 00 	addsd  0x0(%rip),%xmm0        # 39c <erfinv+0xfc>
+     39b:	00 
+     39c:	f2 0f 59 d3          	mulsd  %xmm3,%xmm2
+     3a0:	f2 0f 59 c3          	mulsd  %xmm3,%xmm0
+     3a4:	f2 0f 58 15 00 00 00 	addsd  0x0(%rip),%xmm2        # 3ac <erfinv+0x10c>
+     3ab:	00 
+     3ac:	f2 0f 5c 05 00 00 00 	subsd  0x0(%rip),%xmm0        # 3b4 <erfinv+0x114>
+     3b3:	00 
+     3b4:	f2 0f 59 d3          	mulsd  %xmm3,%xmm2
+     3b8:	f2 0f 5c 15 00 00 00 	subsd  0x0(%rip),%xmm2        # 3c0 <erfinv+0x120>
+     3bf:	00 
+     3c0:	48 83 c4 48          	add    $0x48,%rsp
+     3c4:	f2 0f 5e c2          	divsd  %xmm2,%xmm0
+     3c8:	f2 0f 59 c1          	mulsd  %xmm1,%xmm0
+     3cc:	c3                   	retq   
+     3cd:	0f 1f 00             	nopl   (%rax)
+     3d0:	f2 0f 10 1d 00 00 00 	movsd  0x0(%rip),%xmm3        # 3d8 <erfinv+0x138>
+     3d7:	00 
+     3d8:	66 0f 28 c4          	movapd %xmm4,%xmm0
+     3dc:	f2 0f 11 0c 24       	movsd  %xmm1,(%rsp)
+     3e1:	f2 0f 11 54 24 10    	movsd  %xmm2,0x10(%rsp)
+     3e7:	66 0f 57 c3          	xorpd  %xmm3,%xmm0
+     3eb:	66 0f 29 5c 24 20    	movapd %xmm3,0x20(%rsp)
+     3f1:	e8 00 00 00 00       	callq  3f6 <erfinv+0x156>
+     3f6:	66 0f 28 5c 24 20    	movapd 0x20(%rsp),%xmm3
+     3fc:	66 0f 57 c3          	xorpd  %xmm3,%xmm0
+     400:	f2 0f 10 0c 24       	movsd  (%rsp),%xmm1
+     405:	f2 0f 10 54 24 10    	movsd  0x10(%rsp),%xmm2
+     40b:	f2 0f 51 e0          	sqrtsd %xmm0,%xmm4
+     40f:	66 0f 2e e4          	ucomisd %xmm4,%xmm4
+     413:	7a 02                	jp     417 <erfinv+0x177>
+     415:	74 1a                	je     431 <erfinv+0x191>
+     417:	e8 00 00 00 00       	callq  41c <erfinv+0x17c>
+     41c:	66 0f 28 5c 24 20    	movapd 0x20(%rsp),%xmm3
+     422:	66 0f 28 e0          	movapd %xmm0,%xmm4
+     426:	f2 0f 10 54 24 10    	movsd  0x10(%rsp),%xmm2
+     42c:	f2 0f 10 0c 24       	movsd  (%rsp),%xmm1
+     431:	f2 0f 5e d4          	divsd  %xmm4,%xmm2
+     435:	66 0f 2e 0d 00 00 00 	ucomisd 0x0(%rip),%xmm1        # 43d <erfinv+0x19d>
+     43c:	00 
+     43d:	f2 0f 10 05 00 00 00 	movsd  0x0(%rip),%xmm0        # 445 <erfinv+0x1a5>
+     444:	00 
+     445:	f2 0f 10 25 00 00 00 	movsd  0x0(%rip),%xmm4        # 44d <erfinv+0x1ad>
+     44c:	00 
+     44d:	f2 0f 59 c2          	mulsd  %xmm2,%xmm0
+     451:	f2 0f 58 e2          	addsd  %xmm2,%xmm4
+     455:	f2 0f 58 05 00 00 00 	addsd  0x0(%rip),%xmm0        # 45d <erfinv+0x1bd>
+     45c:	00 
+     45d:	f2 0f 59 e2          	mulsd  %xmm2,%xmm4
+     461:	f2 0f 58 25 00 00 00 	addsd  0x0(%rip),%xmm4        # 469 <erfinv+0x1c9>
+     468:	00 
+     469:	f2 0f 59 c2          	mulsd  %xmm2,%xmm0
+     46d:	f2 0f 58 05 00 00 00 	addsd  0x0(%rip),%xmm0        # 475 <erfinv+0x1d5>
+     474:	00 
+     475:	f2 0f 59 e2          	mulsd  %xmm2,%xmm4
+     479:	f2 0f 58 25 00 00 00 	addsd  0x0(%rip),%xmm4        # 481 <erfinv+0x1e1>
+     480:	00 
+     481:	f2 0f 59 c2          	mulsd  %xmm2,%xmm0
+     485:	f2 0f 58 05 00 00 00 	addsd  0x0(%rip),%xmm0        # 48d <erfinv+0x1ed>
+     48c:	00 
+     48d:	f2 0f 59 e2          	mulsd  %xmm2,%xmm4
+     491:	f2 0f 58 25 00 00 00 	addsd  0x0(%rip),%xmm4        # 499 <erfinv+0x1f9>
+     498:	00 
+     499:	f2 0f 59 c2          	mulsd  %xmm2,%xmm0
+     49d:	f2 0f 58 05 00 00 00 	addsd  0x0(%rip),%xmm0        # 4a5 <erfinv+0x205>
+     4a4:	00 
+     4a5:	f2 0f 59 e2          	mulsd  %xmm2,%xmm4
+     4a9:	f2 0f 58 25 00 00 00 	addsd  0x0(%rip),%xmm4        # 4b1 <erfinv+0x211>
+     4b0:	00 
+     4b1:	f2 0f 59 c2          	mulsd  %xmm2,%xmm0
+     4b5:	f2 0f 58 05 00 00 00 	addsd  0x0(%rip),%xmm0        # 4bd <erfinv+0x21d>
+     4bc:	00 
+     4bd:	f2 0f 59 e2          	mulsd  %xmm2,%xmm4
+     4c1:	f2 0f 58 25 00 00 00 	addsd  0x0(%rip),%xmm4        # 4c9 <erfinv+0x229>
+     4c8:	00 
+     4c9:	f2 0f 59 c2          	mulsd  %xmm2,%xmm0
+     4cd:	f2 0f 58 05 00 00 00 	addsd  0x0(%rip),%xmm0        # 4d5 <erfinv+0x235>
+     4d4:	00 
+     4d5:	f2 0f 59 e2          	mulsd  %xmm2,%xmm4
+     4d9:	f2 0f 58 25 00 00 00 	addsd  0x0(%rip),%xmm4        # 4e1 <erfinv+0x241>
+     4e0:	00 
+     4e1:	f2 0f 59 c2          	mulsd  %xmm2,%xmm0
+     4e5:	f2 0f 58 05 00 00 00 	addsd  0x0(%rip),%xmm0        # 4ed <erfinv+0x24d>
+     4ec:	00 
+     4ed:	f2 0f 59 e2          	mulsd  %xmm2,%xmm4
+     4f1:	f2 0f 58 25 00 00 00 	addsd  0x0(%rip),%xmm4        # 4f9 <erfinv+0x259>
+     4f8:	00 
+     4f9:	f2 0f 59 c2          	mulsd  %xmm2,%xmm0
+     4fd:	f2 0f 58 05 00 00 00 	addsd  0x0(%rip),%xmm0        # 505 <erfinv+0x265>
+     504:	00 
+     505:	f2 0f 59 e2          	mulsd  %xmm2,%xmm4
+     509:	f2 0f 58 25 00 00 00 	addsd  0x0(%rip),%xmm4        # 511 <erfinv+0x271>
+     510:	00 
+     511:	f2 0f 59 c2          	mulsd  %xmm2,%xmm0
+     515:	f2 0f 58 05 00 00 00 	addsd  0x0(%rip),%xmm0        # 51d <erfinv+0x27d>
+     51c:	00 
+     51d:	f2 0f 59 e2          	mulsd  %xmm2,%xmm4
+     521:	f2 0f 58 25 00 00 00 	addsd  0x0(%rip),%xmm4        # 529 <erfinv+0x289>
+     528:	00 
+     529:	f2 0f 59 c2          	mulsd  %xmm2,%xmm0
+     52d:	f2 0f 58 05 00 00 00 	addsd  0x0(%rip),%xmm0        # 535 <erfinv+0x295>
+     534:	00 
+     535:	f2 0f 59 e2          	mulsd  %xmm2,%xmm4
+     539:	f2 0f 5e c4          	divsd  %xmm4,%xmm0
+     53d:	0f 83 9e fd ff ff    	jae    2e1 <erfinv+0x41>
+     543:	0f 8a 98 fd ff ff    	jp     2e1 <erfinv+0x41>
+     549:	66 0f 57 c3          	xorpd  %xmm3,%xmm0
+     54d:	e9 8f fd ff ff       	jmpq   2e1 <erfinv+0x41>
+     552:	66 0f 1f 44 00 00    	nopw   0x0(%rax,%rax,1)
+     558:	0f 8a 83 fd ff ff    	jp     2e1 <erfinv+0x41>
+     55e:	f2 0f 10 05 00 00 00 	movsd  0x0(%rip),%xmm0        # 566 <erfinv+0x2c6>
+     565:	00 
+     566:	f2 0f 11 0c 24       	movsd  %xmm1,(%rsp)
+     56b:	e8 00 00 00 00       	callq  570 <erfinv+0x2d0>
+     570:	f2 0f 10 0c 24       	movsd  (%rsp),%xmm1
+     575:	48 83 c4 48          	add    $0x48,%rsp
+     579:	f2 0f 59 c1          	mulsd  %xmm1,%xmm0
+     57d:	c3                   	retq   
+     57e:	66 90                	xchg   %ax,%ax
+     580:	66 0f 28 d8          	movapd %xmm0,%xmm3
+     584:	f2 0f 59 d8          	mulsd  %xmm0,%xmm3
+     588:	f2 0f 10 05 00 00 00 	movsd  0x0(%rip),%xmm0        # 590 <erfinv+0x2f0>
+     58f:	00 
+     590:	f2 0f 5c 1d 00 00 00 	subsd  0x0(%rip),%xmm3        # 598 <erfinv+0x2f8>
+     597:	00 
+     598:	f2 0f 59 c3          	mulsd  %xmm3,%xmm0
+     59c:	66 0f 28 d3          	movapd %xmm3,%xmm2
+     5a0:	f2 0f 5c 15 00 00 00 	subsd  0x0(%rip),%xmm2        # 5a8 <erfinv+0x308>
+     5a7:	00 
+     5a8:	f2 0f 5c 05 00 00 00 	subsd  0x0(%rip),%xmm0        # 5b0 <erfinv+0x310>
+     5af:	00 
+     5b0:	f2 0f 59 d3          	mulsd  %xmm3,%xmm2
+     5b4:	f2 0f 59 c3          	mulsd  %xmm3,%xmm0
+     5b8:	f2 0f 58 15 00 00 00 	addsd  0x0(%rip),%xmm2        # 5c0 <erfinv+0x320>
+     5bf:	00 
+     5c0:	f2 0f 58 05 00 00 00 	addsd  0x0(%rip),%xmm0        # 5c8 <erfinv+0x328>
+     5c7:	00 
+     5c8:	f2 0f 59 d3          	mulsd  %xmm3,%xmm2
+     5cc:	f2 0f 59 c3          	mulsd  %xmm3,%xmm0
+     5d0:	f2 0f 5c 15 00 00 00 	subsd  0x0(%rip),%xmm2        # 5d8 <erfinv+0x338>
+     5d7:	00 
+     5d8:	f2 0f 5c 05 00 00 00 	subsd  0x0(%rip),%xmm0        # 5e0 <erfinv+0x340>
+     5df:	00 
+     5e0:	f2 0f 59 d3          	mulsd  %xmm3,%xmm2
+     5e4:	f2 0f 59 c3          	mulsd  %xmm3,%xmm0
+     5e8:	f2 0f 58 15 00 00 00 	addsd  0x0(%rip),%xmm2        # 5f0 <erfinv+0x350>
+     5ef:	00 
+     5f0:	f2 0f 58 05 00 00 00 	addsd  0x0(%rip),%xmm0        # 5f8 <erfinv+0x358>
+     5f7:	00 
+     5f8:	f2 0f 59 d3          	mulsd  %xmm3,%xmm2
+     5fc:	f2 0f 59 c3          	mulsd  %xmm3,%xmm0
+     600:	f2 0f 5c 15 00 00 00 	subsd  0x0(%rip),%xmm2        # 608 <erfinv+0x368>
+     607:	00 
+     608:	f2 0f 5c 05 00 00 00 	subsd  0x0(%rip),%xmm0        # 610 <erfinv+0x370>
+     60f:	00 
+     610:	f2 0f 59 d3          	mulsd  %xmm3,%xmm2
+     614:	f2 0f 59 c3          	mulsd  %xmm3,%xmm0
+     618:	f2 0f 58 15 00 00 00 	addsd  0x0(%rip),%xmm2        # 620 <erfinv+0x380>
+     61f:	00 
+     620:	f2 0f 58 05 00 00 00 	addsd  0x0(%rip),%xmm0        # 628 <erfinv+0x388>
+     627:	00 
+     628:	f2 0f 59 d3          	mulsd  %xmm3,%xmm2
+     62c:	f2 0f 59 c3          	mulsd  %xmm3,%xmm0
+     630:	f2 0f 5c 15 00 00 00 	subsd  0x0(%rip),%xmm2        # 638 <erfinv+0x398>
+     637:	00 
+     638:	f2 0f 5c 05 00 00 00 	subsd  0x0(%rip),%xmm0        # 640 <erfinv+0x3a0>
+     63f:	00 
+     640:	f2 0f 59 d3          	mulsd  %xmm3,%xmm2
+     644:	f2 0f 59 c3          	mulsd  %xmm3,%xmm0
+     648:	f2 0f 58 15 00 00 00 	addsd  0x0(%rip),%xmm2        # 650 <erfinv+0x3b0>
+     64f:	00 
+     650:	f2 0f 58 05 00 00 00 	addsd  0x0(%rip),%xmm0        # 658 <erfinv+0x3b8>
+     657:	00 
+     658:	48 83 c4 48          	add    $0x48,%rsp
+     65c:	f2 0f 5e c2          	divsd  %xmm2,%xmm0
+     660:	f2 0f 59 c1          	mulsd  %xmm1,%xmm0
+     664:	c3                   	retq   
+     665:	66 66 2e 0f 1f 84 00 	nopw   %cs:0x0(%rax,%rax,1)
+     66c:	00 00 00 00 
+
+0000000000000670 <erfinvf>:
+     670:	0f 14 c0             	unpcklps %xmm0,%xmm0
+     673:	48 83 ec 08          	sub    $0x8,%rsp
+     677:	0f 5a c0             	cvtps2pd %xmm0,%xmm0
+     67a:	e8 00 00 00 00       	callq  67f <erfinvf+0xf>
+     67f:	66 0f 14 c0          	unpcklpd %xmm0,%xmm0
+     683:	48 83 c4 08          	add    $0x8,%rsp
+     687:	66 0f 5a c0          	cvtpd2ps %xmm0,%xmm0
+     68b:	c3                   	retq   
+     68c:	0f 1f 40 00          	nopl   0x0(%rax)
+
+0000000000000690 <erfcinv>:
+     690:	66 0f 28 c8          	movapd %xmm0,%xmm1
+     694:	48 83 ec 28          	sub    $0x28,%rsp
+     698:	f2 0f 11 0c 24       	movsd  %xmm1,(%rsp)
+     69d:	e8 00 00 00 00       	callq  6a2 <erfcinv+0x12>
+     6a2:	85 c0                	test   %eax,%eax
+     6a4:	f2 0f 10 0c 24       	movsd  (%rsp),%xmm1
+     6a9:	0f 85 91 01 00 00    	jne    840 <erfcinv+0x1b0>
+     6af:	66 0f 2e 0d 00 00 00 	ucomisd 0x0(%rip),%xmm1        # 6b7 <erfcinv+0x27>
+     6b6:	00 
+     6b7:	77 2f                	ja     6e8 <erfcinv+0x58>
+     6b9:	7a 2d                	jp     6e8 <erfcinv+0x58>
+     6bb:	66 0f 2e 0d 00 00 00 	ucomisd 0x0(%rip),%xmm1        # 6c3 <erfcinv+0x33>
+     6c2:	00 
+     6c3:	48 ba 00 00 00 00 00 	mov    $0xfff8000000000000,%rdx
+     6ca:	00 f8 ff 
+     6cd:	48 89 54 24 10       	mov    %rdx,0x10(%rsp)
+     6d2:	f2 0f 10 44 24 10    	movsd  0x10(%rsp),%xmm0
+     6d8:	0f 84 92 02 00 00    	je     970 <erfcinv+0x2e0>
+     6de:	48 83 c4 28          	add    $0x28,%rsp
+     6e2:	c3                   	retq   
+     6e3:	0f 1f 44 00 00       	nopl   0x0(%rax,%rax,1)
+     6e8:	66 0f 2e 0d 00 00 00 	ucomisd 0x0(%rip),%xmm1        # 6f0 <erfcinv+0x60>
+     6ef:	00 
+     6f0:	0f 83 ba 02 00 00    	jae    9b0 <erfcinv+0x320>
+     6f6:	66 0f 2e 0d 00 00 00 	ucomisd 0x0(%rip),%xmm1        # 6fe <erfcinv+0x6e>
+     6fd:	00 
+     6fe:	0f 82 4c 01 00 00    	jb     850 <erfcinv+0x1c0>
+     704:	66 0f 28 c1          	movapd %xmm1,%xmm0
+     708:	e8 00 00 00 00       	callq  70d <erfcinv+0x7d>
+     70d:	f2 0f 10 0d 00 00 00 	movsd  0x0(%rip),%xmm1        # 715 <erfcinv+0x85>
+     714:	00 
+     715:	66 0f 57 c1          	xorpd  %xmm1,%xmm0
+     719:	f2 0f 51 c8          	sqrtsd %xmm0,%xmm1
+     71d:	66 0f 2e c9          	ucomisd %xmm1,%xmm1
+     721:	7a 02                	jp     725 <erfcinv+0x95>
+     723:	74 09                	je     72e <erfcinv+0x9e>
+     725:	e8 00 00 00 00       	callq  72a <erfcinv+0x9a>
+     72a:	66 0f 28 c8          	movapd %xmm0,%xmm1
+     72e:	f2 0f 10 15 00 00 00 	movsd  0x0(%rip),%xmm2        # 736 <erfcinv+0xa6>
+     735:	00 
+     736:	f2 0f 10 05 00 00 00 	movsd  0x0(%rip),%xmm0        # 73e <erfcinv+0xae>
+     73d:	00 
+     73e:	f2 0f 5e d1          	divsd  %xmm1,%xmm2
+     742:	f2 0f 10 0d 00 00 00 	movsd  0x0(%rip),%xmm1        # 74a <erfcinv+0xba>
+     749:	00 
+     74a:	f2 0f 59 c2          	mulsd  %xmm2,%xmm0
+     74e:	f2 0f 58 ca          	addsd  %xmm2,%xmm1
+     752:	f2 0f 58 05 00 00 00 	addsd  0x0(%rip),%xmm0        # 75a <erfcinv+0xca>
+     759:	00 
+     75a:	f2 0f 59 ca          	mulsd  %xmm2,%xmm1
+     75e:	f2 0f 58 0d 00 00 00 	addsd  0x0(%rip),%xmm1        # 766 <erfcinv+0xd6>
+     765:	00 
+     766:	f2 0f 59 c2          	mulsd  %xmm2,%xmm0
+     76a:	f2 0f 58 05 00 00 00 	addsd  0x0(%rip),%xmm0        # 772 <erfcinv+0xe2>
+     771:	00 
+     772:	f2 0f 59 ca          	mulsd  %xmm2,%xmm1
+     776:	f2 0f 58 0d 00 00 00 	addsd  0x0(%rip),%xmm1        # 77e <erfcinv+0xee>
+     77d:	00 
+     77e:	f2 0f 59 c2          	mulsd  %xmm2,%xmm0
+     782:	f2 0f 58 05 00 00 00 	addsd  0x0(%rip),%xmm0        # 78a <erfcinv+0xfa>
+     789:	00 
+     78a:	f2 0f 59 ca          	mulsd  %xmm2,%xmm1
+     78e:	f2 0f 58 0d 00 00 00 	addsd  0x0(%rip),%xmm1        # 796 <erfcinv+0x106>
+     795:	00 
+     796:	f2 0f 59 c2          	mulsd  %xmm2,%xmm0
+     79a:	f2 0f 58 05 00 00 00 	addsd  0x0(%rip),%xmm0        # 7a2 <erfcinv+0x112>
+     7a1:	00 
+     7a2:	f2 0f 59 ca          	mulsd  %xmm2,%xmm1
+     7a6:	f2 0f 58 0d 00 00 00 	addsd  0x0(%rip),%xmm1        # 7ae <erfcinv+0x11e>
+     7ad:	00 
+     7ae:	f2 0f 59 c2          	mulsd  %xmm2,%xmm0
+     7b2:	f2 0f 58 05 00 00 00 	addsd  0x0(%rip),%xmm0        # 7ba <erfcinv+0x12a>
+     7b9:	00 
+     7ba:	f2 0f 59 ca          	mulsd  %xmm2,%xmm1
+     7be:	f2 0f 58 0d 00 00 00 	addsd  0x0(%rip),%xmm1        # 7c6 <erfcinv+0x136>
+     7c5:	00 
+     7c6:	f2 0f 59 c2          	mulsd  %xmm2,%xmm0
+     7ca:	f2 0f 58 05 00 00 00 	addsd  0x0(%rip),%xmm0        # 7d2 <erfcinv+0x142>
+     7d1:	00 
+     7d2:	f2 0f 59 ca          	mulsd  %xmm2,%xmm1
+     7d6:	f2 0f 58 0d 00 00 00 	addsd  0x0(%rip),%xmm1        # 7de <erfcinv+0x14e>
+     7dd:	00 
+     7de:	f2 0f 59 c2          	mulsd  %xmm2,%xmm0
+     7e2:	f2 0f 58 05 00 00 00 	addsd  0x0(%rip),%xmm0        # 7ea <erfcinv+0x15a>
+     7e9:	00 
+     7ea:	f2 0f 59 ca          	mulsd  %xmm2,%xmm1
+     7ee:	f2 0f 58 0d 00 00 00 	addsd  0x0(%rip),%xmm1        # 7f6 <erfcinv+0x166>
+     7f5:	00 
+     7f6:	f2 0f 59 c2          	mulsd  %xmm2,%xmm0
+     7fa:	f2 0f 58 05 00 00 00 	addsd  0x0(%rip),%xmm0        # 802 <erfcinv+0x172>
+     801:	00 
+     802:	f2 0f 59 ca          	mulsd  %xmm2,%xmm1
+     806:	f2 0f 58 0d 00 00 00 	addsd  0x0(%rip),%xmm1        # 80e <erfcinv+0x17e>
+     80d:	00 
+     80e:	f2 0f 59 c2          	mulsd  %xmm2,%xmm0
+     812:	f2 0f 58 05 00 00 00 	addsd  0x0(%rip),%xmm0        # 81a <erfcinv+0x18a>
+     819:	00 
+     81a:	f2 0f 59 ca          	mulsd  %xmm2,%xmm1
+     81e:	f2 0f 58 0d 00 00 00 	addsd  0x0(%rip),%xmm1        # 826 <erfcinv+0x196>
+     825:	00 
+     826:	f2 0f 59 c2          	mulsd  %xmm2,%xmm0
+     82a:	f2 0f 58 05 00 00 00 	addsd  0x0(%rip),%xmm0        # 832 <erfcinv+0x1a2>
+     831:	00 
+     832:	f2 0f 59 ca          	mulsd  %xmm2,%xmm1
+     836:	48 83 c4 28          	add    $0x28,%rsp
+     83a:	f2 0f 5e c1          	divsd  %xmm1,%xmm0
+     83e:	c3                   	retq   
+     83f:	90                   	nop
+     840:	66 0f 28 c1          	movapd %xmm1,%xmm0
+     844:	48 83 c4 28          	add    $0x28,%rsp
+     848:	f2 0f 58 c1          	addsd  %xmm1,%xmm0
+     84c:	c3                   	retq   
+     84d:	0f 1f 00             	nopl   (%rax)
+     850:	66 0f 28 c1          	movapd %xmm1,%xmm0
+     854:	e8 00 00 00 00       	callq  859 <erfcinv+0x1c9>
+     859:	f2 0f 10 0d 00 00 00 	movsd  0x0(%rip),%xmm1        # 861 <erfcinv+0x1d1>
+     860:	00 
+     861:	66 0f 57 c1          	xorpd  %xmm1,%xmm0
+     865:	f2 0f 51 c8          	sqrtsd %xmm0,%xmm1
+     869:	66 0f 2e c9          	ucomisd %xmm1,%xmm1
+     86d:	7a 02                	jp     871 <erfcinv+0x1e1>
+     86f:	74 09                	je     87a <erfcinv+0x1ea>
+     871:	e8 00 00 00 00       	callq  876 <erfcinv+0x1e6>
+     876:	66 0f 28 c8          	movapd %xmm0,%xmm1
+     87a:	f2 0f 10 15 00 00 00 	movsd  0x0(%rip),%xmm2        # 882 <erfcinv+0x1f2>
+     881:	00 
+     882:	f2 0f 10 05 00 00 00 	movsd  0x0(%rip),%xmm0        # 88a <erfcinv+0x1fa>
+     889:	00 
+     88a:	f2 0f 5e d1          	divsd  %xmm1,%xmm2
+     88e:	f2 0f 10 0d 00 00 00 	movsd  0x0(%rip),%xmm1        # 896 <erfcinv+0x206>
+     895:	00 
+     896:	f2 0f 58 ca          	addsd  %xmm2,%xmm1
+     89a:	f2 0f 59 c2          	mulsd  %xmm2,%xmm0
+     89e:	f2 0f 59 ca          	mulsd  %xmm2,%xmm1
+     8a2:	f2 0f 58 05 00 00 00 	addsd  0x0(%rip),%xmm0        # 8aa <erfcinv+0x21a>
+     8a9:	00 
+     8aa:	f2 0f 58 0d 00 00 00 	addsd  0x0(%rip),%xmm1        # 8b2 <erfcinv+0x222>
+     8b1:	00 
+     8b2:	f2 0f 59 c2          	mulsd  %xmm2,%xmm0
+     8b6:	f2 0f 59 ca          	mulsd  %xmm2,%xmm1
+     8ba:	f2 0f 58 05 00 00 00 	addsd  0x0(%rip),%xmm0        # 8c2 <erfcinv+0x232>
+     8c1:	00 
+     8c2:	f2 0f 58 0d 00 00 00 	addsd  0x0(%rip),%xmm1        # 8ca <erfcinv+0x23a>
+     8c9:	00 
+     8ca:	f2 0f 59 c2          	mulsd  %xmm2,%xmm0
+     8ce:	f2 0f 59 ca          	mulsd  %xmm2,%xmm1
+     8d2:	f2 0f 58 05 00 00 00 	addsd  0x0(%rip),%xmm0        # 8da <erfcinv+0x24a>
+     8d9:	00 
+     8da:	f2 0f 58 0d 00 00 00 	addsd  0x0(%rip),%xmm1        # 8e2 <erfcinv+0x252>
+     8e1:	00 
+     8e2:	f2 0f 59 c2          	mulsd  %xmm2,%xmm0
+     8e6:	f2 0f 59 ca          	mulsd  %xmm2,%xmm1
+     8ea:	f2 0f 58 05 00 00 00 	addsd  0x0(%rip),%xmm0        # 8f2 <erfcinv+0x262>
+     8f1:	00 
+     8f2:	f2 0f 58 0d 00 00 00 	addsd  0x0(%rip),%xmm1        # 8fa <erfcinv+0x26a>
+     8f9:	00 
+     8fa:	f2 0f 59 c2          	mulsd  %xmm2,%xmm0
+     8fe:	f2 0f 59 ca          	mulsd  %xmm2,%xmm1
+     902:	f2 0f 58 05 00 00 00 	addsd  0x0(%rip),%xmm0        # 90a <erfcinv+0x27a>
+     909:	00 
+     90a:	f2 0f 58 0d 00 00 00 	addsd  0x0(%rip),%xmm1        # 912 <erfcinv+0x282>
+     911:	00 
+     912:	f2 0f 59 c2          	mulsd  %xmm2,%xmm0
+     916:	f2 0f 59 ca          	mulsd  %xmm2,%xmm1
+     91a:	f2 0f 58 05 00 00 00 	addsd  0x0(%rip),%xmm0        # 922 <erfcinv+0x292>
+     921:	00 
+     922:	f2 0f 58 0d 00 00 00 	addsd  0x0(%rip),%xmm1        # 92a <erfcinv+0x29a>
+     929:	00 
+     92a:	f2 0f 59 c2          	mulsd  %xmm2,%xmm0
+     92e:	f2 0f 59 ca          	mulsd  %xmm2,%xmm1
+     932:	f2 0f 58 05 00 00 00 	addsd  0x0(%rip),%xmm0        # 93a <erfcinv+0x2aa>
+     939:	00 
+     93a:	f2 0f 58 0d 00 00 00 	addsd  0x0(%rip),%xmm1        # 942 <erfcinv+0x2b2>
+     941:	00 
+     942:	f2 0f 59 c2          	mulsd  %xmm2,%xmm0
+     946:	f2 0f 59 ca          	mulsd  %xmm2,%xmm1
+     94a:	f2 0f 58 05 00 00 00 	addsd  0x0(%rip),%xmm0        # 952 <erfcinv+0x2c2>
+     951:	00 
+     952:	f2 0f 58 0d 00 00 00 	addsd  0x0(%rip),%xmm1        # 95a <erfcinv+0x2ca>
+     959:	00 
+     95a:	48 83 c4 28          	add    $0x28,%rsp
+     95e:	f2 0f 59 ca          	mulsd  %xmm2,%xmm1
+     962:	f2 0f 5e c1          	divsd  %xmm1,%xmm0
+     966:	c3                   	retq   
+     967:	66 0f 1f 84 00 00 00 	nopw   0x0(%rax,%rax,1)
+     96e:	00 00 
+     970:	0f 8a 68 fd ff ff    	jp     6de <erfcinv+0x4e>
+     976:	f2 0f 10 05 00 00 00 	movsd  0x0(%rip),%xmm0        # 97e <erfcinv+0x2ee>
+     97d:	00 
+     97e:	f2 0f 11 0c 24       	movsd  %xmm1,(%rsp)
+     983:	e8 00 00 00 00       	callq  988 <erfcinv+0x2f8>
+     988:	f2 0f 10 0c 24       	movsd  (%rsp),%xmm1
+     98d:	66 0f 28 d0          	movapd %xmm0,%xmm2
+     991:	f2 0f 10 05 00 00 00 	movsd  0x0(%rip),%xmm0        # 999 <erfcinv+0x309>
+     998:	00 
+     999:	f2 0f 5c c1          	subsd  %xmm1,%xmm0
+     99d:	f2 0f 59 c2          	mulsd  %xmm2,%xmm0
+     9a1:	e9 38 fd ff ff       	jmpq   6de <erfcinv+0x4e>
+     9a6:	66 2e 0f 1f 84 00 00 	nopw   %cs:0x0(%rax,%rax,1)
+     9ad:	00 00 00 
+     9b0:	f2 0f 10 05 00 00 00 	movsd  0x0(%rip),%xmm0        # 9b8 <erfcinv+0x328>
+     9b7:	00 
+     9b8:	48 83 c4 28          	add    $0x28,%rsp
+     9bc:	f2 0f 5c c1          	subsd  %xmm1,%xmm0
+     9c0:	e9 00 00 00 00       	jmpq   9c5 <erfcinv+0x335>
+     9c5:	66 66 2e 0f 1f 84 00 	nopw   %cs:0x0(%rax,%rax,1)
+     9cc:	00 00 00 00 
+
+00000000000009d0 <erfcinvf>:
+     9d0:	0f 14 c0             	unpcklps %xmm0,%xmm0
+     9d3:	48 83 ec 08          	sub    $0x8,%rsp
+     9d7:	0f 5a c0             	cvtps2pd %xmm0,%xmm0
+     9da:	e8 00 00 00 00       	callq  9df <erfcinvf+0xf>
+     9df:	66 0f 14 c0          	unpcklpd %xmm0,%xmm0
+     9e3:	48 83 c4 08          	add    $0x8,%rsp
+     9e7:	66 0f 5a c0          	cvtpd2ps %xmm0,%xmm0
+     9eb:	c3                   	retq   
+     9ec:	0f 1f 40 00          	nopl   0x0(%rax)
+
+00000000000009f0 <sinpi>:
+     9f0:	53                   	push   %rbx
+     9f1:	66 0f 28 d0          	movapd %xmm0,%xmm2
+     9f5:	48 83 ec 20          	sub    $0x20,%rsp
+     9f9:	f2 0f 11 14 24       	movsd  %xmm2,(%rsp)
+     9fe:	e8 00 00 00 00       	callq  a03 <sinpi+0x13>
+     a03:	85 c0                	test   %eax,%eax
+     a05:	f2 0f 10 14 24       	movsd  (%rsp),%xmm2
+     a0a:	75 74                	jne    a80 <sinpi+0x90>
+     a0c:	66 0f 2e 15 00 00 00 	ucomisd 0x0(%rip),%xmm2        # a14 <sinpi+0x24>
+     a13:	00 
+     a14:	7a 02                	jp     a18 <sinpi+0x28>
+     a16:	74 58                	je     a70 <sinpi+0x80>
+     a18:	66 0f 28 c2          	movapd %xmm2,%xmm0
+     a1c:	f2 0f 11 14 24       	movsd  %xmm2,(%rsp)
+     a21:	e8 00 00 00 00       	callq  a26 <sinpi+0x36>
+     a26:	85 c0                	test   %eax,%eax
+     a28:	f2 0f 10 14 24       	movsd  (%rsp),%xmm2
+     a2d:	75 41                	jne    a70 <sinpi+0x80>
+     a2f:	66 0f 28 c2          	movapd %xmm2,%xmm0
+     a33:	f2 0f 11 14 24       	movsd  %xmm2,(%rsp)
+     a38:	e8 00 00 00 00       	callq  a3d <sinpi+0x4d>
+     a3d:	f2 0f 10 14 24       	movsd  (%rsp),%xmm2
+     a42:	66 0f 2e c2          	ucomisd %xmm2,%xmm0
+     a46:	75 48                	jne    a90 <sinpi+0xa0>
+     a48:	7a 46                	jp     a90 <sinpi+0xa0>
+     a4a:	f2 0f 10 0d 00 00 00 	movsd  0x0(%rip),%xmm1        # a52 <sinpi+0x62>
+     a51:	00 
+     a52:	48 83 c4 20          	add    $0x20,%rsp
+     a56:	66 0f 28 c2          	movapd %xmm2,%xmm0
+     a5a:	5b                   	pop    %rbx
+     a5b:	f2 0f 5e c1          	divsd  %xmm1,%xmm0
+     a5f:	f2 0f 5e c1          	divsd  %xmm1,%xmm0
+     a63:	f2 0f 5e c1          	divsd  %xmm1,%xmm0
+     a67:	c3                   	retq   
+     a68:	0f 1f 84 00 00 00 00 	nopl   0x0(%rax,%rax,1)
+     a6f:	00 
+     a70:	66 0f 28 c2          	movapd %xmm2,%xmm0
+     a74:	e8 00 00 00 00       	callq  a79 <sinpi+0x89>
+     a79:	48 83 c4 20          	add    $0x20,%rsp
+     a7d:	5b                   	pop    %rbx
+     a7e:	c3                   	retq   
+     a7f:	90                   	nop
+     a80:	66 0f 28 c2          	movapd %xmm2,%xmm0
+     a84:	48 83 c4 20          	add    $0x20,%rsp
+     a88:	5b                   	pop    %rbx
+     a89:	f2 0f 58 c2          	addsd  %xmm2,%xmm0
+     a8d:	c3                   	retq   
+     a8e:	66 90                	xchg   %ax,%ax
+     a90:	48 8d 7c 24 1c       	lea    0x1c(%rsp),%rdi
+     a95:	f2 0f 10 0d 00 00 00 	movsd  0x0(%rip),%xmm1        # a9d <sinpi+0xad>
+     a9c:	00 
+     a9d:	66 0f 28 c2          	movapd %xmm2,%xmm0
+     aa1:	e8 00 00 00 00       	callq  aa6 <sinpi+0xb6>
+     aa6:	8b 5c 24 1c          	mov    0x1c(%rsp),%ebx
+     aaa:	f2 0f 59 05 00 00 00 	mulsd  0x0(%rip),%xmm0        # ab2 <sinpi+0xc2>
+     ab1:	00 
+     ab2:	f6 c3 01             	test   $0x1,%bl
+     ab5:	75 19                	jne    ad0 <sinpi+0xe0>
+     ab7:	e8 00 00 00 00       	callq  abc <sinpi+0xcc>
+     abc:	83 e3 02             	and    $0x2,%ebx
+     abf:	74 b8                	je     a79 <sinpi+0x89>
+     ac1:	f2 0f 10 0d 00 00 00 	movsd  0x0(%rip),%xmm1        # ac9 <sinpi+0xd9>
+     ac8:	00 
+     ac9:	66 0f 57 c1          	xorpd  %xmm1,%xmm0
+     acd:	eb aa                	jmp    a79 <sinpi+0x89>
+     acf:	90                   	nop
+     ad0:	e8 00 00 00 00       	callq  ad5 <sinpi+0xe5>
+     ad5:	eb e5                	jmp    abc <sinpi+0xcc>
+     ad7:	66 0f 1f 84 00 00 00 	nopw   0x0(%rax,%rax,1)
+     ade:	00 00 
+
+0000000000000ae0 <sinpif>:
+     ae0:	0f 14 c0             	unpcklps %xmm0,%xmm0
+     ae3:	48 83 ec 08          	sub    $0x8,%rsp
+     ae7:	0f 5a c0             	cvtps2pd %xmm0,%xmm0
+     aea:	e8 00 00 00 00       	callq  aef <sinpif+0xf>
+     aef:	66 0f 14 c0          	unpcklpd %xmm0,%xmm0
+     af3:	48 83 c4 08          	add    $0x8,%rsp
+     af7:	66 0f 5a c0          	cvtpd2ps %xmm0,%xmm0
+     afb:	c3                   	retq   
+     afc:	0f 1f 40 00          	nopl   0x0(%rax)
+
+0000000000000b00 <rcbrt>:
+     b00:	66 0f 28 c8          	movapd %xmm0,%xmm1
+     b04:	48 83 ec 28          	sub    $0x28,%rsp
+     b08:	f2 0f 11 0c 24       	movsd  %xmm1,(%rsp)
+     b0d:	e8 00 00 00 00       	callq  b12 <rcbrt+0x12>
+     b12:	85 c0                	test   %eax,%eax
+     b14:	f2 0f 10 0c 24       	movsd  (%rsp),%xmm1
+     b19:	75 35                	jne    b50 <rcbrt+0x50>
+     b1b:	66 0f 2e 0d 00 00 00 	ucomisd 0x0(%rip),%xmm1        # b23 <rcbrt+0x23>
+     b22:	00 
+     b23:	7a 02                	jp     b27 <rcbrt+0x27>
+     b25:	74 17                	je     b3e <rcbrt+0x3e>
+     b27:	66 0f 28 c1          	movapd %xmm1,%xmm0
+     b2b:	f2 0f 11 0c 24       	movsd  %xmm1,(%rsp)
+     b30:	e8 00 00 00 00       	callq  b35 <rcbrt+0x35>
+     b35:	85 c0                	test   %eax,%eax
+     b37:	f2 0f 10 0c 24       	movsd  (%rsp),%xmm1
+     b3c:	74 22                	je     b60 <rcbrt+0x60>
+     b3e:	f2 0f 10 05 00 00 00 	movsd  0x0(%rip),%xmm0        # b46 <rcbrt+0x46>
+     b45:	00 
+     b46:	f2 0f 5e c1          	divsd  %xmm1,%xmm0
+     b4a:	48 83 c4 28          	add    $0x28,%rsp
+     b4e:	c3                   	retq   
+     b4f:	90                   	nop
+     b50:	66 0f 28 c1          	movapd %xmm1,%xmm0
+     b54:	48 83 c4 28          	add    $0x28,%rsp
+     b58:	f2 0f 58 c1          	addsd  %xmm1,%xmm0
+     b5c:	c3                   	retq   
+     b5d:	0f 1f 00             	nopl   (%rax)
+     b60:	f2 0f 10 15 00 00 00 	movsd  0x0(%rip),%xmm2        # b68 <rcbrt+0x68>
+     b67:	00 
+     b68:	f2 0f 11 0c 24       	movsd  %xmm1,(%rsp)
+     b6d:	66 0f 54 d1          	andpd  %xmm1,%xmm2
+     b71:	66 0f 28 c2          	movapd %xmm2,%xmm0
+     b75:	f2 0f 11 54 24 10    	movsd  %xmm2,0x10(%rsp)
+     b7b:	e8 00 00 00 00       	callq  b80 <rcbrt+0x80>
+     b80:	f2 0f 59 05 00 00 00 	mulsd  0x0(%rip),%xmm0        # b88 <rcbrt+0x88>
+     b87:	00 
+     b88:	e8 00 00 00 00       	callq  b8d <rcbrt+0x8d>
+     b8d:	f2 0f 10 25 00 00 00 	movsd  0x0(%rip),%xmm4        # b95 <rcbrt+0x95>
+     b94:	00 
+     b95:	f2 0f 10 54 24 10    	movsd  0x10(%rsp),%xmm2
+     b9b:	66 0f 28 d8          	movapd %xmm0,%xmm3
+     b9f:	f2 0f 10 0c 24       	movsd  (%rsp),%xmm1
+     ba4:	66 0f 57 d4          	xorpd  %xmm4,%xmm2
+     ba8:	f2 0f 59 c3          	mulsd  %xmm3,%xmm0
+     bac:	66 0f d7 c1          	pmovmskb %xmm1,%eax
+     bb0:	f2 0f 59 d3          	mulsd  %xmm3,%xmm2
+     bb4:	84 c0                	test   %al,%al
+     bb6:	f2 0f 59 c2          	mulsd  %xmm2,%xmm0
+     bba:	f2 0f 10 15 00 00 00 	movsd  0x0(%rip),%xmm2        # bc2 <rcbrt+0xc2>
+     bc1:	00 
+     bc2:	f2 0f 59 d3          	mulsd  %xmm3,%xmm2
+     bc6:	f2 0f 58 05 00 00 00 	addsd  0x0(%rip),%xmm0        # bce <rcbrt+0xce>
+     bcd:	00 
+     bce:	f2 0f 59 c2          	mulsd  %xmm2,%xmm0
+     bd2:	f2 0f 58 c3          	addsd  %xmm3,%xmm0
+     bd6:	0f 89 6e ff ff ff    	jns    b4a <rcbrt+0x4a>
+     bdc:	66 0f 57 c4          	xorpd  %xmm4,%xmm0
+     be0:	e9 65 ff ff ff       	jmpq   b4a <rcbrt+0x4a>
+     be5:	66 66 2e 0f 1f 84 00 	nopw   %cs:0x0(%rax,%rax,1)
+     bec:	00 00 00 00 
+
+0000000000000bf0 <rcbrtf>:
+     bf0:	0f 14 c0             	unpcklps %xmm0,%xmm0
+     bf3:	48 83 ec 08          	sub    $0x8,%rsp
+     bf7:	0f 5a c0             	cvtps2pd %xmm0,%xmm0
+     bfa:	e8 00 00 00 00       	callq  bff <rcbrtf+0xf>
+     bff:	66 0f 14 c0          	unpcklpd %xmm0,%xmm0
+     c03:	48 83 c4 08          	add    $0x8,%rsp
+     c07:	66 0f 5a c0          	cvtpd2ps %xmm0,%xmm0
+     c0b:	c3                   	retq   
+     c0c:	0f 1f 40 00          	nopl   0x0(%rax)
+
+0000000000000c10 <module_cuda_config_register>:
+     c10:	89 fe                	mov    %edi,%esi
+     c12:	89 3d 00 00 00 00    	mov    %edi,0x0(%rip)        # c18 <module_cuda_config_register+0x8>
+     c18:	31 c0                	xor    %eax,%eax
+     c1a:	bf 00 00 00 00       	mov    $0x0,%edi
+     c1f:	e9 00 00 00 00       	jmpq   c24 <module_cuda_config_register+0x14>
+     c24:	66 66 66 2e 0f 1f 84 	nopw   %cs:0x0(%rax,%rax,1)
+     c2b:	00 00 00 00 00 
+
+0000000000000c30 <module_cuda_tid_update_interface>:
+     c30:	48 83 ec 18          	sub    $0x18,%rsp
+     c34:	31 c9                	xor    %ecx,%ecx
+     c36:	41 b8 01 00 00 00    	mov    $0x1,%r8d
+     c3c:	48 8d 74 24 0c       	lea    0xc(%rsp),%rsi
+     c41:	89 7c 24 0c          	mov    %edi,0xc(%rsp)
+     c45:	ba 04 00 00 00       	mov    $0x4,%edx
+     c4a:	bf 00 00 00 00       	mov    $0x0,%edi
+     c4f:	e8 00 00 00 00       	callq  c54 <module_cuda_tid_update_interface+0x24>
+     c54:	85 c0                	test   %eax,%eax
+     c56:	75 05                	jne    c5d <module_cuda_tid_update_interface+0x2d>
+     c58:	48 83 c4 18          	add    $0x18,%rsp
+     c5c:	c3                   	retq   
+     c5d:	89 c7                	mov    %eax,%edi
+     c5f:	e8 00 00 00 00       	callq  c64 <module_cuda_tid_update_interface+0x34>
+     c64:	48 8b 3d 00 00 00 00 	mov    0x0(%rip),%rdi        # c6b <module_cuda_tid_update_interface+0x3b>
+     c6b:	49 89 c0             	mov    %rax,%r8
+     c6e:	b9 14 00 00 00       	mov    $0x14,%ecx
+     c73:	ba 00 00 00 00       	mov    $0x0,%edx
+     c78:	be 00 00 00 00       	mov    $0x0,%esi
+     c7d:	31 c0                	xor    %eax,%eax
+     c7f:	e8 00 00 00 00       	callq  c84 <module_cuda_tid_update_interface+0x54>
+     c84:	bf 01 00 00 00       	mov    $0x1,%edi
+     c89:	e8 00 00 00 00       	callq  c8e <module_cuda_tid_update_interface+0x5e>
+     c8e:	66 90                	xchg   %ax,%ax
+
+0000000000000c90 <module_cuda_match_with_trace_buf_interface>:
+     c90:	53                   	push   %rbx
+     c91:	89 f3                	mov    %esi,%ebx
+     c93:	48 89 d6             	mov    %rdx,%rsi
+     c96:	89 da                	mov    %ebx,%edx
+     c98:	b9 01 00 00 00       	mov    $0x1,%ecx
+     c9d:	48 83 ec 20          	sub    $0x20,%rsp
+     ca1:	48 8b 3d 00 00 00 00 	mov    0x0(%rip),%rdi        # ca8 <module_cuda_match_with_trace_buf_interface+0x18>
+     ca8:	48 c1 e2 04          	shl    $0x4,%rdx
+     cac:	e8 00 00 00 00       	callq  cb1 <module_cuda_match_with_trace_buf_interface+0x21>
+     cb1:	85 c0                	test   %eax,%eax
+     cb3:	0f 85 9a 00 00 00    	jne    d53 <module_cuda_match_with_trace_buf_interface+0xc3>
+     cb9:	8b 0d 00 00 00 00    	mov    0x0(%rip),%ecx        # cbf <module_cuda_match_with_trace_buf_interface+0x2f>
+     cbf:	31 d2                	xor    %edx,%edx
+     cc1:	be 02 00 00 00       	mov    $0x2,%esi
+     cc6:	bf 00 00 00 00       	mov    $0x0,%edi
+     ccb:	8d 44 19 ff          	lea    -0x1(%rcx,%rbx,1),%eax
+     ccf:	f7 f1                	div    %ecx
+     cd1:	89 05 00 00 00 00    	mov    %eax,0x0(%rip)        # cd7 <module_cuda_match_with_trace_buf_interface+0x47>
+     cd7:	e8 00 00 00 00       	callq  cdc <module_cuda_match_with_trace_buf_interface+0x4c>
+     cdc:	8b 05 00 00 00 00    	mov    0x0(%rip),%eax        # ce2 <module_cuda_match_with_trace_buf_interface+0x52>
+     ce2:	c7 44 24 04 01 00 00 	movl   $0x1,0x4(%rsp)
+     ce9:	00 
+     cea:	45 31 c9             	xor    %r9d,%r9d
+     ced:	c7 44 24 14 01 00 00 	movl   $0x1,0x14(%rsp)
+     cf4:	00 
+     cf5:	45 31 c0             	xor    %r8d,%r8d
+     cf8:	b9 01 00 00 00       	mov    $0x1,%ecx
+     cfd:	be 01 00 00 00       	mov    $0x1,%esi
+     d02:	c7 44 24 08 01 00 00 	movl   $0x1,0x8(%rsp)
+     d09:	00 
+     d0a:	c7 44 24 18 01 00 00 	movl   $0x1,0x18(%rsp)
+     d11:	00 
+     d12:	89 04 24             	mov    %eax,(%rsp)
+     d15:	8b 05 00 00 00 00    	mov    0x0(%rip),%eax        # d1b <module_cuda_match_with_trace_buf_interface+0x8b>
+     d1b:	48 8b 14 24          	mov    (%rsp),%rdx
+     d1f:	89 44 24 10          	mov    %eax,0x10(%rsp)
+     d23:	48 8b 7c 24 10       	mov    0x10(%rsp),%rdi
+     d28:	e8 00 00 00 00       	callq  d2d <module_cuda_match_with_trace_buf_interface+0x9d>
+     d2d:	85 c0                	test   %eax,%eax
+     d2f:	74 0f                	je     d40 <module_cuda_match_with_trace_buf_interface+0xb0>
+     d31:	48 83 c4 20          	add    $0x20,%rsp
+     d35:	5b                   	pop    %rbx
+     d36:	c3                   	retq   
+     d37:	66 0f 1f 84 00 00 00 	nopw   0x0(%rax,%rax,1)
+     d3e:	00 00 
+     d40:	48 8b 35 00 00 00 00 	mov    0x0(%rip),%rsi        # d47 <module_cuda_match_with_trace_buf_interface+0xb7>
+     d47:	89 df                	mov    %ebx,%edi
+     d49:	48 83 c4 20          	add    $0x20,%rsp
+     d4d:	5b                   	pop    %rbx
+     d4e:	e9 8d f4 ff ff       	jmpq   1e0 <_ZL35module_match_with_trace_buf_on_cudaiP13trace_content>
+     d53:	89 c7                	mov    %eax,%edi
+     d55:	e8 00 00 00 00       	callq  d5a <module_cuda_match_with_trace_buf_interface+0xca>
+     d5a:	48 8b 3d 00 00 00 00 	mov    0x0(%rip),%rdi        # d61 <module_cuda_match_with_trace_buf_interface+0xd1>
+     d61:	49 89 c0             	mov    %rax,%r8
+     d64:	b9 e5 00 00 00       	mov    $0xe5,%ecx
+     d69:	ba 00 00 00 00       	mov    $0x0,%edx
+     d6e:	be 00 00 00 00       	mov    $0x0,%esi
+     d73:	31 c0                	xor    %eax,%eax
+     d75:	e8 00 00 00 00       	callq  d7a <module_cuda_match_with_trace_buf_interface+0xea>
+     d7a:	83 cf ff             	or     $0xffffffffffffffff,%edi
+     d7d:	e8 00 00 00 00       	callq  d82 <module_cuda_match_with_trace_buf_interface+0xf2>
+     d82:	66 66 66 66 66 2e 0f 	nopw   %cs:0x0(%rax,%rax,1)
+     d89:	1f 84 00 00 00 00 00 
+
+0000000000000d90 <module_cuda_timestamp_entry_update_interface>:
+     d90:	41 57                	push   %r15
+     d92:	44 0f b6 ff          	movzbl %dil,%r15d
+     d96:	41 56                	push   %r14
+     d98:	49 89 f6             	mov    %rsi,%r14
+     d9b:	41 55                	push   %r13
+     d9d:	41 54                	push   %r12
+     d9f:	55                   	push   %rbp
+     da0:	53                   	push   %rbx
+     da1:	48 83 ec 08          	sub    $0x8,%rsp
+     da5:	41 83 ff 01          	cmp    $0x1,%r15d
+     da9:	0f 8e 11 01 00 00    	jle    ec0 <module_cuda_timestamp_entry_update_interface+0x130>
+     daf:	4c 8d aa 04 00 40 00 	lea    0x400004(%rdx),%r13
+     db6:	41 bc 04 00 40 00    	mov    $0x400004,%r12d
+     dbc:	31 db                	xor    %ebx,%ebx
+     dbe:	bd 01 00 00 00       	mov    $0x1,%ebp
+     dc3:	eb 29                	jmp    dee <module_cuda_timestamp_entry_update_interface+0x5e>
+     dc5:	0f 1f 00             	nopl   (%rax)
+     dc8:	72 6e                	jb     e38 <module_cuda_timestamp_entry_update_interface+0xa8>
+     dca:	83 c5 01             	add    $0x1,%ebp
+     dcd:	89 83 00 00 00 00    	mov    %eax,0x0(%rbx)
+     dd3:	49 81 c5 04 00 40 00 	add    $0x400004,%r13
+     dda:	48 83 c3 04          	add    $0x4,%rbx
+     dde:	49 81 c4 04 00 40 00 	add    $0x400004,%r12
+     de5:	41 39 ef             	cmp    %ebp,%r15d
+     de8:	0f 8e d2 00 00 00    	jle    ec0 <module_cuda_timestamp_entry_update_interface+0x130>
+     dee:	41 8b 44 1e 04       	mov    0x4(%r14,%rbx,1),%eax
+     df3:	8b bb 00 00 00 00    	mov    0x0(%rbx),%edi
+     df9:	39 f8                	cmp    %edi,%eax
+     dfb:	76 cb                	jbe    dc8 <module_cuda_timestamp_entry_update_interface+0x38>
+     dfd:	89 fe                	mov    %edi,%esi
+     dff:	8d 50 01             	lea    0x1(%rax),%edx
+     e02:	41 b8 01 00 00 00    	mov    $0x1,%r8d
+     e08:	48 c1 e6 06          	shl    $0x6,%rsi
+     e0c:	29 fa                	sub    %edi,%edx
+     e0e:	4a 8d 0c 26          	lea    (%rsi,%r12,1),%rcx
+     e12:	49 8d 74 35 00       	lea    0x0(%r13,%rsi,1),%rsi
+     e17:	48 c1 e2 06          	shl    $0x6,%rdx
+     e1b:	bf 00 00 00 00       	mov    $0x0,%edi
+     e20:	e8 00 00 00 00       	callq  e25 <module_cuda_timestamp_entry_update_interface+0x95>
+     e25:	85 c0                	test   %eax,%eax
+     e27:	0f 85 b3 00 00 00    	jne    ee0 <module_cuda_timestamp_entry_update_interface+0x150>
+     e2d:	41 8b 44 1e 04       	mov    0x4(%r14,%rbx,1),%eax
+     e32:	eb 96                	jmp    dca <module_cuda_timestamp_entry_update_interface+0x3a>
+     e34:	0f 1f 40 00          	nopl   0x0(%rax)
+     e38:	89 fe                	mov    %edi,%esi
+     e3a:	ba ff ff 00 00       	mov    $0xffff,%edx
+     e3f:	41 b8 01 00 00 00    	mov    $0x1,%r8d
+     e45:	48 c1 e6 06          	shl    $0x6,%rsi
+     e49:	29 fa                	sub    %edi,%edx
+     e4b:	bf 00 00 00 00       	mov    $0x0,%edi
+     e50:	4a 8d 0c 26          	lea    (%rsi,%r12,1),%rcx
+     e54:	49 8d 74 35 00       	lea    0x0(%r13,%rsi,1),%rsi
+     e59:	48 c1 e2 06          	shl    $0x6,%rdx
+     e5d:	e8 00 00 00 00       	callq  e62 <module_cuda_timestamp_entry_update_interface+0xd2>
+     e62:	85 c0                	test   %eax,%eax
+     e64:	75 69                	jne    ecf <module_cuda_timestamp_entry_update_interface+0x13f>
+     e66:	41 8b 54 1e 04       	mov    0x4(%r14,%rbx,1),%edx
+     e6b:	41 b8 01 00 00 00    	mov    $0x1,%r8d
+     e71:	4c 89 e1             	mov    %r12,%rcx
+     e74:	4c 89 ee             	mov    %r13,%rsi
+     e77:	bf 00 00 00 00       	mov    $0x0,%edi
+     e7c:	83 c2 01             	add    $0x1,%edx
+     e7f:	48 c1 e2 06          	shl    $0x6,%rdx
+     e83:	e8 00 00 00 00       	callq  e88 <module_cuda_timestamp_entry_update_interface+0xf8>
+     e88:	85 c0                	test   %eax,%eax
+     e8a:	74 a1                	je     e2d <module_cuda_timestamp_entry_update_interface+0x9d>
+     e8c:	89 c7                	mov    %eax,%edi
+     e8e:	e8 00 00 00 00       	callq  e93 <module_cuda_timestamp_entry_update_interface+0x103>
+     e93:	b9 82 00 00 00       	mov    $0x82,%ecx
+     e98:	49 89 c0             	mov    %rax,%r8
+     e9b:	48 8b 3d 00 00 00 00 	mov    0x0(%rip),%rdi        # ea2 <module_cuda_timestamp_entry_update_interface+0x112>
+     ea2:	ba 00 00 00 00       	mov    $0x0,%edx
+     ea7:	be 00 00 00 00       	mov    $0x0,%esi
+     eac:	31 c0                	xor    %eax,%eax
+     eae:	e8 00 00 00 00       	callq  eb3 <module_cuda_timestamp_entry_update_interface+0x123>
+     eb3:	83 cf ff             	or     $0xffffffffffffffff,%edi
+     eb6:	e8 00 00 00 00       	callq  ebb <module_cuda_timestamp_entry_update_interface+0x12b>
+     ebb:	0f 1f 44 00 00       	nopl   0x0(%rax,%rax,1)
+     ec0:	48 83 c4 08          	add    $0x8,%rsp
+     ec4:	5b                   	pop    %rbx
+     ec5:	5d                   	pop    %rbp
+     ec6:	41 5c                	pop    %r12
+     ec8:	41 5d                	pop    %r13
+     eca:	41 5e                	pop    %r14
+     ecc:	41 5f                	pop    %r15
+     ece:	c3                   	retq   
+     ecf:	89 c7                	mov    %eax,%edi
+     ed1:	e8 00 00 00 00       	callq  ed6 <module_cuda_timestamp_entry_update_interface+0x146>
+     ed6:	b9 7d 00 00 00       	mov    $0x7d,%ecx
+     edb:	49 89 c0             	mov    %rax,%r8
+     ede:	eb bb                	jmp    e9b <module_cuda_timestamp_entry_update_interface+0x10b>
+     ee0:	89 c7                	mov    %eax,%edi
+     ee2:	e8 00 00 00 00       	callq  ee7 <module_cuda_timestamp_entry_update_interface+0x157>
+     ee7:	b9 77 00 00 00       	mov    $0x77,%ecx
+     eec:	49 89 c0             	mov    %rax,%r8
+     eef:	eb aa                	jmp    e9b <module_cuda_timestamp_entry_update_interface+0x10b>
+     ef1:	66 66 66 66 66 66 2e 	nopw   %cs:0x0(%rax,%rax,1)
+     ef8:	0f 1f 84 00 00 00 00 
+     eff:	00 
+
+0000000000000f00 <module_cuda_init_interface>:
+     f00:	48 83 ec 08          	sub    $0x8,%rsp
+     f04:	e8 00 00 00 00       	callq  f09 <module_cuda_init_interface+0x9>
+     f09:	89 c7                	mov    %eax,%edi
+     f0b:	e8 00 00 00 00       	callq  f10 <module_cuda_init_interface+0x10>
+     f10:	ba 00 00 00 00       	mov    $0x0,%edx
+     f15:	31 c0                	xor    %eax,%eax
+     f17:	b9 08 00 00 00       	mov    $0x8,%ecx
+     f1c:	48 89 d7             	mov    %rdx,%rdi
+     f1f:	be 00 00 00 10       	mov    $0x10000000,%esi
+     f24:	f3 48 ab             	rep stos %rax,%es:(%rdi)
+     f27:	bf 00 00 00 00       	mov    $0x0,%edi
+     f2c:	e8 00 00 00 00       	callq  f31 <module_cuda_init_interface+0x31>
+     f31:	85 c0                	test   %eax,%eax
+     f33:	75 48                	jne    f7d <module_cuda_init_interface+0x7d>
+     f35:	be 40 00 00 04       	mov    $0x4000040,%esi
+     f3a:	bf 00 00 00 00       	mov    $0x0,%edi
+     f3f:	31 c0                	xor    %eax,%eax
+     f41:	e8 00 00 00 00       	callq  f46 <module_cuda_init_interface+0x46>
+     f46:	be 00 00 02 04       	mov    $0x4020000,%esi
+     f4b:	bf 00 00 00 00       	mov    $0x0,%edi
+     f50:	31 c0                	xor    %eax,%eax
+     f52:	e8 00 00 00 00       	callq  f57 <module_cuda_init_interface+0x57>
+     f57:	be 00 00 00 01       	mov    $0x1000000,%esi
+     f5c:	bf 00 00 00 00       	mov    $0x0,%edi
+     f61:	31 c0                	xor    %eax,%eax
+     f63:	e8 00 00 00 00       	callq  f68 <module_cuda_init_interface+0x68>
+     f68:	be 08 20 80 02       	mov    $0x2802008,%esi
+     f6d:	bf 00 00 00 00       	mov    $0x0,%edi
+     f72:	31 c0                	xor    %eax,%eax
+     f74:	48 83 c4 08          	add    $0x8,%rsp
+     f78:	e9 00 00 00 00       	jmpq   f7d <module_cuda_init_interface+0x7d>
+     f7d:	89 c7                	mov    %eax,%edi
+     f7f:	e8 00 00 00 00       	callq  f84 <module_cuda_init_interface+0x84>
+     f84:	48 8b 3d 00 00 00 00 	mov    0x0(%rip),%rdi        # f8b <module_cuda_init_interface+0x8b>
+     f8b:	49 89 c0             	mov    %rax,%r8
+     f8e:	b9 29 00 00 00       	mov    $0x29,%ecx
+     f93:	ba 00 00 00 00       	mov    $0x0,%edx
+     f98:	be 00 00 00 00       	mov    $0x0,%esi
+     f9d:	31 c0                	xor    %eax,%eax
+     f9f:	e8 00 00 00 00       	callq  fa4 <module_cuda_init_interface+0xa4>
+     fa4:	83 cf ff             	or     $0xffffffffffffffff,%edi
+     fa7:	e8 00 00 00 00       	callq  fac <module_cuda_init_interface+0xac>
+     fac:	0f 1f 40 00          	nopl   0x0(%rax)
+
+0000000000000fb0 <module_cuda_global_history_queue_update_interface>:
+     fb0:	48 83 ec 08          	sub    $0x8,%rsp
+     fb4:	48 89 fe             	mov    %rdi,%rsi
+     fb7:	31 c9                	xor    %ecx,%ecx
+     fb9:	41 b8 01 00 00 00    	mov    $0x1,%r8d
+     fbf:	ba 00 00 02 04       	mov    $0x4020000,%edx
+     fc4:	bf 00 00 00 00       	mov    $0x0,%edi
+     fc9:	e8 00 00 00 00       	callq  fce <module_cuda_global_history_queue_update_interface+0x1e>
+     fce:	85 c0                	test   %eax,%eax
+     fd0:	75 05                	jne    fd7 <module_cuda_global_history_queue_update_interface+0x27>
+     fd2:	48 83 c4 08          	add    $0x8,%rsp
+     fd6:	c3                   	retq   
+     fd7:	89 c7                	mov    %eax,%edi
+     fd9:	e8 00 00 00 00       	callq  fde <module_cuda_global_history_queue_update_interface+0x2e>
+     fde:	48 8b 3d 00 00 00 00 	mov    0x0(%rip),%rdi        # fe5 <module_cuda_global_history_queue_update_interface+0x35>
+     fe5:	49 89 c0             	mov    %rax,%r8
+     fe8:	b9 99 00 00 00       	mov    $0x99,%ecx
+     fed:	ba 00 00 00 00       	mov    $0x0,%edx
+     ff2:	be 00 00 00 00       	mov    $0x0,%esi
+     ff7:	31 c0                	xor    %eax,%eax
+     ff9:	e8 00 00 00 00       	callq  ffe <module_cuda_global_history_queue_update_interface+0x4e>
+     ffe:	83 cf ff             	or     $0xffffffffffffffff,%edi
+    1001:	e8 00 00 00 00       	callq  1006 <module_cuda_global_history_queue_update_interface+0x56>
+    1006:	66 2e 0f 1f 84 00 00 	nopw   %cs:0x0(%rax,%rax,1)
+    100d:	00 00 00 
+
+0000000000001010 <module_cuda_free_interface>:
+    1010:	48 83 ec 08          	sub    $0x8,%rsp
+    1014:	48 8b 3d 00 00 00 00 	mov    0x0(%rip),%rdi        # 101b <module_cuda_free_interface+0xb>
+    101b:	e8 00 00 00 00       	callq  1020 <module_cuda_free_interface+0x10>
+    1020:	85 c0                	test   %eax,%eax
+    1022:	75 05                	jne    1029 <module_cuda_free_interface+0x19>
+    1024:	48 83 c4 08          	add    $0x8,%rsp
+    1028:	c3                   	retq   
+    1029:	89 c7                	mov    %eax,%edi
+    102b:	e8 00 00 00 00       	callq  1030 <module_cuda_free_interface+0x20>
+    1030:	48 8b 3d 00 00 00 00 	mov    0x0(%rip),%rdi        # 1037 <module_cuda_free_interface+0x27>
+    1037:	49 89 c0             	mov    %rax,%r8
+    103a:	b9 38 00 00 00       	mov    $0x38,%ecx
+    103f:	ba 00 00 00 00       	mov    $0x0,%edx
+    1044:	be 00 00 00 00       	mov    $0x0,%esi
+    1049:	31 c0                	xor    %eax,%eax
+    104b:	e8 00 00 00 00       	callq  1050 <module_cuda_free_interface+0x40>
+    1050:	83 cf ff             	or     $0xffffffffffffffff,%edi
+    1053:	e8 00 00 00 00       	callq  1058 <module_cuda_free_interface+0x48>
+    1058:	0f 1f 84 00 00 00 00 	nopl   0x0(%rax,%rax,1)
+    105f:	00 
+
+0000000000001060 <module_cuda_global_timestamp_queue_update_interface>:
+    1060:	48 83 ec 08          	sub    $0x8,%rsp
+    1064:	48 89 fe             	mov    %rdi,%rsi
+    1067:	31 c9                	xor    %ecx,%ecx
+    1069:	41 b8 01 00 00 00    	mov    $0x1,%r8d
+    106f:	ba 40 00 00 04       	mov    $0x4000040,%edx
+    1074:	bf 00 00 00 00       	mov    $0x0,%edi
+    1079:	e8 00 00 00 00       	callq  107e <module_cuda_global_timestamp_queue_update_interface+0x1e>
+    107e:	85 c0                	test   %eax,%eax
+    1080:	75 05                	jne    1087 <module_cuda_global_timestamp_queue_update_interface+0x27>
+    1082:	48 83 c4 08          	add    $0x8,%rsp
+    1086:	c3                   	retq   
+    1087:	89 c7                	mov    %eax,%edi
+    1089:	e8 00 00 00 00       	callq  108e <module_cuda_global_timestamp_queue_update_interface+0x2e>
+    108e:	48 8b 3d 00 00 00 00 	mov    0x0(%rip),%rdi        # 1095 <module_cuda_global_timestamp_queue_update_interface+0x35>
+    1095:	49 89 c0             	mov    %rax,%r8
+    1098:	b9 3f 00 00 00       	mov    $0x3f,%ecx
+    109d:	ba 00 00 00 00       	mov    $0x0,%edx
+    10a2:	be 00 00 00 00       	mov    $0x0,%esi
+    10a7:	31 c0                	xor    %eax,%eax
+    10a9:	e8 00 00 00 00       	callq  10ae <module_cuda_global_timestamp_queue_update_interface+0x4e>
+    10ae:	83 cf ff             	or     $0xffffffffffffffff,%edi
+    10b1:	e8 00 00 00 00       	callq  10b6 <module_cuda_global_timestamp_queue_update_interface+0x56>
+    10b6:	66 2e 0f 1f 84 00 00 	nopw   %cs:0x0(%rax,%rax,1)
+    10bd:	00 00 00 
+
+00000000000010c0 <module_cuda_timestamp_queue_update_interface>:
+    10c0:	40 0f b6 ff          	movzbl %dil,%edi
+    10c4:	48 83 ec 08          	sub    $0x8,%rsp
+    10c8:	41 b8 01 00 00 00    	mov    $0x1,%r8d
+    10ce:	48 89 f8             	mov    %rdi,%rax
+    10d1:	ba 04 00 40 00       	mov    $0x400004,%edx
+    10d6:	48 c1 e0 16          	shl    $0x16,%rax
+    10da:	48 8d 0c b8          	lea    (%rax,%rdi,4),%rcx
+    10de:	bf 00 00 00 00       	mov    $0x0,%edi
+    10e3:	e8 00 00 00 00       	callq  10e8 <module_cuda_timestamp_queue_update_interface+0x28>
+    10e8:	85 c0                	test   %eax,%eax
+    10ea:	75 05                	jne    10f1 <module_cuda_timestamp_queue_update_interface+0x31>
+    10ec:	48 83 c4 08          	add    $0x8,%rsp
+    10f0:	c3                   	retq   
+    10f1:	89 c7                	mov    %eax,%edi
+    10f3:	e8 00 00 00 00       	callq  10f8 <module_cuda_timestamp_queue_update_interface+0x38>
+    10f8:	48 8b 3d 00 00 00 00 	mov    0x0(%rip),%rdi        # 10ff <module_cuda_timestamp_queue_update_interface+0x3f>
+    10ff:	49 89 c0             	mov    %rax,%r8
+    1102:	b9 4f 00 00 00       	mov    $0x4f,%ecx
+    1107:	ba 00 00 00 00       	mov    $0x0,%edx
+    110c:	be 00 00 00 00       	mov    $0x0,%esi
+    1111:	31 c0                	xor    %eax,%eax
+    1113:	e8 00 00 00 00       	callq  1118 <module_cuda_timestamp_queue_update_interface+0x58>
+    1118:	83 cf ff             	or     $0xffffffffffffffff,%edi
+    111b:	e8 00 00 00 00       	callq  1120 <_Z49module_cuda_timestamp_entry_update_interfacei_oldhjP9timestamp>
+
+0000000000001120 <_Z49module_cuda_timestamp_entry_update_interfacei_oldhjP9timestamp>:
+    1120:	40 0f b6 ff          	movzbl %dil,%edi
+    1124:	89 f1                	mov    %esi,%ecx
+    1126:	48 83 ec 08          	sub    $0x8,%rsp
+    112a:	48 89 f8             	mov    %rdi,%rax
+    112d:	89 c9                	mov    %ecx,%ecx
+    112f:	48 89 d6             	mov    %rdx,%rsi
+    1132:	48 c1 e0 16          	shl    $0x16,%rax
+    1136:	48 c1 e1 06          	shl    $0x6,%rcx
+    113a:	41 b8 01 00 00 00    	mov    $0x1,%r8d
+    1140:	48 8d 04 b8          	lea    (%rax,%rdi,4),%rax
+    1144:	ba 40 00 00 00       	mov    $0x40,%edx
+    1149:	bf 00 00 00 00       	mov    $0x0,%edi
+    114e:	48 01 c1             	add    %rax,%rcx
+    1151:	e8 00 00 00 00       	callq  1156 <_Z49module_cuda_timestamp_entry_update_interfacei_oldhjP9timestamp+0x36>
+    1156:	85 c0                	test   %eax,%eax
+    1158:	75 05                	jne    115f <_Z49module_cuda_timestamp_entry_update_interfacei_oldhjP9timestamp+0x3f>
+    115a:	48 83 c4 08          	add    $0x8,%rsp
+    115e:	c3                   	retq   
+    115f:	89 c7                	mov    %eax,%edi
+    1161:	e8 00 00 00 00       	callq  1166 <_Z49module_cuda_timestamp_entry_update_interfacei_oldhjP9timestamp+0x46>
+    1166:	48 8b 3d 00 00 00 00 	mov    0x0(%rip),%rdi        # 116d <_Z49module_cuda_timestamp_entry_update_interfacei_oldhjP9timestamp+0x4d>
+    116d:	49 89 c0             	mov    %rax,%r8
+    1170:	b9 62 00 00 00       	mov    $0x62,%ecx
+    1175:	ba 00 00 00 00       	mov    $0x0,%edx
+    117a:	be 00 00 00 00       	mov    $0x0,%esi
+    117f:	31 c0                	xor    %eax,%eax
+    1181:	e8 00 00 00 00       	callq  1186 <_Z49module_cuda_timestamp_entry_update_interfacei_oldhjP9timestamp+0x66>
+    1186:	83 cf ff             	or     $0xffffffffffffffff,%edi
+    1189:	e8 00 00 00 00       	callq  118e <_Z49module_cuda_timestamp_entry_update_interfacei_oldhjP9timestamp+0x6e>
+    118e:	66 90                	xchg   %ax,%ax
+
+0000000000001190 <module_cuda_history_hash_queue_update_interface>:
+    1190:	40 0f b6 ff          	movzbl %dil,%edi
+    1194:	48 83 ec 08          	sub    $0x8,%rsp
+    1198:	41 b8 01 00 00 00    	mov    $0x1,%r8d
+    119e:	48 89 f9             	mov    %rdi,%rcx
+    11a1:	48 c1 e7 16          	shl    $0x16,%rdi
+    11a5:	ba 00 20 40 00       	mov    $0x402000,%edx
+    11aa:	48 c1 e1 0d          	shl    $0xd,%rcx
+    11ae:	48 01 f9             	add    %rdi,%rcx
+    11b1:	bf 00 00 00 00       	mov    $0x0,%edi
+    11b6:	e8 00 00 00 00       	callq  11bb <module_cuda_history_hash_queue_update_interface+0x2b>
+    11bb:	85 c0                	test   %eax,%eax
+    11bd:	75 05                	jne    11c4 <module_cuda_history_hash_queue_update_interface+0x34>
+    11bf:	48 83 c4 08          	add    $0x8,%rsp
+    11c3:	c3                   	retq   
+    11c4:	89 c7                	mov    %eax,%edi
+    11c6:	e8 00 00 00 00       	callq  11cb <module_cuda_history_hash_queue_update_interface+0x3b>
+    11cb:	48 8b 3d 00 00 00 00 	mov    0x0(%rip),%rdi        # 11d2 <module_cuda_history_hash_queue_update_interface+0x42>
+    11d2:	49 89 c0             	mov    %rax,%r8
+    11d5:	b9 a9 00 00 00       	mov    $0xa9,%ecx
+    11da:	ba 00 00 00 00       	mov    $0x0,%edx
+    11df:	be 00 00 00 00       	mov    $0x0,%esi
+    11e4:	31 c0                	xor    %eax,%eax
+    11e6:	e8 00 00 00 00       	callq  11eb <module_cuda_history_hash_queue_update_interface+0x5b>
+    11eb:	83 cf ff             	or     $0xffffffffffffffff,%edi
+    11ee:	e8 00 00 00 00       	callq  11f3 <module_cuda_history_hash_queue_update_interface+0x63>
+    11f3:	66 66 66 66 2e 0f 1f 	nopw   %cs:0x0(%rax,%rax,1)
+    11fa:	84 00 00 00 00 00 
+
+0000000000001200 <module_cuda_global_page_filter_update_interface>:
+    1200:	48 83 ec 08          	sub    $0x8,%rsp
+    1204:	48 89 fe             	mov    %rdi,%rsi
+    1207:	31 c9                	xor    %ecx,%ecx
+    1209:	41 b8 01 00 00 00    	mov    $0x1,%r8d
+    120f:	ba 00 00 00 01       	mov    $0x1000000,%edx
+    1214:	bf 00 00 00 00       	mov    $0x0,%edi
+    1219:	e8 00 00 00 00       	callq  121e <module_cuda_global_page_filter_update_interface+0x1e>
+    121e:	85 c0                	test   %eax,%eax
+    1220:	75 05                	jne    1227 <module_cuda_global_page_filter_update_interface+0x27>
+    1222:	48 83 c4 08          	add    $0x8,%rsp
+    1226:	c3                   	retq   
+    1227:	89 c7                	mov    %eax,%edi
+    1229:	e8 00 00 00 00       	callq  122e <module_cuda_global_page_filter_update_interface+0x2e>
+    122e:	48 8b 3d 00 00 00 00 	mov    0x0(%rip),%rdi        # 1235 <module_cuda_global_page_filter_update_interface+0x35>
+    1235:	49 89 c0             	mov    %rax,%r8
+    1238:	b9 b9 00 00 00       	mov    $0xb9,%ecx
+    123d:	ba 00 00 00 00       	mov    $0x0,%edx
+    1242:	be 00 00 00 00       	mov    $0x0,%esi
+    1247:	31 c0                	xor    %eax,%eax
+    1249:	e8 00 00 00 00       	callq  124e <module_cuda_global_page_filter_update_interface+0x4e>
+    124e:	83 cf ff             	or     $0xffffffffffffffff,%edi
+    1251:	e8 00 00 00 00       	callq  1256 <module_cuda_global_page_filter_update_interface+0x56>
+    1256:	66 2e 0f 1f 84 00 00 	nopw   %cs:0x0(%rax,%rax,1)
+    125d:	00 00 00 
+
+0000000000001260 <module_cuda_page_filter_update_interface>:
+    1260:	40 0f b6 cf          	movzbl %dil,%ecx
+    1264:	48 83 ec 08          	sub    $0x8,%rsp
+    1268:	41 b8 01 00 00 00    	mov    $0x1,%r8d
+    126e:	48 c1 e1 14          	shl    $0x14,%rcx
+    1272:	ba 00 00 10 00       	mov    $0x100000,%edx
+    1277:	bf 00 00 00 00       	mov    $0x0,%edi
+    127c:	e8 00 00 00 00       	callq  1281 <module_cuda_page_filter_update_interface+0x21>
+    1281:	85 c0                	test   %eax,%eax
+    1283:	75 05                	jne    128a <module_cuda_page_filter_update_interface+0x2a>
+    1285:	48 83 c4 08          	add    $0x8,%rsp
+    1289:	c3                   	retq   
+    128a:	89 c7                	mov    %eax,%edi
+    128c:	e8 00 00 00 00       	callq  1291 <module_cuda_page_filter_update_interface+0x31>
+    1291:	48 8b 3d 00 00 00 00 	mov    0x0(%rip),%rdi        # 1298 <module_cuda_page_filter_update_interface+0x38>
+    1298:	49 89 c0             	mov    %rax,%r8
+    129b:	b9 c9 00 00 00       	mov    $0xc9,%ecx
+    12a0:	ba 00 00 00 00       	mov    $0x0,%edx
+    12a5:	be 00 00 00 00       	mov    $0x0,%esi
+    12aa:	31 c0                	xor    %eax,%eax
+    12ac:	e8 00 00 00 00       	callq  12b1 <module_cuda_page_filter_update_interface+0x51>
+    12b1:	83 cf ff             	or     $0xffffffffffffffff,%edi
+    12b4:	e8 00 00 00 00       	callq  12b9 <module_cuda_page_filter_update_interface+0x59>
+    12b9:	0f 1f 80 00 00 00 00 	nopl   0x0(%rax)
+
+00000000000012c0 <module_cuda_global_timestamp_queue_fetch_interface>:
+    12c0:	48 83 ec 08          	sub    $0x8,%rsp
+    12c4:	31 c9                	xor    %ecx,%ecx
+    12c6:	41 b8 02 00 00 00    	mov    $0x2,%r8d
+    12cc:	ba 40 00 00 04       	mov    $0x4000040,%edx
+    12d1:	be 00 00 00 00       	mov    $0x0,%esi
+    12d6:	e8 00 00 00 00       	callq  12db <module_cuda_global_timestamp_queue_fetch_interface+0x1b>
+    12db:	85 c0                	test   %eax,%eax
+    12dd:	75 05                	jne    12e4 <module_cuda_global_timestamp_queue_fetch_interface+0x24>
+    12df:	48 83 c4 08          	add    $0x8,%rsp
+    12e3:	c3                   	retq   
+    12e4:	89 c7                	mov    %eax,%edi
+    12e6:	e8 00 00 00 00       	callq  12eb <module_cuda_global_timestamp_queue_fetch_interface+0x2b>
+    12eb:	48 8b 3d 00 00 00 00 	mov    0x0(%rip),%rdi        # 12f2 <module_cuda_global_timestamp_queue_fetch_interface+0x32>
+    12f2:	49 89 c0             	mov    %rax,%r8
+    12f5:	b9 46 00 00 00       	mov    $0x46,%ecx
+    12fa:	ba 00 00 00 00       	mov    $0x0,%edx
+    12ff:	be 00 00 00 00       	mov    $0x0,%esi
+    1304:	31 c0                	xor    %eax,%eax
+    1306:	e8 00 00 00 00       	callq  130b <module_cuda_global_timestamp_queue_fetch_interface+0x4b>
+    130b:	83 cf ff             	or     $0xffffffffffffffff,%edi
+    130e:	e8 00 00 00 00       	callq  1313 <module_cuda_global_timestamp_queue_fetch_interface+0x53>
+    1313:	66 66 66 66 2e 0f 1f 	nopw   %cs:0x0(%rax,%rax,1)
+    131a:	84 00 00 00 00 00 
+
+0000000000001320 <module_cuda_timestamp_queue_fetch_interface>:
+    1320:	89 f8                	mov    %edi,%eax
+    1322:	48 83 ec 08          	sub    $0x8,%rsp
+    1326:	48 89 f7             	mov    %rsi,%rdi
+    1329:	0f b6 c0             	movzbl %al,%eax
+    132c:	41 b8 02 00 00 00    	mov    $0x2,%r8d
+    1332:	be 00 00 00 00       	mov    $0x0,%esi
+    1337:	48 89 c2             	mov    %rax,%rdx
+    133a:	48 c1 e2 16          	shl    $0x16,%rdx
+    133e:	48 8d 0c 82          	lea    (%rdx,%rax,4),%rcx
+    1342:	ba 04 00 40 00       	mov    $0x400004,%edx
+    1347:	e8 00 00 00 00       	callq  134c <module_cuda_timestamp_queue_fetch_interface+0x2c>
+    134c:	85 c0                	test   %eax,%eax
+    134e:	75 05                	jne    1355 <module_cuda_timestamp_queue_fetch_interface+0x35>
+    1350:	48 83 c4 08          	add    $0x8,%rsp
+    1354:	c3                   	retq   
+    1355:	89 c7                	mov    %eax,%edi
+    1357:	e8 00 00 00 00       	callq  135c <module_cuda_timestamp_queue_fetch_interface+0x3c>
+    135c:	48 8b 3d 00 00 00 00 	mov    0x0(%rip),%rdi        # 1363 <module_cuda_timestamp_queue_fetch_interface+0x43>
+    1363:	49 89 c0             	mov    %rax,%r8
+    1366:	b9 58 00 00 00       	mov    $0x58,%ecx
+    136b:	ba 00 00 00 00       	mov    $0x0,%edx
+    1370:	be 00 00 00 00       	mov    $0x0,%esi
+    1375:	31 c0                	xor    %eax,%eax
+    1377:	e8 00 00 00 00       	callq  137c <module_cuda_timestamp_queue_fetch_interface+0x5c>
+    137c:	83 cf ff             	or     $0xffffffffffffffff,%edi
+    137f:	e8 00 00 00 00       	callq  1384 <module_cuda_timestamp_queue_fetch_interface+0x64>
+    1384:	66 66 66 2e 0f 1f 84 	nopw   %cs:0x0(%rax,%rax,1)
+    138b:	00 00 00 00 00 
+
+0000000000001390 <module_cuda_timestamp_entry_fetch_interface>:
+    1390:	89 f8                	mov    %edi,%eax
+    1392:	48 89 d7             	mov    %rdx,%rdi
+    1395:	89 f6                	mov    %esi,%esi
+    1397:	0f b6 c0             	movzbl %al,%eax
+    139a:	48 c1 e6 06          	shl    $0x6,%rsi
+    139e:	48 83 ec 08          	sub    $0x8,%rsp
+    13a2:	48 89 c2             	mov    %rax,%rdx
+    13a5:	41 b8 02 00 00 00    	mov    $0x2,%r8d
+    13ab:	48 c1 e2 16          	shl    $0x16,%rdx
+    13af:	48 8d 0c 82          	lea    (%rdx,%rax,4),%rcx
+    13b3:	ba 40 00 00 00       	mov    $0x40,%edx
+    13b8:	48 8d 0c 0e          	lea    (%rsi,%rcx,1),%rcx
+    13bc:	be 00 00 00 00       	mov    $0x0,%esi
+    13c1:	e8 00 00 00 00       	callq  13c6 <module_cuda_timestamp_entry_fetch_interface+0x36>
+    13c6:	85 c0                	test   %eax,%eax
+    13c8:	75 05                	jne    13cf <module_cuda_timestamp_entry_fetch_interface+0x3f>
+    13ca:	48 83 c4 08          	add    $0x8,%rsp
+    13ce:	c3                   	retq   
+    13cf:	89 c7                	mov    %eax,%edi
+    13d1:	e8 00 00 00 00       	callq  13d6 <module_cuda_timestamp_entry_fetch_interface+0x46>
+    13d6:	48 8b 3d 00 00 00 00 	mov    0x0(%rip),%rdi        # 13dd <module_cuda_timestamp_entry_fetch_interface+0x4d>
+    13dd:	49 89 c0             	mov    %rax,%r8
+    13e0:	b9 92 00 00 00       	mov    $0x92,%ecx
+    13e5:	ba 00 00 00 00       	mov    $0x0,%edx
+    13ea:	be 00 00 00 00       	mov    $0x0,%esi
+    13ef:	31 c0                	xor    %eax,%eax
+    13f1:	e8 00 00 00 00       	callq  13f6 <module_cuda_timestamp_entry_fetch_interface+0x66>
+    13f6:	83 cf ff             	or     $0xffffffffffffffff,%edi
+    13f9:	e8 00 00 00 00       	callq  13fe <module_cuda_timestamp_entry_fetch_interface+0x6e>
+    13fe:	66 90                	xchg   %ax,%ax
+
+0000000000001400 <module_cuda_global_history_queue_fetch_interface>:
+    1400:	48 83 ec 08          	sub    $0x8,%rsp
+    1404:	31 c9                	xor    %ecx,%ecx
+    1406:	41 b8 02 00 00 00    	mov    $0x2,%r8d
+    140c:	ba 00 00 02 04       	mov    $0x4020000,%edx
+    1411:	be 00 00 00 00       	mov    $0x0,%esi
+    1416:	e8 00 00 00 00       	callq  141b <module_cuda_global_history_queue_fetch_interface+0x1b>
+    141b:	85 c0                	test   %eax,%eax
+    141d:	75 05                	jne    1424 <module_cuda_global_history_queue_fetch_interface+0x24>
+    141f:	48 83 c4 08          	add    $0x8,%rsp
+    1423:	c3                   	retq   
+    1424:	89 c7                	mov    %eax,%edi
+    1426:	e8 00 00 00 00       	callq  142b <module_cuda_global_history_queue_fetch_interface+0x2b>
+    142b:	48 8b 3d 00 00 00 00 	mov    0x0(%rip),%rdi        # 1432 <module_cuda_global_history_queue_fetch_interface+0x32>
+    1432:	49 89 c0             	mov    %rax,%r8
+    1435:	b9 a0 00 00 00       	mov    $0xa0,%ecx
+    143a:	ba 00 00 00 00       	mov    $0x0,%edx
+    143f:	be 00 00 00 00       	mov    $0x0,%esi
+    1444:	31 c0                	xor    %eax,%eax
+    1446:	e8 00 00 00 00       	callq  144b <module_cuda_global_history_queue_fetch_interface+0x4b>
+    144b:	83 cf ff             	or     $0xffffffffffffffff,%edi
+    144e:	e8 00 00 00 00       	callq  1453 <module_cuda_global_history_queue_fetch_interface+0x53>
+    1453:	66 66 66 66 2e 0f 1f 	nopw   %cs:0x0(%rax,%rax,1)
+    145a:	84 00 00 00 00 00 
+
+0000000000001460 <module_cuda_history_hash_queue_fetch_interface>:
+    1460:	89 f9                	mov    %edi,%ecx
+    1462:	48 83 ec 08          	sub    $0x8,%rsp
+    1466:	48 89 f7             	mov    %rsi,%rdi
+    1469:	0f b6 c9             	movzbl %cl,%ecx
+    146c:	41 b8 02 00 00 00    	mov    $0x2,%r8d
+    1472:	ba 00 20 40 00       	mov    $0x402000,%edx
+    1477:	48 89 c8             	mov    %rcx,%rax
+    147a:	48 c1 e1 16          	shl    $0x16,%rcx
+    147e:	be 00 00 00 00       	mov    $0x0,%esi
+    1483:	48 c1 e0 0d          	shl    $0xd,%rax
+    1487:	48 8d 0c 08          	lea    (%rax,%rcx,1),%rcx
+    148b:	e8 00 00 00 00       	callq  1490 <module_cuda_history_hash_queue_fetch_interface+0x30>
+    1490:	85 c0                	test   %eax,%eax
+    1492:	75 05                	jne    1499 <module_cuda_history_hash_queue_fetch_interface+0x39>
+    1494:	48 83 c4 08          	add    $0x8,%rsp
+    1498:	c3                   	retq   
+    1499:	89 c7                	mov    %eax,%edi
+    149b:	e8 00 00 00 00       	callq  14a0 <module_cuda_history_hash_queue_fetch_interface+0x40>
+    14a0:	48 8b 3d 00 00 00 00 	mov    0x0(%rip),%rdi        # 14a7 <module_cuda_history_hash_queue_fetch_interface+0x47>
+    14a7:	49 89 c0             	mov    %rax,%r8
+    14aa:	b9 b2 00 00 00       	mov    $0xb2,%ecx
+    14af:	ba 00 00 00 00       	mov    $0x0,%edx
+    14b4:	be 00 00 00 00       	mov    $0x0,%esi
+    14b9:	31 c0                	xor    %eax,%eax
+    14bb:	e8 00 00 00 00       	callq  14c0 <module_cuda_history_hash_queue_fetch_interface+0x60>
+    14c0:	83 cf ff             	or     $0xffffffffffffffff,%edi
+    14c3:	e8 00 00 00 00       	callq  14c8 <module_cuda_history_hash_queue_fetch_interface+0x68>
+    14c8:	0f 1f 84 00 00 00 00 	nopl   0x0(%rax,%rax,1)
+    14cf:	00 
+
+00000000000014d0 <module_cuda_global_page_filter_fetch_interface>:
+    14d0:	48 83 ec 08          	sub    $0x8,%rsp
+    14d4:	31 c9                	xor    %ecx,%ecx
+    14d6:	41 b8 02 00 00 00    	mov    $0x2,%r8d
+    14dc:	ba 00 00 00 01       	mov    $0x1000000,%edx
+    14e1:	be 00 00 00 00       	mov    $0x0,%esi
+    14e6:	e8 00 00 00 00       	callq  14eb <module_cuda_global_page_filter_fetch_interface+0x1b>
+    14eb:	85 c0                	test   %eax,%eax
+    14ed:	75 05                	jne    14f4 <module_cuda_global_page_filter_fetch_interface+0x24>
+    14ef:	48 83 c4 08          	add    $0x8,%rsp
+    14f3:	c3                   	retq   
+    14f4:	89 c7                	mov    %eax,%edi
+    14f6:	e8 00 00 00 00       	callq  14fb <module_cuda_global_page_filter_fetch_interface+0x2b>
+    14fb:	48 8b 3d 00 00 00 00 	mov    0x0(%rip),%rdi        # 1502 <module_cuda_global_page_filter_fetch_interface+0x32>
+    1502:	49 89 c0             	mov    %rax,%r8
+    1505:	b9 c0 00 00 00       	mov    $0xc0,%ecx
+    150a:	ba 00 00 00 00       	mov    $0x0,%edx
+    150f:	be 00 00 00 00       	mov    $0x0,%esi
+    1514:	31 c0                	xor    %eax,%eax
+    1516:	e8 00 00 00 00       	callq  151b <module_cuda_global_page_filter_fetch_interface+0x4b>
+    151b:	83 cf ff             	or     $0xffffffffffffffff,%edi
+    151e:	e8 00 00 00 00       	callq  1523 <module_cuda_global_page_filter_fetch_interface+0x53>
+    1523:	66 66 66 66 2e 0f 1f 	nopw   %cs:0x0(%rax,%rax,1)
+    152a:	84 00 00 00 00 00 
+
+0000000000001530 <module_cuda_page_filter_fetch_interface>:
+    1530:	89 f9                	mov    %edi,%ecx
+    1532:	48 83 ec 08          	sub    $0x8,%rsp
+    1536:	48 89 f7             	mov    %rsi,%rdi
+    1539:	0f b6 c9             	movzbl %cl,%ecx
+    153c:	41 b8 02 00 00 00    	mov    $0x2,%r8d
+    1542:	ba 00 00 10 00       	mov    $0x100000,%edx
+    1547:	48 c1 e1 14          	shl    $0x14,%rcx
+    154b:	be 00 00 00 00       	mov    $0x0,%esi
+    1550:	e8 00 00 00 00       	callq  1555 <module_cuda_page_filter_fetch_interface+0x25>
+    1555:	85 c0                	test   %eax,%eax
+    1557:	75 05                	jne    155e <module_cuda_page_filter_fetch_interface+0x2e>
+    1559:	48 83 c4 08          	add    $0x8,%rsp
+    155d:	c3                   	retq   
+    155e:	89 c7                	mov    %eax,%edi
+    1560:	e8 00 00 00 00       	callq  1565 <module_cuda_page_filter_fetch_interface+0x35>
+    1565:	48 8b 3d 00 00 00 00 	mov    0x0(%rip),%rdi        # 156c <module_cuda_page_filter_fetch_interface+0x3c>
+    156c:	49 89 c0             	mov    %rax,%r8
+    156f:	b9 d2 00 00 00       	mov    $0xd2,%ecx
+    1574:	ba 00 00 00 00       	mov    $0x0,%edx
+    1579:	be 00 00 00 00       	mov    $0x0,%esi
+    157e:	31 c0                	xor    %eax,%eax
+    1580:	e8 00 00 00 00       	callq  1585 <module_cuda_page_filter_fetch_interface+0x55>
+    1585:	83 cf ff             	or     $0xffffffffffffffff,%edi
+    1588:	e8 00 00 00 00       	callq  158d <module_cuda_page_filter_fetch_interface+0x5d>
+    158d:	0f 1f 00             	nopl   (%rax)
+
+0000000000001590 <module_cuda_global_race_queue_fetch_interface>:
+    1590:	53                   	push   %rbx
+    1591:	31 c9                	xor    %ecx,%ecx
+    1593:	41 b8 02 00 00 00    	mov    $0x2,%r8d
+    1599:	ba 08 20 80 02       	mov    $0x2802008,%edx
+    159e:	be 00 00 00 00       	mov    $0x0,%esi
+    15a3:	48 89 fb             	mov    %rdi,%rbx
+    15a6:	e8 00 00 00 00       	callq  15ab <module_cuda_global_race_queue_fetch_interface+0x1b>
+    15ab:	85 c0                	test   %eax,%eax
+    15ad:	75 13                	jne    15c2 <module_cuda_global_race_queue_fetch_interface+0x32>
+    15af:	8b b3 00 20 80 02    	mov    0x2802000(%rbx),%esi
+    15b5:	bf 00 00 00 00       	mov    $0x0,%edi
+    15ba:	31 c0                	xor    %eax,%eax
+    15bc:	5b                   	pop    %rbx
+    15bd:	e9 00 00 00 00       	jmpq   15c2 <module_cuda_global_race_queue_fetch_interface+0x32>
+    15c2:	89 c7                	mov    %eax,%edi
+    15c4:	e8 00 00 00 00       	callq  15c9 <module_cuda_global_race_queue_fetch_interface+0x39>
+    15c9:	48 8b 3d 00 00 00 00 	mov    0x0(%rip),%rdi        # 15d0 <module_cuda_global_race_queue_fetch_interface+0x40>
+    15d0:	49 89 c0             	mov    %rax,%r8
+    15d3:	b9 d9 00 00 00       	mov    $0xd9,%ecx
+    15d8:	ba 00 00 00 00       	mov    $0x0,%edx
+    15dd:	be 00 00 00 00       	mov    $0x0,%esi
+    15e2:	31 c0                	xor    %eax,%eax
+    15e4:	e8 00 00 00 00       	callq  15e9 <module_cuda_global_race_queue_fetch_interface+0x59>
+    15e9:	83 cf ff             	or     $0xffffffffffffffff,%edi
+    15ec:	e8 00 00 00 00       	callq  15f1 <module_cuda_global_race_queue_fetch_interface+0x61>
+
+Disassembly of section .text._Z23cutGetMaxGflopsDeviceIdv:
+
+0000000000000000 <_Z23cutGetMaxGflopsDeviceIdv>:
+   0:	41 57                	push   %r15
+   2:	41 56                	push   %r14
+   4:	41 55                	push   %r13
+   6:	41 54                	push   %r12
+   8:	55                   	push   %rbp
+   9:	53                   	push   %rbx
+   a:	48 81 ec 68 02 00 00 	sub    $0x268,%rsp
+  11:	48 8d bc 24 5c 02 00 	lea    0x25c(%rsp),%rdi
+  18:	00 
+  19:	c7 84 24 5c 02 00 00 	movl   $0x0,0x25c(%rsp)
+  20:	00 00 00 00 
+  24:	e8 00 00 00 00       	callq  29 <_Z23cutGetMaxGflopsDeviceIdv+0x29>
+  29:	8b 8c 24 5c 02 00 00 	mov    0x25c(%rsp),%ecx
+  30:	85 c9                	test   %ecx,%ecx
+  32:	0f 8e d1 01 00 00    	jle    209 <_Z23cutGetMaxGflopsDeviceIdv+0x209>
+  38:	4c 8d 6c 24 10       	lea    0x10(%rsp),%r13
+  3d:	45 31 e4             	xor    %r12d,%r12d
+  40:	31 db                	xor    %ebx,%ebx
+  42:	66 0f 1f 44 00 00    	nopw   0x0(%rax,%rax,1)
+  48:	89 de                	mov    %ebx,%esi
+  4a:	4c 89 ef             	mov    %r13,%rdi
+  4d:	e8 00 00 00 00       	callq  52 <_Z23cutGetMaxGflopsDeviceIdv+0x52>
+  52:	8b 84 24 58 01 00 00 	mov    0x158(%rsp),%eax
+  59:	8d 50 ff             	lea    -0x1(%rax),%edx
+  5c:	81 fa 0d 27 00 00    	cmp    $0x270d,%edx
+  62:	77 07                	ja     6b <_Z23cutGetMaxGflopsDeviceIdv+0x6b>
+  64:	41 39 c4             	cmp    %eax,%r12d
+  67:	44 0f 4c e0          	cmovl  %eax,%r12d
+  6b:	8b 84 24 5c 02 00 00 	mov    0x25c(%rsp),%eax
+  72:	83 c3 01             	add    $0x1,%ebx
+  75:	39 d8                	cmp    %ebx,%eax
+  77:	7f cf                	jg     48 <_Z23cutGetMaxGflopsDeviceIdv+0x48>
+  79:	85 c0                	test   %eax,%eax
+  7b:	0f 8e 88 01 00 00    	jle    209 <_Z23cutGetMaxGflopsDeviceIdv+0x209>
+  81:	c7 44 24 0c 00 00 00 	movl   $0x0,0xc(%rsp)
+  88:	00 
+  89:	45 31 f6             	xor    %r14d,%r14d
+  8c:	31 ed                	xor    %ebp,%ebp
+  8e:	49 bf 0f 27 00 00 0f 	mov    $0x270f0000270f,%r15
+  95:	27 00 00 
+  98:	0f 1f 84 00 00 00 00 	nopl   0x0(%rax,%rax,1)
+  9f:	00 
+  a0:	89 ee                	mov    %ebp,%esi
+  a2:	4c 89 ef             	mov    %r13,%rdi
+  a5:	bb 01 00 00 00       	mov    $0x1,%ebx
+  aa:	e8 00 00 00 00       	callq  af <_Z23cutGetMaxGflopsDeviceIdv+0xaf>
+  af:	4c 39 bc 24 58 01 00 	cmp    %r15,0x158(%rsp)
+  b6:	00 
+  b7:	0f 84 e1 00 00 00    	je     19e <_Z23cutGetMaxGflopsDeviceIdv+0x19e>
+  bd:	8b b4 24 58 01 00 00 	mov    0x158(%rsp),%esi
+  c4:	8b 94 24 5c 01 00 00 	mov    0x15c(%rsp),%edx
+  cb:	b3 08                	mov    $0x8,%bl
+  cd:	c7 84 24 20 02 00 00 	movl   $0x10,0x220(%rsp)
+  d4:	10 00 00 00 
+  d8:	c7 84 24 24 02 00 00 	movl   $0x8,0x224(%rsp)
+  df:	08 00 00 00 
+  e3:	c7 84 24 28 02 00 00 	movl   $0x11,0x228(%rsp)
+  ea:	11 00 00 00 
+  ee:	c7 84 24 2c 02 00 00 	movl   $0x8,0x22c(%rsp)
+  f5:	08 00 00 00 
+  f9:	89 f7                	mov    %esi,%edi
+  fb:	c7 84 24 30 02 00 00 	movl   $0x12,0x230(%rsp)
+ 102:	12 00 00 00 
+ 106:	c7 84 24 34 02 00 00 	movl   $0x8,0x234(%rsp)
+ 10d:	08 00 00 00 
+ 111:	c1 e7 04             	shl    $0x4,%edi
+ 114:	c7 84 24 38 02 00 00 	movl   $0x13,0x238(%rsp)
+ 11b:	13 00 00 00 
+ 11f:	c7 84 24 3c 02 00 00 	movl   $0x8,0x23c(%rsp)
+ 126:	08 00 00 00 
+ 12a:	01 d7                	add    %edx,%edi
+ 12c:	c7 84 24 40 02 00 00 	movl   $0x20,0x240(%rsp)
+ 133:	20 00 00 00 
+ 137:	c7 84 24 44 02 00 00 	movl   $0x20,0x244(%rsp)
+ 13e:	20 00 00 00 
+ 142:	83 ff 10             	cmp    $0x10,%edi
+ 145:	c7 84 24 48 02 00 00 	movl   $0x21,0x248(%rsp)
+ 14c:	21 00 00 00 
+ 150:	c7 84 24 4c 02 00 00 	movl   $0x30,0x24c(%rsp)
+ 157:	30 00 00 00 
+ 15b:	c7 84 24 50 02 00 00 	movl   $0xffffffff,0x250(%rsp)
+ 162:	ff ff ff ff 
+ 166:	c7 84 24 54 02 00 00 	movl   $0xffffffff,0x254(%rsp)
+ 16d:	ff ff ff ff 
+ 171:	74 2b                	je     19e <_Z23cutGetMaxGflopsDeviceIdv+0x19e>
+ 173:	48 8d 84 24 30 02 00 	lea    0x230(%rsp),%rax
+ 17a:	00 
+ 17b:	31 c9                	xor    %ecx,%ecx
+ 17d:	b3 11                	mov    $0x11,%bl
+ 17f:	90                   	nop
+ 180:	83 c1 01             	add    $0x1,%ecx
+ 183:	39 df                	cmp    %ebx,%edi
+ 185:	74 69                	je     1f0 <_Z23cutGetMaxGflopsDeviceIdv+0x1f0>
+ 187:	8b 18                	mov    (%rax),%ebx
+ 189:	48 83 c0 08          	add    $0x8,%rax
+ 18d:	83 fb ff             	cmp    $0xffffffffffffffff,%ebx
+ 190:	75 ee                	jne    180 <_Z23cutGetMaxGflopsDeviceIdv+0x180>
+ 192:	bf 00 00 00 00       	mov    $0x0,%edi
+ 197:	31 c0                	xor    %eax,%eax
+ 199:	e8 00 00 00 00       	callq  19e <_Z23cutGetMaxGflopsDeviceIdv+0x19e>
+ 19e:	8b 84 24 4c 01 00 00 	mov    0x14c(%rsp),%eax
+ 1a5:	0f af 84 24 6c 01 00 	imul   0x16c(%rsp),%eax
+ 1ac:	00 
+ 1ad:	0f af c3             	imul   %ebx,%eax
+ 1b0:	44 39 f0             	cmp    %r14d,%eax
+ 1b3:	7e 13                	jle    1c8 <_Z23cutGetMaxGflopsDeviceIdv+0x1c8>
+ 1b5:	41 83 fc 02          	cmp    $0x2,%r12d
+ 1b9:	7e 45                	jle    200 <_Z23cutGetMaxGflopsDeviceIdv+0x200>
+ 1bb:	44 39 a4 24 58 01 00 	cmp    %r12d,0x158(%rsp)
+ 1c2:	00 
+ 1c3:	74 3b                	je     200 <_Z23cutGetMaxGflopsDeviceIdv+0x200>
+ 1c5:	0f 1f 00             	nopl   (%rax)
+ 1c8:	83 c5 01             	add    $0x1,%ebp
+ 1cb:	39 ac 24 5c 02 00 00 	cmp    %ebp,0x25c(%rsp)
+ 1d2:	0f 8f c8 fe ff ff    	jg     a0 <_Z23cutGetMaxGflopsDeviceIdv+0xa0>
+ 1d8:	8b 44 24 0c          	mov    0xc(%rsp),%eax
+ 1dc:	48 81 c4 68 02 00 00 	add    $0x268,%rsp
+ 1e3:	5b                   	pop    %rbx
+ 1e4:	5d                   	pop    %rbp
+ 1e5:	41 5c                	pop    %r12
+ 1e7:	41 5d                	pop    %r13
+ 1e9:	41 5e                	pop    %r14
+ 1eb:	41 5f                	pop    %r15
+ 1ed:	c3                   	retq   
+ 1ee:	66 90                	xchg   %ax,%ax
+ 1f0:	48 63 c9             	movslq %ecx,%rcx
+ 1f3:	8b 9c cc 24 02 00 00 	mov    0x224(%rsp,%rcx,8),%ebx
+ 1fa:	eb a2                	jmp    19e <_Z23cutGetMaxGflopsDeviceIdv+0x19e>
+ 1fc:	0f 1f 40 00          	nopl   0x0(%rax)
+ 200:	89 6c 24 0c          	mov    %ebp,0xc(%rsp)
+ 204:	41 89 c6             	mov    %eax,%r14d
+ 207:	eb bf                	jmp    1c8 <_Z23cutGetMaxGflopsDeviceIdv+0x1c8>
+ 209:	c7 44 24 0c 00 00 00 	movl   $0x0,0xc(%rsp)
+ 210:	00 
+ 211:	eb c5                	jmp    1d8 <_Z23cutGetMaxGflopsDeviceIdv+0x1d8>

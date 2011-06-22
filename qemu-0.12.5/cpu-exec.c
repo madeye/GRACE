@@ -23,23 +23,18 @@
 #include "kvm.h"
 
 #ifdef PPI_DEBUG_TOOL
-
-#define PPI_DETECTOR_MODULE
-
-extern uint32_t total_id;
-extern uint8_t thread_start;
-extern uint8_t thread_exit;
+// extern uint32_t total_id;
+// extern uint8_t thread_start;
+// extern uint8_t thread_exit;
 extern uint8_t timing_start;
 extern uint8_t timing_end;
 extern uint8_t current_id;
 extern uint8_t last_id;
 extern volatile uint8_t is_detect_start;
 extern uint8_t is_process_captured;
-extern struct map_queue map;
-extern struct ProcessQueue process_queue;   // Process queue
+extern uint32_t max_thread_num;
 
-#include "module/copy.h"
-#include "module/process.h"
+#include "module/cpu/profiler/copy.h"
 
 #ifdef PPI_PRINT_INFO
 #include <time.h>
@@ -49,6 +44,12 @@ clock_t end_time;
 
 time_t first_time;
 time_t second_time;
+
+struct timespec time1;
+struct timespec time2;
+
+struct timeval t1;
+struct timeval t2;
 #endif
 
 #include <assert.h>
@@ -56,7 +57,13 @@ time_t second_time;
 
 extern FILE *stderr;
 
+#include "module/cpu/profiler/sync.h"
+#include <assert.h>
+#include <string.h>
 
+extern struct global_timestamp_queue gts;
+extern struct global_syn_info syn;
+extern struct statistics_syn_info stat_syn;
 #endif
 
 #if !defined(CONFIG_SOFTMMU)
@@ -661,49 +668,26 @@ int cpu_exec(CPUState *env1)
 
 
 #ifdef PPI_DEBUG_TOOL
-
-                    if (thread_start) {
-#ifdef PPI_PRINT_INFO
-                        printf("\tthread start : last tid : %d ; current tid : %d\n", last_id, current_id);
-#endif
-
-                        trace_syn_collection(TRACE_SYN_CREATE, 0, 0, 0, EIP);      
-
-                        thread_start = 0;
-                    }
-                    if (thread_exit) {
-#ifdef PPI_PRINT_INFO
-                        printf("\tthread exit : last tid : %d ; current tid : %d\n", last_id, current_id);
-#endif
-
-                        trace_syn_collection(TRACE_SYN_JOIN, 0, 0, 0, EIP);
-
-                        thread_exit= 0;
-                    }
-
-                    /*if (is_detect_start && current_id) {*/
-                        /*is_collect = 1;    	*/
-                    /*} else {*/
-                        /*is_collect = 0;*/
-                    /*}*/
-
                     // TODO: Necessary to add is_detect_start here?
                     if (is_detect_start) {
                         if (last_id != current_id) {
-                            trace_mem_buf_clear(&map, last_id);
+                            //trace_mem_buf_clear(&map, last_id);
+                            trace_mem_buf_clear(last_id);
                             last_id = current_id;
                         } else {	
                             if (env->trace_mem_ptr - env->debug_info.trace_mem_buf > TRACE_BUF_SIZE) {
-                                trace_mem_buf_clear(&map, last_id);
+                                //trace_mem_buf_clear(&map, last_id);
+                                trace_mem_buf_clear(last_id);
                             }
                         }
                     }
 
                     if (timing_start) {
-
 #ifdef PPI_PRINT_INFO
                         start_time= clock();
                         first_time = time(NULL);
+                        clock_gettime(CLOCK_REALTIME, &time1);
+                        gettimeofday(&t1, NULL);
                         printf("\ttiming start!\n");
 #endif
 
@@ -712,14 +696,21 @@ int cpu_exec(CPUState *env1)
 
                     if (timing_end) {
                         data_race_detector_report();
+                        module_syn_print(&syn);
+                        module_syn_statistics_print(&stat_syn);
 
 #ifdef PPI_PRINT_INFO
                         end_time = clock();
                         second_time = time(NULL);
+                        clock_gettime(CLOCK_REALTIME, &time2);
+                        gettimeofday(&t2, NULL);
                         printf("\ttiming end!\n");
-                        printf("\nTime costs : %f (s) ; %f (s)\n", 
-                                (double)(end_time - start_time) / 1000000, difftime(second_time, first_time));
+
+                        fprintf(stderr, "\nTime costs : %f (s)\n", 
+                                (double)((unsigned long)(t2.tv_usec + t2.tv_sec * 1000000) - 
+                                (unsigned long)(t1.tv_usec + t1.tv_sec * 1000000)) / 1000000);
 #endif
+
                         is_detect_start = 0;
                         timing_end = 0;
                     }

@@ -32,7 +32,7 @@
 #define PPI_DEBUG_SWITCHER
 
 #ifdef PPI_DEBUG_TOOL
-#include "../module/interface.h"
+#include "../module/cpu/detector/interface.h"
 #endif
 
 /* target supports implicit self modifying code */

@@ -175,11 +175,9 @@ int main(int argc, char **argv)
 
 #ifdef PPI_DEBUG_TOOL
 #define PPI_PROCESS_INIT
-#define PPI_MONITOR_INIT
 #define PPI_COPY_INIT
 
-#include "module/process.h"
-#include "module/copy.h"
+#include "module/cpu/profiler/process.h"
 
 uint32_t bench_mark_id = 0;
 volatile uint8_t is_detect_start = 0;
@@ -187,15 +185,26 @@ uint8_t is_process_captured = 0;
 uint8_t just_exec = 0;
 uint8_t just_clone = 0;
 uint8_t just_exit = 0;
-uint8_t thread_start = 0;
-uint8_t thread_exit = 0;
+// uint8_t thread_start = 0;
+// uint8_t thread_exit = 0;
 uint8_t timing_start = 0;
 uint8_t timing_end = 0;
 uint32_t total_id = 1;
 uint32_t current_id = 0;
 uint8_t last_id = 0;
 struct ProcessQueue process_queue;
-struct map_queue map;
+uint32_t max_thread_num = 4;
+int cuda_thread_num = 1024;
+
+#define PPI_TIMESTAMP_INIT
+#define PPI_SYNC_INIT
+
+#include "module/cpu/profiler/sync.h"
+#include <assert.h>
+#include <string.h>
+
+struct global_syn_info syn;
+struct statistics_syn_info stat_syn;
 #endif
 
 static const char *data_dir;
@@ -4908,12 +4917,6 @@ int main(int argc, char **argv, char **envp)
 
     init_clocks();
 
-#ifdef PPI_DEBUG_TOOL
-    data_race_detector_init();
-    process_queue_init(&process_queue);
-    map_queue_init(&map);
-#endif
-
     qemu_errors_to_file(stderr);
     qemu_cache_utils_init(envp);
 
@@ -5042,6 +5045,14 @@ int main(int argc, char **argv, char **envp)
             case QEMU_OPTION_benchmark:
                 bench_mark_id = atoi(optarg);
                 printf("bench mark: %d\n", bench_mark_id);
+                break;
+            case QEMU_OPTION_threadnum:
+                max_thread_num = atoi(optarg);
+                printf("max thread num: %d\n", max_thread_num);
+                break;
+            case QEMU_OPTION_cuda_threadnum:
+                cuda_thread_num = atoi(optarg);
+                printf("max thread num: %d\n", cuda_thread_num);
                 break;
 #endif
             case QEMU_OPTION_hda:
@@ -6174,6 +6185,15 @@ int main(int argc, char **argv, char **envp)
 
         close(fd);
     }
+#endif
+
+#ifdef PPI_DEBUG_TOOL
+    process_queue_init(&process_queue);
+    
+    module_syn_init(&syn);
+    module_syn_statistics_init(&stat_syn);
+
+    data_race_detector_init();
 #endif
 
     main_loop();
