@@ -24,6 +24,8 @@ __host__ void module_cuda_config_register(
 #endif
 }
 
+struct trace_content *cuda_buf;
+
 __host__ void module_cuda_init_interface()
 {
     cudaSetDevice(cutGetMaxGflopsDeviceId());
@@ -32,6 +34,7 @@ __host__ void module_cuda_init_interface()
 
     cutilSafeCall(cudaMalloc((void **)&d_trace_buf, 
                 sizeof(struct trace_content) * TRACE_CUDA_BUF_SIZE));
+    cutilSafeCall(cudaHostAlloc((void **)&cuda_buf, sizeof(struct trace_content) * TRACE_CUDA_BUF_SIZE, cudaHostAllocDefault));
 
     memset(old_index, 0, MAX_PROCESS_NUM * sizeof(uint32_t));
 
@@ -49,6 +52,7 @@ __host__ void module_cuda_init_interface()
 
 __host__ void module_cuda_free_interface()
 {
+    cutilSafeCall(cudaFreeHost(cuda_buf));
     cutilSafeCall(cudaFree(d_trace_buf));
 }
 

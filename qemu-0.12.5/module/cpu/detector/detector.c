@@ -174,7 +174,8 @@ void *module_pthread_stage_two(void *args)
 #ifdef CUDA
 #ifdef PPI_THREE_STAGE
 volatile int last_tid = 0;
-struct trace_content cuda_buf[TRACE_BUF_CUDA_SIZE * 2];
+/*struct trace_content cuda_buf[TRACE_BUF_CUDA_SIZE * 2];*/
+extern struct trace_content *cuda_buf;
 int cuda_buf_size = 0;
 #endif
 #endif
@@ -182,11 +183,15 @@ int cuda_buf_size = 0;
 void *module_pthread_stage_new_three(void *args)
 {
     uint8_t i, j;
-    int n;
-    volatile uint8_t tid;
-    volatile uint32_t size;
+    int n, m;
+    uint8_t tid;
+    uint32_t size;
     struct shared_trace_chunk *temp_chunk;
     struct trace_content *content; 
+
+    uint64_t address;
+    uint32_t index;
+    uint8_t flag;
 
     i = ((int *)args)[0];
     fprintf(stderr, "stage three : core %d start!\n", i);
@@ -238,20 +243,45 @@ void *module_pthread_stage_new_three(void *args)
             for (n = 0; n < size; n++) {
                 content = &temp_chunk->buf[n];
 
-                /*memcpy(cuda_buf + cuda_buf_size, content, */
-                /*sizeof(struct trace_content));*/
-                /*cuda_buf_size++;*/
+                address = content->address;
+                index = (address >> FILTER_BASE_BIT) & FILTER_ENTRY_MASK;
+                flag = 0;
 
                 if (content->type == TRACE_MEM_LOAD) {
                     module_history_load_record(content);
                     module_filter_load_record(content);
+                    for (m = 0; m < info.max_tid_num; m++) {
+                        if (m != tid) {
+                            if (gpf.thread[m].entry[index].store) {
+                                flag = 1;
+                            }
+                        }
+                    }
                 } else if (content->type == TRACE_MEM_STORE) {
                     module_history_store_record(content);
                     module_filter_store_record(content);
+                    for (m = 0; m < info.max_tid_num; m++) {
+                        if (m != tid) {
+                            if (gpf.thread[m].entry[index].load) {
+                                flag = 1;
+                            }
+
+                            if (gpf.thread[m].entry[index].store) {
+                                flag = 1;
+                            }
+                        }
+                    }
                 } else {
                     fprintf(stderr, "unknown type : %d\n", content->type);
                     assert(0);
                 }
+
+                if (flag) {
+                    memcpy(cuda_buf + cuda_buf_size, content, 
+                            sizeof(struct trace_content));
+                    cuda_buf_size++;
+                }
+
             }
 
             if (last_tid != tid) {
@@ -260,28 +290,28 @@ void *module_pthread_stage_new_three(void *args)
                 module_cuda_page_filter_update_interface(
                         last_tid, &gpf.thread[last_tid]);
 
-                /*if (cuda_buf_size > 0) {*/
-                /*module_cuda_timestamp_entry_update_interface(*/
-                /*info.max_tid_num, cts.index, gts.thread); */
-                /*module_cuda_match_with_trace_buf_interface(*/
-                /*tid, cuda_buf_size, cuda_buf);*/
+                if (cuda_buf_size > 0) {
+                    module_cuda_timestamp_entry_update_interface(
+                            info.max_tid_num, cts.index, gts.thread); 
+                    module_cuda_match_with_trace_buf_interface(
+                            tid, cuda_buf_size, cuda_buf);
 
-                /*cuda_buf_size = 0;*/
-                /*}*/
+                    cuda_buf_size = 0;
+                }
 
                 last_tid = tid;
             }
 
-            /*if (cuda_buf_size >= TRACE_BUF_CUDA_SIZE) {*/
-            module_cuda_timestamp_entry_update_interface(
-                    info.max_tid_num, cts.index, gts.thread); 
-            /*module_cuda_match_with_trace_buf_interface(*/
-            /*tid, cuda_buf_size, cuda_buf);*/
-            module_cuda_match_with_trace_buf_interface(
-                    tid, size, temp_chunk->buf);
+            if (cuda_buf_size >= TRACE_BUF_CUDA_SIZE) {
+                module_cuda_timestamp_entry_update_interface(
+                        info.max_tid_num, cts.index, gts.thread); 
+                module_cuda_match_with_trace_buf_interface(
+                        tid, cuda_buf_size, cuda_buf);
+                /*module_cuda_match_with_trace_buf_interface(*/
+                /*tid, size, temp_chunk->buf);*/
 
-            /*cuda_buf_size = 0;*/
-            /*}*/
+                cuda_buf_size = 0;
+            }
 #endif
 
             temp_chunk->info->thread_id = 0;
