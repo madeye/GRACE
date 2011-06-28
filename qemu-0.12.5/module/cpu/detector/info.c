@@ -29,10 +29,10 @@ static inline void module_info_init(void)
 #define STAGE_TWO_BASE_CPU_ID 1
 #define STAGE_THREE_BASE_CPU_ID 2
 
-#define MAX_STAGE_NUM 2
+#define MAX_STAGE_NUM 1
 #ifdef CUDA
 #define MAX_CORE_NUM 1
-#define MAX_CHUNK_NUM 256
+#define MAX_CHUNK_NUM 64
 #else
 #define MAX_CORE_NUM 4
 #define MAX_CHUNK_NUM 4

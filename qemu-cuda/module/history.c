@@ -18,7 +18,7 @@ struct history_queue {
     uint32_t store_tail;
 };
 
-#define MAX_HASH_NUM 16384
+#define MAX_HASH_NUM 1024
 #define HASH_BASE_BIT 2
 
 struct history_hash_queue {

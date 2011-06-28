@@ -179,6 +179,126 @@ int cuda_buf_size = 0;
 #endif
 #endif
 
+void *module_pthread_stage_new_three(void *args)
+{
+    uint8_t i, j;
+    int n;
+    volatile uint8_t tid;
+    volatile uint32_t size;
+    struct shared_trace_chunk *temp_chunk;
+    struct trace_content *content; 
+
+    i = ((int *)args)[0];
+    fprintf(stderr, "stage three : core %d start!\n", i);
+
+    info.core_id = i;
+    ppi_set_cpu_thread(STAGE_TWO_BASE_CPU_ID + i);
+
+    j = 0;
+
+#ifdef CUDA
+    printf("CUDA Init.\n");
+    module_cuda_config_register(cuda_thread_num);
+    module_cuda_init_interface();
+#endif
+
+    while(1) {
+
+        if (stage_three_stop) 
+            break;
+
+        pthread_mutex_lock(&det_lock);
+        if (!is_detect_start)
+            pthread_cond_wait(&det_cond, &det_lock);
+        pthread_mutex_unlock(&det_lock);
+
+        temp_chunk = &shared_buf.stage[0].core[i].chunk[j];
+
+        if (temp_chunk->info->is_buf_full) {
+            tid = temp_chunk->info->thread_id;
+            size = temp_chunk->info->buf_size;
+
+#ifndef CUDA
+            module_detector_stage_three(tid, size, temp_chunk->buf);            
+#else
+            if (!info.exist[tid]) {
+                printf("\tnew tid: %d\n", tid);
+
+                if (info.max_tid_num < (tid + 1)) {
+                    info.max_tid_num = (tid + 1);
+                    module_cuda_tid_update_interface(info.max_tid_num);
+                }
+
+                printf("max tid num: %d\n", info.max_tid_num);
+
+                info.exist[tid] = 1;
+
+            }
+
+            for (n = 0; n < size; n++) {
+                content = &temp_chunk->buf[n];
+
+                /*memcpy(cuda_buf + cuda_buf_size, content, */
+                /*sizeof(struct trace_content));*/
+                /*cuda_buf_size++;*/
+
+                if (content->type == TRACE_MEM_LOAD) {
+                    module_history_load_record(content);
+                    module_filter_load_record(content);
+                } else if (content->type == TRACE_MEM_STORE) {
+                    module_history_store_record(content);
+                    module_filter_store_record(content);
+                } else {
+                    fprintf(stderr, "unknown type : %d\n", content->type);
+                    assert(0);
+                }
+            }
+
+            if (last_tid != tid) {
+                module_cuda_history_hash_queue_update_interface(
+                        last_tid, &gh.thread[last_tid]);
+                module_cuda_page_filter_update_interface(
+                        last_tid, &gpf.thread[last_tid]);
+
+                /*if (cuda_buf_size > 0) {*/
+                /*module_cuda_timestamp_entry_update_interface(*/
+                /*info.max_tid_num, cts.index, gts.thread); */
+                /*module_cuda_match_with_trace_buf_interface(*/
+                /*tid, cuda_buf_size, cuda_buf);*/
+
+                /*cuda_buf_size = 0;*/
+                /*}*/
+
+                last_tid = tid;
+            }
+
+            /*if (cuda_buf_size >= TRACE_BUF_CUDA_SIZE) {*/
+            module_cuda_timestamp_entry_update_interface(
+                    info.max_tid_num, cts.index, gts.thread); 
+            /*module_cuda_match_with_trace_buf_interface(*/
+            /*tid, cuda_buf_size, cuda_buf);*/
+            module_cuda_match_with_trace_buf_interface(
+                    tid, size, temp_chunk->buf);
+
+            /*cuda_buf_size = 0;*/
+            /*}*/
+#endif
+
+            temp_chunk->info->thread_id = 0;
+            temp_chunk->info->buf_size = 0;				
+            temp_chunk->info->is_buf_full = 0;	
+
+            j = (j + 1) % MAX_CHUNK_HISTORY_NUM;
+        }
+    }
+#ifdef CUDA
+    module_cuda_global_race_queue_fetch_interface(&gr);
+    module_cuda_free_interface(); 
+#endif
+    stage_three_finish = 1;
+}
+
+
 void *module_pthread_stage_three(void *args)
 {
     uint8_t i, j;
@@ -296,13 +416,16 @@ static inline void data_race_detector_stage(void)
     /* STAGE ONE */
     ppi_set_cpu_thread(STAGE_ONE_BASE_CPU_ID);
 
-    /* STAGE TWO */
-    pthread_create(&pid[0], NULL, module_pthread_stage_two, (void *)&cid[0]);
+    /* STAGE NEW THREE */
+    pthread_create(&pid[0], NULL, module_pthread_stage_new_three, (void *)&cid[0]);
 
-    /* STAGE THREE */
-    for (i = 0; i < MAX_CORE_NUM; i++) {
-        pthread_create(&pid[i], NULL, module_pthread_stage_three, (void *)&cid[i]);
-    }
+    /*[> STAGE TWO <]*/
+    /*pthread_create(&pid[0], NULL, module_pthread_stage_two, (void *)&cid[0]);*/
+
+    /*[> STAGE THREE <]*/
+    /*for (i = 0; i < MAX_CORE_NUM; i++) {*/
+    /*pthread_create(&pid[i], NULL, module_pthread_stage_three, (void *)&cid[i]);*/
+    /*}*/
 }
 #else
 static inline void module_detector_start(uint8_t tid, 

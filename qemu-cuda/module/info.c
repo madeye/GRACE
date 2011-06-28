@@ -35,7 +35,7 @@ static inline void module_info_init(void)
 #else
 #define MAX_CORE_NUM 4
 #endif
-#define MAX_CHUNK_NUM 256
+#define MAX_CHUNK_NUM 64
 #define TRACE_SHARED_BUF_SIZE (TRACE_BUF_SIZE)
 
 struct trace_info {

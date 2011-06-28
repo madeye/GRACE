@@ -220,13 +220,13 @@ __host__ void module_cuda_global_race_queue_fetch_interface(
 __host__ void module_cuda_match_with_trace_buf_interface(
         uint8_t tid, uint32_t size, struct trace_content *h_trace_buf)
 {
-    cutilSafeCall(cudaMemcpy(d_trace_buf, h_trace_buf, 
+    cutilSafeCall(cudaMemcpyAsync(d_trace_buf, h_trace_buf, 
                 sizeof(struct trace_content) * size, 
-                cudaMemcpyHostToDevice));
+                cudaMemcpyHostToDevice, 0));
 
     numBlocks = (size + numThreads - 1) / numThreads;
 
     cudaFuncSetCacheConfig(module_match_with_trace_buf_on_cuda, cudaFuncCachePreferL1); 
-    module_match_with_trace_buf_on_cuda<<<numBlocks, numThreads>>>(size, d_trace_buf);
+    module_match_with_trace_buf_on_cuda<<<numBlocks, numThreads, 0, 0>>>(size, d_trace_buf);
 }
 
