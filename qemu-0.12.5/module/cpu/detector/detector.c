@@ -174,7 +174,7 @@ void *module_pthread_stage_two(void *args)
 #ifdef CUDA
 #ifdef PPI_THREE_STAGE
 volatile int last_tid = 0;
-struct trace_content cuda_buf[TRACE_BUF_CUDA_SIZE * 2];
+extern struct trace_content *cuda_buf;
 int cuda_buf_size = 0;
 #endif
 #endif

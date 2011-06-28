@@ -11,6 +11,7 @@ int numThreads = 256;
 int numBlocks = 256;
 
 struct trace_content *d_trace_buf;
+struct trace_content *cuda_buf;
 
 uint32_t old_index[MAX_PROCESS_NUM];
 
@@ -33,6 +34,8 @@ __host__ void module_cuda_init_interface()
     cutilSafeCall(cudaMalloc((void **)&d_trace_buf, 
                 sizeof(struct trace_content) * TRACE_CUDA_BUF_SIZE));
 
+    cutilSafeCall(cudaHostAlloc((void **)&cuda_buf, sizeof(struct trace_content) * TRACE_CUDA_BUF_SIZE, cudaHostAllocDefault));
+
     memset(old_index, 0, MAX_PROCESS_NUM * sizeof(uint32_t));
 
 #if 1
@@ -50,6 +53,7 @@ __host__ void module_cuda_init_interface()
 __host__ void module_cuda_free_interface()
 {
     cutilSafeCall(cudaFree(d_trace_buf));
+    cutilSafeCall(cudaFreeHost(cuda_buf));
 }
 
 __host__ void module_cuda_tid_update_interface(
@@ -220,13 +224,13 @@ __host__ void module_cuda_global_race_queue_fetch_interface(
 __host__ void module_cuda_match_with_trace_buf_interface(
         uint8_t tid, uint32_t size, struct trace_content *h_trace_buf)
 {
-    cutilSafeCall(cudaMemcpy(d_trace_buf, h_trace_buf, 
+    cutilSafeCall(cudaMemcpyAsync(d_trace_buf, h_trace_buf, 
                 sizeof(struct trace_content) * size, 
-                cudaMemcpyHostToDevice));
+                cudaMemcpyHostToDevice, 0));
 
     numBlocks = (size + numThreads - 1) / numThreads;
 
     cudaFuncSetCacheConfig(module_match_with_trace_buf_on_cuda, cudaFuncCachePreferL1); 
-    module_match_with_trace_buf_on_cuda<<<numBlocks, numThreads>>>(size, d_trace_buf);
+    module_match_with_trace_buf_on_cuda<<<numBlocks, numThreads, 0, 0>>>(size, d_trace_buf);
 }
 

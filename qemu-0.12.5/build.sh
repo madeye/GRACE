@@ -2,7 +2,7 @@
 export LDFLAGS="$LDFLAGS -ldl"
 make distclean
 ./configure --prefix=/root/qemu --target-list=x86_64-softmmu
-pushd ./module/match
+pushd ./module/gpu/match
 make clean
 #make dbg=1
 make

@@ -47,7 +47,7 @@ objcopy="objcopy"
 ld="ld"
 helper_cflags=""
 #libs_softmmu=""
-libs_softmmu="-L../module/lib -lmatch_x86_64 -L/usr/local/cuda/lib64 -lcudart"
+libs_softmmu="-L../module/gpu/lib -lmatch_x86_64 -L/usr/local/cuda/lib64 -lcudart"
 libs_tools=""
 audio_pt_int=""
 audio_win_int=""
@@ -1789,7 +1789,7 @@ fi
 # After here, no more $cc or $ld runs
 
 if test "$debug" = "no" ; then
-  CFLAGS="-O2 $CFLAGS"
+  CFLAGS="-O3 -mtune=core2 $CFLAGS"
 fi
 
 # Consult white-list to determine whether to enable werror
