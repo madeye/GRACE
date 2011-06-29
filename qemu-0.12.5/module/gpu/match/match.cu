@@ -29,7 +29,7 @@ __host__ void module_cuda_init_interface()
 {
     cudaSetDevice(cutGetMaxGflopsDeviceId());
 
-#define TRACE_CUDA_BUF_SIZE (16 * 1024 * 1024)
+#define TRACE_CUDA_BUF_SIZE (1024 * 1024)
 
     cutilSafeCall(cudaMalloc((void **)&d_trace_buf, 
                 sizeof(struct trace_content) * TRACE_CUDA_BUF_SIZE));
@@ -227,6 +227,10 @@ __host__ void module_cuda_match_with_trace_buf_interface(
     cutilSafeCall(cudaMemcpyAsync(d_trace_buf, h_trace_buf, 
                 sizeof(struct trace_content) * size, 
                 cudaMemcpyHostToDevice, 0));
+
+    /*cutilSafeCall(cudaMemcpy(d_trace_buf, h_trace_buf, */
+                /*sizeof(struct trace_content) * size, */
+                /*cudaMemcpyHostToDevice));*/
 
     numBlocks = (size + numThreads - 1) / numThreads;
 

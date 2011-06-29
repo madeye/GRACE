@@ -118,7 +118,7 @@ static inline int module_race_content_equal(
 __device__
 #endif
 static inline void module_race_collection(
-        struct trace_content *content1, struct trace_content *content2) 
+        struct history_content *content1, struct trace_content *content2) 
 {
     uint32_t i;
     struct race_queue *temp_queue;

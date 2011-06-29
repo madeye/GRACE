@@ -40,6 +40,8 @@ CUFILES		:= match.cu
 # C/C++ source files (compiled with gcc / c++)
 CCFILES		:= 
 
+#CUDACCFLAGS := -Xptxas -dlcm=ca
+
 #USECUDADYNLIB	:= 1
 #USEDRVAPI      := 1
 

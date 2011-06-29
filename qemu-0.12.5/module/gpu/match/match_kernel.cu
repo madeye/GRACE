@@ -12,9 +12,12 @@ __global__ static void module_match_with_trace_buf_on_cuda(
         uint32_t size, struct trace_content *trace_buf)
 {
     const uint32_t i = blockIdx.x * blockDim.x + threadIdx.x;
+    /*__shared__ trace_content content[blockDim.x];*/
 
     if (i >= size)
         return;
+
+    /*content[threadIdx.x] = trace_buf[i];*/
 
     struct trace_content *content = &trace_buf[i];
 

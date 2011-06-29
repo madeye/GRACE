@@ -1,8 +1,13 @@
 
 /* history */
 
+struct history_content {
+    uint64_t address;
+    uint16_t index;
+};
+
 struct history_entry {
-    struct trace_content content;
+    struct history_content content;
 };
 
 #define HISTORY_QUEUE_SIZE (1 << 4)
