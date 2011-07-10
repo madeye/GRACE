@@ -238,3 +238,4 @@ __host__ void module_cuda_match_with_trace_buf_interface(
     module_match_with_trace_buf_on_cuda<<<numBlocks, numThreads, 0, 0>>>(size, d_trace_buf);
 }
 
+

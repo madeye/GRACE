@@ -37,14 +37,15 @@ static inline void module_info_init(void)
 #define MAX_CORE_NUM 4
 #define MAX_CHUNK_NUM 4
 #endif
-#define MAX_CHUNK_HISTORY_NUM 4
-#define MAX_CHUNK_MATCH_NUM (MAX_CHUNK_NUM)
+#define MAX_CHUNK_HISTORY_NUM MAX_CHUNK_NUM
+#define MAX_CHUNK_MATCH_NUM MAX_CHUNK_NUM
 #define TRACE_SHARED_BUF_SIZE (TRACE_BUF_SIZE)
 
 struct trace_info {
     volatile uint32_t buf_size;
     volatile uint8_t thread_id;
-    volatile uint8_t is_buf_full;
+    volatile uint8_t is_buf_full_0;
+    volatile uint8_t is_buf_full_1;
 };
 
 struct shared_trace_chunk {
@@ -100,13 +101,106 @@ static inline void module_shared_buf_all_empty(void)
     for (i = 0; i < MAX_STAGE_NUM; i++) {
         for (j = 0; j < MAX_CORE_NUM; j++) {
             for (k = 0; k < MAX_CHUNK_NUM; k++) {
-                while (shared_buf.stage[i].core[j].chunk[k].info->is_buf_full);
+                while (shared_buf.stage[i].core[j].chunk[k].info->is_buf_full_0 ||
+                        shared_buf.stage[i].core[j].chunk[k].info->is_buf_full_1);
             }
         }
     }
 }
 
-static inline void module_shared_buf_copy(uint8_t sid, uint8_t cid, uint8_t kid,
+#if 0
+void *module_pthread_stage_one_memcpy(void *args)
+{
+    uint32_t i, j;
+
+    i = (uint32_t) args;
+    fprintf(stderr, "stage one memcpy : core %d start!\n", i);
+
+    ppi_set_cpu_thread(i);
+
+    while(1) {
+        pthread_mutex_lock(&stage_one_memcpy_lock);
+        pthread_cond_wait(&stage_one_memcpy_cond, &stage_one_memcpy_lock);
+        stage_one_copying = 1;
+        pthread_mutex_unlock(&stage_one_memcpy_lock);
+
+        memcpy(stage_one_dst, stage_one_src, stage_one_size);
+        
+        stage_one_info->is_buf_full_0 = 1;
+        stage_one_info->is_buf_full_1 = 1;
+        
+        pthread_mutex_lock(&stage_one_memcpy_lock);
+        stage_one_copying = 0;
+        pthread_cond_broadcast(&stage_one_memcpy_cond);
+        pthread_mutex_unlock(&stage_one_memcpy_lock);
+    }
+}
+#endif
+
+#if 0
+void *module_pthread_stage_two_memcpy(void *args)
+{
+    uint32_t i, j;
+
+    i = (uint32_t) args;
+    fprintf(stderr, "stage two memcpy : core %d start!\n", i);
+
+    ppi_set_cpu_thread(i);
+
+    while(1) {
+        pthread_mutex_lock(&stage_two_memcpy_lock);
+        pthread_cond_wait(&stage_two_memcpy_cond, &stage_two_memcpy_lock);
+        stage_two_copying = 1;
+        pthread_mutex_unlock(&stage_two_memcpy_lock);
+
+        memcpy(stage_two_dst, stage_two_src, stage_two_size);
+        
+        pthread_mutex_lock(&stage_two_memcpy_lock);
+        stage_two_copying = 0;
+        pthread_cond_broadcast(&stage_two_memcpy_cond);
+        pthread_mutex_unlock(&stage_two_memcpy_lock);
+    }
+}
+
+#endif
+
+#if 0
+
+static inline void module_stage_one_shared_buf_copy(uint8_t sid, uint8_t cid, uint8_t kid,
+                uint8_t tid, uint32_t size, struct trace_content *buf)
+{
+    struct shared_trace_chunk *temp_chunk;
+
+    temp_chunk = &shared_buf.stage[sid].core[cid].chunk[kid];
+
+    while (temp_chunk->info->is_buf_full_0 ||
+            temp_chunk->info->is_buf_full_1);
+
+    if (stage_one_copying) {
+        pthread_mutex_lock(&stage_one_memcpy_lock);
+        pthread_cond_wait(&stage_one_memcpy_cond, &stage_one_memcpy_lock);
+        pthread_mutex_unlock(&stage_one_memcpy_lock);
+    }
+
+    stage_one_src = buf;
+    stage_one_dst = temp_chunk->buf;
+    stage_one_size = size * sizeof(struct trace_content);
+    stage_one_info = temp_chunk->info;
+
+    temp_chunk->info->buf_size = size;
+    temp_chunk->info->thread_id = tid;
+
+    pthread_mutex_lock(&stage_one_memcpy_lock);
+    pthread_cond_broadcast(&stage_one_memcpy_cond);
+    pthread_mutex_unlock(&stage_one_memcpy_lock);
+
+}
+
+#endif
+
+#if 0
+
+static inline void module_stage_two_shared_buf_copy(uint8_t sid, uint8_t cid, uint8_t kid,
                 uint8_t tid, uint32_t size, struct trace_content *buf)
 {
     struct shared_trace_chunk *temp_chunk;
@@ -115,12 +209,45 @@ static inline void module_shared_buf_copy(uint8_t sid, uint8_t cid, uint8_t kid,
 
     while (temp_chunk->info->is_buf_full);
 
-    memcpy(temp_chunk->buf, buf, size * sizeof(struct trace_content));
+    if (stage_two_copying) {
+        pthread_mutex_lock(&stage_two_memcpy_lock);
+        pthread_cond_wait(&stage_two_memcpy_cond, &stage_two_memcpy_lock);
+        pthread_mutex_unlock(&stage_two_memcpy_lock);
+    }
+
+    stage_two_src = buf;
+    stage_two_dst = temp_chunk->buf;
+    stage_two_size = size * sizeof(struct trace_content);
+
+    pthread_mutex_lock(&stage_two_memcpy_lock);
+    pthread_cond_broadcast(&stage_two_memcpy_cond);
+    pthread_mutex_unlock(&stage_two_memcpy_lock);
 
     temp_chunk->info->buf_size = size;
     temp_chunk->info->thread_id = tid;
 
     temp_chunk->info->is_buf_full = 1;
 }
+
+#endif
+
+#if 1
+static inline void module_shared_buf_copy(uint8_t sid, uint8_t cid, uint8_t kid,
+                uint8_t tid, uint32_t size, struct trace_content *buf)
+{
+    struct shared_trace_chunk *temp_chunk;
+
+    temp_chunk = &shared_buf.stage[sid].core[cid].chunk[kid];
+
+    while (temp_chunk->info->is_buf_full_0 || temp_chunk->info->is_buf_full_1);
+
+    memcpy(temp_chunk->buf, buf, size * sizeof(struct trace_content));
+
+    temp_chunk->info->buf_size = size;
+    temp_chunk->info->thread_id = tid;
+    temp_chunk->info->is_buf_full_0 = 1;
+    temp_chunk->info->is_buf_full_1 = 1;
+}
+#endif
 #endif
 

@@ -6,27 +6,34 @@
 #include <unistd.h>
 #include <pthread.h>
 #include <sys/syscall.h>
+#include "asmlib.h"
 
 extern int cuda_thread_num;
 
 pthread_mutex_t det_lock = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t  det_cond = PTHREAD_COND_INITIALIZER;
+
+pthread_mutex_t stage_one_memcpy_lock = PTHREAD_MUTEX_INITIALIZER;
+pthread_cond_t  stage_one_memcpy_cond = PTHREAD_COND_INITIALIZER;
+volatile stage_one_copying = 0;
+void *stage_one_src;
+void *stage_one_dst;
+uint32_t stage_one_size;
+struct trace_info *stage_one_info;
+
+pthread_mutex_t stage_two_memcpy_lock = PTHREAD_MUTEX_INITIALIZER;
+pthread_cond_t  stage_two_memcpy_cond = PTHREAD_COND_INITIALIZER;
+volatile stage_two_copying = 0;
+void *stage_two_src;
+void *stage_two_dst;
+uint32_t stage_two_size;
+
 volatile uint8_t stage_three_stop = 0;
 volatile uint8_t stage_three_finish = 0;
 extern volatile uint8_t is_detect_start;
 extern uint32_t max_thread_num;
 
 #include "interface.h"
-
-#include "info.c"
-#include "race.c"
-#include "timestamp.c"
-#include "history.c"
-#include "filter.c"
-
-#ifdef CUDA
-#include "../../gpu/match/match.h"
-#endif
 
 #ifdef PPI_THREE_STAGE
 static inline void ppi_set_cpu_thread(int cpu_no)
@@ -38,6 +45,16 @@ static inline void ppi_set_cpu_thread(int cpu_no)
     sched_setaffinity(syscall(SYS_gettid), 
             sizeof(unsigned long int), (cpu_set_t *)(&cpumask));
 }
+#endif
+
+#include "info.c"
+#include "race.c"
+#include "timestamp.c"
+#include "history.c"
+#include "filter.c"
+
+#ifdef CUDA
+#include "../../gpu/match/match.h"
 #endif
 
 /* interface */
@@ -140,13 +157,14 @@ void *module_pthread_stage_two(void *args)
 
         temp_chunk = &shared_buf.stage[0].core[i].chunk[j];
 
-        if (temp_chunk->info->is_buf_full) {
+        if (temp_chunk->info->is_buf_full_0) {
+
             tid = temp_chunk->info->thread_id;
             size = temp_chunk->info->buf_size;
 
             module_detector_stage_two(tid, size, temp_chunk->buf);
 
-#if 1
+#if 0
             next_chunk = &shared_buf.stage[1].core[cid].chunk[kid[cid]];
 
             while (next_chunk->info->is_buf_full) {
@@ -155,19 +173,20 @@ void *module_pthread_stage_two(void *args)
                 next_chunk = &shared_buf.stage[1].core[cid].chunk[kid[cid]];
             }
 
-            module_shared_buf_copy(1, cid, kid[cid], tid, size, temp_chunk->buf);
+            /*module_shared_buf_copy(1, cid, kid[cid], tid, size, temp_chunk->buf);*/
 
             kid[cid] = (kid[cid] + 1) % MAX_CHUNK_MATCH_NUM;
             cid = (cid + 1) % MAX_CORE_NUM;
 #endif
 
-            temp_chunk->info->thread_id = 0;
-            temp_chunk->info->buf_size = 0;				
+            /*temp_chunk->info->thread_id = 0;*/
+            /*temp_chunk->info->buf_size = 0;				*/
 
-            temp_chunk->info->is_buf_full = 0;	
+            temp_chunk->info->is_buf_full_0 = 0;	
 
             j = (j + 1) % MAX_CHUNK_HISTORY_NUM;
         }
+
     }    
 }
 
@@ -210,9 +229,10 @@ void *module_pthread_stage_three(void *args)
             pthread_cond_wait(&det_cond, &det_lock);
         pthread_mutex_unlock(&det_lock);
 
-        temp_chunk = &shared_buf.stage[1].core[i].chunk[j];
+        temp_chunk = &shared_buf.stage[0].core[i].chunk[j];
 
-        if (temp_chunk->info->is_buf_full) {
+        if (temp_chunk->info->is_buf_full_1) {
+
             tid = temp_chunk->info->thread_id;
             size = temp_chunk->info->buf_size;
 
@@ -257,6 +277,11 @@ void *module_pthread_stage_three(void *args)
                         size * sizeof(struct trace_content));
                 cuda_buf_size += size;
 
+                /*module_cuda_timestamp_entry_update_interface(*/
+                /*info.max_tid_num, cts.index, gts.thread); */
+                /*module_cuda_match_with_trace_buf_interface(*/
+                /*tid, size, temp_chunk->buf);*/
+
                 if (cuda_buf_size >= TRACE_BUF_CUDA_SIZE) {
                     module_cuda_timestamp_entry_update_interface(
                             info.max_tid_num, cts.index, gts.thread); 
@@ -269,10 +294,11 @@ void *module_pthread_stage_three(void *args)
 #endif
 #endif
 
-            temp_chunk->info->thread_id = 0;
-            temp_chunk->info->buf_size = 0;				
 
-            temp_chunk->info->is_buf_full = 0;	
+            /*temp_chunk->info->thread_id = 0;*/
+            /*temp_chunk->info->buf_size = 0;				*/
+
+            temp_chunk->info->is_buf_full_1 = 0;	
 
             j = (j + 1) % MAX_CHUNK_MATCH_NUM;
         }
@@ -297,9 +323,13 @@ static inline void data_race_detector_stage(void)
 
     /* STAGE ONE */
     ppi_set_cpu_thread(STAGE_ONE_BASE_CPU_ID);
+    /*pthread_create(&pid[0], NULL, module_pthread_stage_one_memcpy,*/
+    /*(void *)STAGE_ONE_BASE_CPU_ID);*/
 
     /* STAGE TWO */
     pthread_create(&pid[0], NULL, module_pthread_stage_two, (void *)&cid[0]);
+    /*pthread_create(&pid[1], NULL, module_pthread_stage_two_memcpy,*/
+    /*(void *)STAGE_TWO_BASE_CPU_ID);*/
 
     /* STAGE THREE */
     for (i = 0; i < MAX_CORE_NUM; i++) {
@@ -385,6 +415,9 @@ static inline void module_detector_start(uint8_t tid,
 
 void data_race_detector_init(void) 
 {
+    int i = InstructionSet();
+    CacheBypassLimit = 0x1600000;
+    printf("Architecture: %d\n", i);
     module_info_init();
     module_timestamp_init();
     module_history_init();

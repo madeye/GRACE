@@ -47,7 +47,7 @@ objcopy="objcopy"
 ld="ld"
 helper_cflags=""
 #libs_softmmu=""
-libs_softmmu="-L../module/gpu/lib -lmatch_x86_64 -L/usr/local/cuda/lib64 -lcudart"
+libs_softmmu="../module/cpu/detector/alibelf64.a -L../module/gpu/lib -lmatch_x86_64 -L/usr/local/cuda/lib64 -lcudart"
 libs_tools=""
 audio_pt_int=""
 audio_win_int=""
@@ -648,8 +648,8 @@ case "$cpu" in
            host_guest_base="yes"
            ;;
     x86_64)
-           QEMU_CFLAGS="-m64 $QEMU_CFLAGS"
-           LDFLAGS="-m64 $LDFLAGS"
+           QEMU_CFLAGS="-m64 -march=core2 $QEMU_CFLAGS"
+           LDFLAGS="-m64 -march=core2 $LDFLAGS"
            host_guest_base="yes"
            ;;
     arm*)

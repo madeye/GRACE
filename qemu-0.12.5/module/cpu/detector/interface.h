@@ -7,6 +7,8 @@
 
 #define TRACE_PRIVATE_BUF_SIZE (16 * 1024 * 1024)
 
+//#define DATA_CACHE_SIZE_HALF 0x800000
+
 #define TRACE_MEM_INT
 #define TRACE_MEM_FLOAT
 
@@ -55,7 +57,8 @@ enum {
     TRACE_MEM_SIZE_QUAD = 8,
 };
 
-__attribute__ ((aligned (16))) struct trace_content {
+__attribute__ ((aligned (16)))
+struct trace_content {
 #if 0
     uint32_t tid:8, type:2, size:4, index:18;
     uint32_t pc;
@@ -95,5 +98,6 @@ typedef struct DEBUGInfo {
 void data_race_detector_init(void);
 void data_race_detector(uint8_t tid, uint32_t size, struct trace_content *buf);
 void data_race_detector_report(void);
+
 
 #endif  /* INTERFACE_H */
