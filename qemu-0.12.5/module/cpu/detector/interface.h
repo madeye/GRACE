@@ -12,7 +12,7 @@
 #define TRACE_MEM_INT
 #define TRACE_MEM_FLOAT
 
-#define MAX_PROCESS_NUM 16
+#define MAX_PROCESS_NUM 8
 
 #define CUDA
 #define PPI_THREE_STAGE
@@ -20,7 +20,7 @@
 #ifdef CUDA
 #ifdef PPI_THREE_STAGE
 /* cuda + 3-stage */
-#define TRACE_BUF_SIZE (1 * 1024)
+#define TRACE_BUF_SIZE (1024)
 #define TRACE_BUF_CUDA_SIZE (256 * 1024)
 #else
 /* cuda + 1-stage */
@@ -94,6 +94,9 @@ typedef struct DEBUGInfo {
     //struct trace_content *env->trace_mem_ptr, *trace_mem_end;
     /* uint8_t current_thread_id; */
 } DEBUGInfo;
+
+#define prefetch(x) __asm__ __volatile__ ("prefetch %0;"::"m"(*(char *)(x)))
+#define prefetchw(x) __asm__ __volatile__ ("prefetchw %0;"::"m"(*(char *)(x)))
 
 void data_race_detector_init(void);
 void data_race_detector(uint8_t tid, uint32_t size, struct trace_content *buf);

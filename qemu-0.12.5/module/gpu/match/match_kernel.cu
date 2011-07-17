@@ -20,6 +20,9 @@ __global__ static void module_match_with_trace_buf_on_cuda(
     /*content[threadIdx.x] = trace_buf[i];*/
 
     struct trace_content *content = &trace_buf[i];
+    
+    /*struct trace_content *ptr = content + 32;*/
+    /*asm volatile ("prefetch.L1 [%0];"::"l"(ptr));*/
 
     if (content->type == TRACE_MEM_LOAD) {
         module_filter_load_match(content);

@@ -48,7 +48,7 @@ static inline void module_timestamp_print(
 
     wrong = 0;
 
-    for (i = 0; i < MAX_PROCESS_NUM / 2; i++) {
+    for (i = 0; i < MAX_PROCESS_NUM; i++) {
         fprintf(stderr, "tid : %d ; timestamp count : %d\n", 
                 i, gts.thread[i].count);
 

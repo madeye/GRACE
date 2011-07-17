@@ -65,6 +65,9 @@ static inline void module_detector_stage_two(uint8_t tid,
 {
     uint32_t i;
     struct trace_content *content;
+    struct history_queue *temp_queue;
+    uint32_t tail;
+    struct history_entry *temp_entry;
 
     if (!info.exist[tid]) {
         printf("\tnew tid: %d\n", tid);
@@ -76,8 +79,17 @@ static inline void module_detector_stage_two(uint8_t tid,
         info.exist[tid] = 1;
     }
 
-    for (i = 0; i < size; i++) {
+    for (i = 0; i < size; i += 1) {
         content = &buf[i];
+
+        /*temp_queue = &gh.thread[tid].hash[(buf[i+1].address >> HASH_BASE_BIT) % MAX_HASH_NUM];*/
+        /*tail = temp_queue->store_tail;*/
+        /*temp_entry = &temp_queue->store_entry[tail];*/
+        /*prefetchw(temp_entry);*/
+
+        /*tail = temp_queue->load_tail;*/
+        /*temp_entry = &temp_queue->load_entry[tail];*/
+        /*prefetchw(temp_entry);*/
 
         if (content->type == TRACE_MEM_LOAD) {
             module_history_load_record(content);
@@ -89,7 +101,37 @@ static inline void module_detector_stage_two(uint8_t tid,
             fprintf(stderr, "unknown type : %d\n", content->type);
             assert(0);
         }
+
+        /*content = &buf[i+1];*/
+        /*prefetch(&buf[i+2]);*/
+
+        /*if (content->type == TRACE_MEM_LOAD) {*/
+            /*module_history_load_record(content);*/
+            /*module_filter_load_record(content);*/
+        /*} else if (content->type == TRACE_MEM_STORE) {*/
+            /*module_history_store_record(content);*/
+            /*module_filter_store_record(content);*/
+        /*} else {*/
+            /*fprintf(stderr, "unknown type : %d\n", content->type);*/
+            /*assert(0);*/
+        /*}*/
     }
+
+    /*if (i == size) {*/
+        /*content = &buf[i-1];*/
+
+        /*if (content->type == TRACE_MEM_LOAD) {*/
+            /*module_history_load_record(content);*/
+            /*module_filter_load_record(content);*/
+        /*} else if (content->type == TRACE_MEM_STORE) {*/
+            /*module_history_store_record(content);*/
+            /*module_filter_store_record(content);*/
+        /*} else {*/
+            /*fprintf(stderr, "unknown type : %d\n", content->type);*/
+            /*assert(0);*/
+        /*}*/
+
+    /*}*/
 }
 
 static inline void module_detector_stage_three(uint8_t tid, 

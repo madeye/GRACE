@@ -48,6 +48,7 @@ struct trace_info {
     volatile uint8_t is_buf_full_1;
 };
 
+/*__attribute__ ((aligned (16)))*/
 struct shared_trace_chunk {
     struct trace_content *buf;
     struct trace_info *info;
