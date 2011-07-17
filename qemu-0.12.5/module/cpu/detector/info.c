@@ -66,6 +66,11 @@ struct global_shared_trace_buf {
 
 struct global_shared_trace_buf shared_buf;
 
+double doTime_s1=0;
+double noWaitTime_s1=0;
+double doTime_s2=0;
+double noWaitTime_s2=0;
+
 static inline void module_shared_buf_init(void)
 {
     int i, j, k;

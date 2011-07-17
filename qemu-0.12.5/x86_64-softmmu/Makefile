@@ -1,1 +1,1 @@
-/root/projects/repo-ppi-debug/qemu-0.12.5/Makefile.target
+/home/aza/erg/qemu-0.12.5/Makefile.target

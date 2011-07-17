@@ -1,1 +1,1 @@
-/root/projects/repo-ppi-debug/qemu-0.12.5/Makefile.hw
+/home/aza/erg/qemu-0.12.5/Makefile.hw
