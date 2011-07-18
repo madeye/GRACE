@@ -130,7 +130,7 @@ void *module_pthread_stage_two(void *args)
 #endif
 
     j = 0;
-    double flag=1;    
+    int flag=1;    
     
     while(1) {
 
@@ -141,8 +141,10 @@ void *module_pthread_stage_two(void *args)
 
         temp_chunk = &shared_buf.stage[0].core[i].chunk[j];
         if (temp_chunk->info->is_buf_full) {
+
+	     gettimeofday(&s1t2, NULL);
+	     if(flag==0&&isStarts1==1)  WaitTime_s1+=tsub(s1t2, s1t1);
             doTime_s1 += 1.0f;
-            noWaitTime_s1 += flag;           
 
             tid = temp_chunk->info->thread_id;
             size = temp_chunk->info->buf_size;
@@ -170,7 +172,9 @@ void *module_pthread_stage_two(void *args)
             temp_chunk->info->is_buf_full = 0;	
 
             j = (j + 1) % MAX_CHUNK_HISTORY_NUM;            
-            flag = 1.0f;
+            flag = 1;
+            isStarts1=1;
+            gettimeofday(&s1t1, NULL);
         }
         else
         {
@@ -207,7 +211,7 @@ void *module_pthread_stage_three(void *args)
     module_cuda_config_register(cuda_thread_num);
     module_cuda_init_interface();
 #endif
-    double flag=1;	  
+    int flag=1;	  
     while(1) {
 
         if (stage_three_stop) 
@@ -220,10 +224,11 @@ void *module_pthread_stage_three(void *args)
 
         temp_chunk = &shared_buf.stage[1].core[i].chunk[j];
         
-        doTime_s2+=1.0f;
+
         if (temp_chunk->info->is_buf_full) {
-            doTime_s1 += 1.0f;
-            noWaitTime_s1 += flag;           
+	 gettimeofday(&s2t2, NULL);
+	 if(flag==0&&isStarts2==1) WaitTime_s2+=tsub(s2t2, s2t1);
+	 doTime_s2 += 1.0f;
             
             tid = temp_chunk->info->thread_id;
             size = temp_chunk->info->buf_size;
@@ -288,13 +293,15 @@ void *module_pthread_stage_three(void *args)
 
             j = (j + 1) % MAX_CHUNK_MATCH_NUM;
             flag = 1.0f;
+            isStarts2=1;
+            gettimeofday(&s2t1, NULL);
         }
         else
         {
             flag = 0;
         }
     }    
-    fprintf(stderr, "WatTime:: %f %f %f %f\n", doTime_s1, noWaitTime_s1, doTime_s2, noWaitTime_s2);
+    fprintf(stderr, "WatTime:: %f %f %f %f\n", doTime_s1, WaitTime_s1, doTime_s2, WaitTime_s2);
 #ifdef CUDA
     module_cuda_global_race_queue_fetch_interface(&gr);
     module_cuda_free_interface(); 
