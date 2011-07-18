@@ -130,7 +130,6 @@ void *module_pthread_stage_two(void *args)
 #endif
 
     j = 0;
-    double flag=1;
     
     while(1) {
 
@@ -141,10 +140,9 @@ void *module_pthread_stage_two(void *args)
 
         temp_chunk = &shared_buf.stage[0].core[i].chunk[j];
         
-        
+        doTime_s1+=1.0f;
         if (temp_chunk->info->is_buf_full) {
-            doTime_s1+=1.0f;
-            noWaitTime_s1+=flag;
+            noWaitTime_s1+=1.0f;
             tid = temp_chunk->info->thread_id;
             size = temp_chunk->info->buf_size;
 
@@ -171,11 +169,6 @@ void *module_pthread_stage_two(void *args)
             temp_chunk->info->is_buf_full = 0;	
 
             j = (j + 1) % MAX_CHUNK_HISTORY_NUM;
-            flag=1.0f;
-        }
-        else
-        {
-        	flag=0;
         }
     }    
 }
@@ -208,7 +201,6 @@ void *module_pthread_stage_three(void *args)
     module_cuda_config_register(cuda_thread_num);
     module_cuda_init_interface();
 #endif
-    double flag=1;
 
     while(1) {
 
@@ -222,10 +214,9 @@ void *module_pthread_stage_three(void *args)
 
         temp_chunk = &shared_buf.stage[1].core[i].chunk[j];
         
-        
+        doTime_s2+=1.0f;
         if (temp_chunk->info->is_buf_full) {
-            doTime_s2+=1.0f;
-            noWaitTime_s2+=flag;
+            noWaitTime_s2+=1.0f;
             tid = temp_chunk->info->thread_id;
             size = temp_chunk->info->buf_size;
 
@@ -288,11 +279,6 @@ void *module_pthread_stage_three(void *args)
             temp_chunk->info->is_buf_full = 0;	
 
             j = (j + 1) % MAX_CHUNK_MATCH_NUM;
-            flag=1;
-        }
-        else
-        {
-        	flag=0;
         }
     }    
     fprintf(stderr, "WatTime:: %f %f %f %f\n", doTime_s1, noWaitTime_s1, doTime_s2, noWaitTime_s2);
