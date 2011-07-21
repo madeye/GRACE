@@ -683,18 +683,48 @@ void helper_syn_condbroad_trace(target_ulong pc) {
 #endif
 #if 1
 #define trace_mem_collection(tid1, type1, size1, pc1, address1, index1) { \
-	struct trace_content *ptr = env->trace_mem_ptr; \		    
-	ptr->address = address1; \		    
-	ptr->address2 = EMPTYADDR; \		    
-	ptr->index = (index1); \		    
-	ptr->tid = (tid1); \		    
-	ptr->type = (type1); \		    
-	ptr->size = (size1); \		    
-	ptr->pc = (pc1); \		    
-	lastPtr=ptr;\		    
-	lastIndex=index1;\	    
-	env->trace_mem_ptr++; \	    
+     menCount++;\   
+     if(menCount%2==1)\
+     {\    	   
+	     	struct trace_content *ptr = env->trace_mem_ptr;\	    
+	     	ptr->address = (unsigned int)(address1);\	    
+	     	ptr->address2 = (unsigned int)(EMPTYADDR);\	    
+	     	ptr->index = (index1); \	    
+	     	ptr->tid = (tid1); \	    
+	     	ptr->type = (type1); \	    
+	     	ptr->size = (size1); \	    
+	     	ptr->pc = (pc1); \	    
+	     	lastPtr=ptr;\ 
+	     	lastIndex=index1;\
+	     	env->trace_mem_ptr++; \    
+     }\    
+     else\
+     {\	    
+	     	if(index1==lastIndex)\
+	     	{\		    
+	     		struct trace_content *ptr = lastPtr; \		    
+	     		ptr->address2 = (unsigned int)(address1); \		    
+	     		ptr->type2 = (type1); \		    
+	     		lastPtr=ptr;\		    
+	     		lastIndex=index1;\	    
+	     	}\	    
+     		else\	 
+     		{\		    
+     			struct trace_content *ptr = env->trace_mem_ptr; \		    
+     			ptr->address = (unsigned int)(address1); \		    
+     			ptr->address2 = (unsigned int)(EMPTYADDR); \		    
+     			ptr->index = (index1); \		    
+     			ptr->tid = (tid1); \		    
+     			ptr->type = (type1); \		    
+     			ptr->size = (size1); \		    
+     			ptr->pc = (pc1); \		    
+     			lastPtr=ptr;\		    
+     			lastIndex=index1;\	    
+     			env->trace_mem_ptr++; \	    
+     		}\	       
+     	}\
 }
+
 #endif
 
 void helper_load_byte_trace(target_ulong pc, target_ulong addr) {

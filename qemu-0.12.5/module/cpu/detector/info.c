@@ -68,32 +68,6 @@ struct global_shared_trace_buf {
 
 struct global_shared_trace_buf shared_buf;
 
-double doTime_s1=0;
-double noWaitTime_s1=0;
-double doTime_s2=0;
-double noWaitTime_s2=0;
-
-double WaitTime_s1=0;
-double WaitTime_s2=0;
-
-int isStarts1=0;
-int isStarts2=0;
-
-
-struct timeval s1t1;	
-struct timeval s1t2;	
-
-struct timeval s2t1;	
-struct timeval s2t2;
-
-inline double	
-tsub(struct timeval t2, struct timeval t1)	
-{	
-	return (double)((unsigned long)(t2.tv_usec + t2.tv_sec * 1000000) - (unsigned long)(t1.tv_usec + t1.tv_sec * 1000000));	
-
-}
-
-
 static inline void module_shared_buf_init(void)
 {
     int i, j, k;
