@@ -15,6 +15,8 @@ volatile uint8_t stage_three_stop = 0;
 volatile uint8_t stage_three_finish = 0;
 extern volatile uint8_t is_detect_start;
 extern uint32_t max_thread_num;
+extern uint32_t EMPTYADDR;
+
 
 #include "interface.h"
 
@@ -61,7 +63,6 @@ static inline void module_detector_stage_two(uint8_t tid,
 
     for (i = 0; i < size; i++) {
         content = &buf[i];
-
         if (content->type == TRACE_MEM_LOAD) {
             module_history_load_record(content);
             module_filter_load_record(content);
@@ -71,6 +72,19 @@ static inline void module_detector_stage_two(uint8_t tid,
         } else {
             fprintf(stderr, "unknown type : %d\n", content->type);
             assert(0);
+        }
+        if(content->address2!=EMPTYADDR)
+        {
+	        if (content->type2 == TRACE_MEM_LOAD) {
+	            module_history_load_record2(content);
+	            module_filter_load_record2(content);
+	        } else if (content->type2 == TRACE_MEM_STORE) {
+	            module_history_store_record2(content);
+	            module_filter_store_record2(content);
+	        } else {
+	            fprintf(stderr, "unknown type : %d\n", content->type);
+	            assert(0);
+	        }
         }
     }
 }

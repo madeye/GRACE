@@ -42,6 +42,13 @@ extern struct ProcessQueue process_queue;   // Process queue
 extern pthread_mutex_t det_lock;
 extern pthread_cond_t  det_cond;
 extern uint32_t max_thread_num;
+
+unsigned int menCount=0;
+uint8_t lastIndex=0xff;
+struct trace_content *lastPtr;
+uint32_t EMPTYADDR=0xffffffff;
+
+
 #endif
 
 #ifdef DEBUG_PCALL
@@ -676,14 +683,17 @@ void helper_syn_condbroad_trace(target_ulong pc) {
 #endif
 #if 1
 #define trace_mem_collection(tid1, type1, size1, pc1, address1, index1) { \
-    struct trace_content *ptr = env->trace_mem_ptr; \
-    ptr->address = (address1); \
-    ptr->index = (index1); \
-    ptr->tid = (tid1); \
-    ptr->type = (type1); \
-    ptr->size = (size1); \
-    ptr->pc = (pc1); \
-    env->trace_mem_ptr++; \
+	struct trace_content *ptr = env->trace_mem_ptr; \		    
+	ptr->address = address1; \		    
+	ptr->address2 = EMPTYADDR; \		    
+	ptr->index = (index1); \		    
+	ptr->tid = (tid1); \		    
+	ptr->type = (type1); \		    
+	ptr->size = (size1); \		    
+	ptr->pc = (pc1); \		    
+	lastPtr=ptr;\		    
+	lastIndex=index1;\	    
+	env->trace_mem_ptr++; \	    
 }
 #endif
 

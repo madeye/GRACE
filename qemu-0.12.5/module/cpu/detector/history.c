@@ -63,7 +63,7 @@ static inline void module_history_load_record(
 {
 #ifdef MOD_HISTORY
     uint8_t tid;
-    uint64_t address;
+    uint32_t address;
     struct history_queue *temp_queue;
     uint32_t tail;
     struct history_entry *temp_entry;
@@ -90,12 +90,37 @@ static inline void module_history_load_record(
 #endif
 }
 
+static inline void module_history_load_record2(
+        struct trace_content *content) 
+{
+#ifdef MOD_HISTORY
+    uint8_t tid;
+    uint32_t address;
+    struct history_queue *temp_queue;
+    uint32_t tail;
+    struct history_entry *temp_entry;
+
+    tid = content->tid;
+    address = content->address2;
+
+    temp_queue = &gh.thread[tid].hash[(address >> HASH_BASE_BIT) % MAX_HASH_NUM];
+    tail = temp_queue->load_tail;	
+    temp_entry = &temp_queue->load_entry[tail];
+
+    temp_entry->content.address = content->address2;
+    temp_entry->content.index = content->index;
+
+
+    temp_queue->load_tail = (tail + 1) % MAX_LOAD_QUEUE_SIZE;
+#endif
+}
+
 static inline void module_history_store_record(
         struct trace_content *content) 
 {
 #ifdef MOD_HISTORY
     uint8_t tid;
-    uint64_t address;
+    uint32_t address;
     struct history_queue *temp_queue;
     uint32_t tail;
     struct history_entry *temp_entry;
@@ -121,6 +146,32 @@ static inline void module_history_store_record(
     temp_queue->store_tail = (tail + 1) % MAX_STORE_QUEUE_SIZE;
 #endif
 }
+
+static inline void module_history_store_record2(
+        struct trace_content *content) 
+{
+#ifdef MOD_HISTORY
+    uint8_t tid;
+    uint32_t address;
+    struct history_queue *temp_queue;
+    uint32_t tail;
+    struct history_entry *temp_entry;
+
+    tid = content->tid;
+    address = content->address2;
+
+    temp_queue = &gh.thread[tid].hash[(address >> HASH_BASE_BIT) % MAX_HASH_NUM];
+    tail = temp_queue->store_tail;
+    temp_entry = &temp_queue->store_entry[tail];
+
+    temp_entry->content.address = content->address2;
+    temp_entry->content.index = content->index;
+
+
+    temp_queue->store_tail = (tail + 1) % MAX_STORE_QUEUE_SIZE;
+#endif
+}
+
 #endif
 
 /* match */

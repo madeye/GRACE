@@ -42,18 +42,12 @@ enum {
 
 
 struct trace_content {
+   uint64_t address;
+   uint64_t address2;
     uint8_t tid;
     uint8_t type;
+    uint8_t type2;
     uint8_t size;
-    union {
-        struct {	
-            uint64_t address;
-            uint64_t index;
-        } mem;
-        struct {
-            uint64_t args[2];
-        } syn;
-    } value;
     uint64_t pc;
 };
 

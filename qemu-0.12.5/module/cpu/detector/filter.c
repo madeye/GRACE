@@ -46,11 +46,26 @@ static inline void module_filter_load_record(
 {
 #ifdef MOD_FILTER
     uint8_t tid;
-    uint64_t address;
+    uint32_t address;
     uint32_t index;
 
     tid = content->tid;
     address = content->address;
+
+    index = (address >> FILTER_BASE_BIT) & FILTER_ENTRY_MASK;
+
+    gpf.thread[tid].entry[index].load = 1;
+#endif
+}
+static inline void module_filter_load_record2(struct trace_content *content) 
+{
+#ifdef MOD_FILTER
+    uint8_t tid;
+    uint32_t address;
+    uint32_t index;
+
+    tid = content->tid;
+    address = content->address2;
 
     index = (address >> FILTER_BASE_BIT) & FILTER_ENTRY_MASK;
 
@@ -74,6 +89,24 @@ static inline void module_filter_store_record(
     gpf.thread[tid].entry[index].store = 1;
 #endif
 }
+
+static inline void module_filter_store_record2(
+        struct trace_content *content) 
+{
+#ifdef MOD_FILTER
+    uint8_t tid;
+    uint32_t address;
+    uint32_t index;
+
+    tid = content->tid;
+    address = content->address2;
+
+    index = (address >> FILTER_BASE_BIT) & FILTER_ENTRY_MASK;
+
+    gpf.thread[tid].entry[index].store = 1;
+#endif
+}
+
 #endif
 
 #ifdef PPI_GPU_MODULE

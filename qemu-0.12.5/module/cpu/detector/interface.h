@@ -55,6 +55,7 @@ enum {
     TRACE_MEM_SIZE_QUAD = 8,
 };
 
+
 __attribute__ ((aligned (16))) struct trace_content {
 #if 0
     uint32_t tid:8, type:2, size:4, index:18;
@@ -68,10 +69,12 @@ __attribute__ ((aligned (16))) struct trace_content {
     uint8_t pc;
 #endif
 #if 1
-    uint64_t address;
+    uint32_t address;
+    uint32_t address2;
     uint16_t index;
     uint8_t tid;
     uint8_t type;
+    uint8_t type2;
     uint8_t size;
     uint16_t pc;
 #endif
