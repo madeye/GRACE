@@ -32,9 +32,9 @@
 #endif
 
 #define MOD_PROFILER
-#define MOD_HISTORY
-#define MOD_FILTER
-#define MOD_MATCH
+//#define MOD_HISTORY
+//#define MOD_FILTER
+//#define MOD_MATCH
 
 enum {
     //TRACE_TYPE_BASE,
@@ -75,6 +75,16 @@ struct trace_content {
     uint16_t index;
     uint8_t tid;
     uint8_t type;
+    uint8_t size;
+    uint16_t pc;
+#endif
+#if 0
+    uint32_t address1;
+    uint32_t address2;
+    uint16_t index;
+    uint8_t tid;
+    uint8_t type1;
+    uint8_t type2;
     uint8_t size;
     uint16_t pc;
 #endif

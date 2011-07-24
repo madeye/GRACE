@@ -9,6 +9,7 @@
 #include "asmlib.h"
 
 extern int cuda_thread_num;
+extern uint32_t bench_mark_id;
 
 pthread_mutex_t det_lock = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t  det_cond = PTHREAD_COND_INITIALIZER;
@@ -56,6 +57,16 @@ static inline void ppi_set_cpu_thread(int cpu_no)
 #ifdef CUDA
 #include "../../gpu/match/match.h"
 #endif
+
+#include <sys/time.h>
+
+struct timeval e1;
+struct timeval e2;
+
+int chunk_count = 0;
+#define CHUNK_SAMPLING 100
+
+FILE * pFile;
 
 /* interface */
 
@@ -457,6 +468,10 @@ static inline void module_detector_start(uint8_t tid,
 
 void data_race_detector_init(void) 
 {
+    char str[50];
+    sprintf(str, "bandwidth%d.txt", bench_mark_id);
+    pFile = fopen(str, "w");
+    gettimeofday(&e1, NULL);
     int i = InstructionSet();
     CacheBypassLimit = 0x1600000;
     printf("Architecture: %d\n", i);
@@ -487,6 +502,7 @@ void data_race_detector(uint8_t tid, uint32_t size, struct trace_content *buf)
 #ifdef PPI_THREE_STAGE
     struct trace_content *buf_ptr;
     uint32_t buf_size;
+    double time;
 
     if (info.last_tid != tid) {
         module_shared_buf_all_empty();
@@ -503,6 +519,16 @@ void data_race_detector(uint8_t tid, uint32_t size, struct trace_content *buf)
 
         buf_size -= TRACE_SHARED_BUF_SIZE;
         buf_ptr += TRACE_SHARED_BUF_SIZE;
+
+        chunk_count++;
+        if (chunk_count >= CHUNK_SAMPLING) {
+            gettimeofday(&e2, NULL);
+            time = (double)((unsigned long)(e2.tv_usec + e2.tv_sec * 1000000) - 
+                    (unsigned long)(e1.tv_usec + e1.tv_sec * 1000000)) / 1000000;
+            fprintf(pFile, "%f\n", (double) CHUNK_SAMPLING / time);
+            chunk_count = 0;
+            gettimeofday(&e1, NULL);
+        }
     }
 
     module_shared_buf_copy(0, 0, info.chunk_id, tid, buf_size, buf_ptr);
@@ -531,5 +557,8 @@ void data_race_detector_report(void)
 #endif
     module_timestamp_print(max_thread_num);
     module_race_print();
+    if (pFile != NULL) {
+        fclose(pFile);
+    }
 }
 
