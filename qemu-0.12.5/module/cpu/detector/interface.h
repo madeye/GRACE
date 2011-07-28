@@ -33,6 +33,7 @@
 #define MOD_HISTORY
 #define MOD_FILTER
 #define MOD_MATCH
+#define PARALLEL_STAGE_2
 
 enum {
     //TRACE_TYPE_BASE,

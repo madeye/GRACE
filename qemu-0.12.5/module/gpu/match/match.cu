@@ -29,7 +29,7 @@ __host__ void module_cuda_init_interface()
 {
     cudaSetDevice(cutGetMaxGflopsDeviceId());
 
-#define TRACE_CUDA_BUF_SIZE (16 * 1024 * 1024)
+#define TRACE_CUDA_BUF_SIZE (512 * 1024)
 
     cutilSafeCall(cudaMalloc((void **)&d_trace_buf, 
                 sizeof(struct trace_content) * TRACE_CUDA_BUF_SIZE));

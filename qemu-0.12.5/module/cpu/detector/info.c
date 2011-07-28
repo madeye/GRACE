@@ -27,7 +27,7 @@ static inline void module_info_init(void)
 #ifdef PPI_THREE_STAGE
 #define STAGE_ONE_BASE_CPU_ID 0
 #define STAGE_TWO_BASE_CPU_ID 1
-#define STAGE_THREE_BASE_CPU_ID 2
+#define STAGE_THREE_BASE_CPU_ID 3
 
 #define MAX_STAGE_NUM 2
 #ifdef CUDA
@@ -45,6 +45,9 @@ struct trace_info {
     volatile uint32_t buf_size;
     volatile uint8_t thread_id;
     volatile uint8_t is_buf_full;
+#ifdef PARALLEL_STAGE_2
+    volatile uint8_t is_buf_full_flags[2];
+#endif
 };
 
 struct shared_trace_chunk {
@@ -101,10 +104,37 @@ static inline void module_shared_buf_all_empty(void)
         for (j = 0; j < MAX_CORE_NUM; j++) {
             for (k = 0; k < MAX_CHUNK_NUM; k++) {
                 while (shared_buf.stage[i].core[j].chunk[k].info->is_buf_full);
+#ifdef PARALLEL_STAGE_2
+                while (shared_buf.stage[i].core[j].chunk[k].info->is_buf_full_flags[0]
+                        || shared_buf.stage[i].core[j].chunk[k].info->is_buf_full_flags[1]);
+#endif
+
             }
         }
     }
 }
+
+#ifdef PARALLEL_STAGE_2
+static inline void module_shared_buf_copy_2(uint8_t sid, uint8_t cid, uint8_t kid,
+                uint8_t tid, uint32_t size, struct trace_content *buf)
+{
+    struct shared_trace_chunk *temp_chunk;
+
+    temp_chunk = &shared_buf.stage[sid].core[cid].chunk[kid];
+
+    while (temp_chunk->info->is_buf_full_flags[0] ||
+            temp_chunk->info->is_buf_full_flags[1]);
+
+    memcpy(temp_chunk->buf, buf, size * sizeof(struct trace_content));
+
+    temp_chunk->info->buf_size = size;
+    temp_chunk->info->thread_id = tid;
+
+    temp_chunk->info->is_buf_full_flags[0] = 1;
+    temp_chunk->info->is_buf_full_flags[1] = 1;
+
+}
+#endif
 
 static inline void module_shared_buf_copy(uint8_t sid, uint8_t cid, uint8_t kid,
                 uint8_t tid, uint32_t size, struct trace_content *buf)
@@ -121,6 +151,7 @@ static inline void module_shared_buf_copy(uint8_t sid, uint8_t cid, uint8_t kid,
     temp_chunk->info->thread_id = tid;
 
     temp_chunk->info->is_buf_full = 1;
+
 }
 #endif
 
