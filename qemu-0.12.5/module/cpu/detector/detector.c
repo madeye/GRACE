@@ -91,15 +91,17 @@ static inline void module_detector_stage_two(uint8_t tid,
         /*temp_entry = &temp_queue->load_entry[tail];*/
         /*prefetchw(temp_entry);*/
 
-        if (content->type == TRACE_MEM_LOAD) {
-            module_history_load_record(content);
-            module_filter_load_record(content);
-        } else if (content->type == TRACE_MEM_STORE) {
-            module_history_store_record(content);
-            module_filter_store_record(content);
-        } else {
-            fprintf(stderr, "unknown type : %d\n", content->type);
-            assert(0);
+        if(((content->address >> 2) & 1) == info.core_id) {
+            if (content->type == TRACE_MEM_LOAD) {
+                module_history_load_record(content);
+                module_filter_load_record(content);
+            } else if (content->type == TRACE_MEM_STORE) {
+                module_history_store_record(content);
+                module_filter_store_record(content);
+            } else {
+                fprintf(stderr, "unknown type : %d\n", content->type);
+                assert(0);
+            }
         }
 
         /*content = &buf[i+1];*/
@@ -166,7 +168,7 @@ static inline void module_detector_stage_three(uint8_t tid,
 
 void *module_pthread_stage_two(void *args)
 {
-    uint8_t i, j;
+    int i, j;
 #if 1
     uint8_t cid, kid[MAX_CORE_NUM];
 #endif
@@ -177,7 +179,7 @@ void *module_pthread_stage_two(void *args)
     struct shared_trace_chunk *next_chunk;
 #endif
 
-    i = ((int *)args)[0];
+    i = (int)args;
     fprintf(stderr, "stage two : core %d start!\n", i);
 
     info.core_id = i;
@@ -197,9 +199,9 @@ void *module_pthread_stage_two(void *args)
             pthread_cond_wait(&det_cond, &det_lock);
         pthread_mutex_unlock(&det_lock);
 
-        temp_chunk = &shared_buf.stage[0].core[i].chunk[j];
+        temp_chunk = &shared_buf.stage[0].core[0].chunk[j];
 
-        if (temp_chunk->info->is_buf_full_0) {
+        if (temp_chunk->info->is_buf_full[i]) {
 
             tid = temp_chunk->info->thread_id;
             size = temp_chunk->info->buf_size;
@@ -224,7 +226,8 @@ void *module_pthread_stage_two(void *args)
             /*temp_chunk->info->thread_id = 0;*/
             /*temp_chunk->info->buf_size = 0;				*/
 
-            temp_chunk->info->is_buf_full_0 = 0;	
+            temp_chunk->info->is_buf_full[i] = 0;
+
 
             j = (j + 1) % MAX_CHUNK_HISTORY_NUM;
         }
@@ -273,7 +276,7 @@ void *module_pthread_stage_three(void *args)
 
         temp_chunk = &shared_buf.stage[0].core[i].chunk[j];
 
-        if (temp_chunk->info->is_buf_full_1) {
+        if (temp_chunk->info->is_buf_full[2]) {
 
             tid = temp_chunk->info->thread_id;
             size = temp_chunk->info->buf_size;
@@ -340,7 +343,7 @@ void *module_pthread_stage_three(void *args)
             /*temp_chunk->info->thread_id = 0;*/
             /*temp_chunk->info->buf_size = 0;				*/
 
-            temp_chunk->info->is_buf_full_1 = 0;	
+            temp_chunk->info->is_buf_full[2] = 0;	
 
             j = (j + 1) % MAX_CHUNK_MATCH_NUM;
         }
@@ -369,7 +372,8 @@ static inline void data_race_detector_stage(void)
     /*(void *)STAGE_ONE_BASE_CPU_ID);*/
 
     /* STAGE TWO */
-    pthread_create(&pid[0], NULL, module_pthread_stage_two, (void *)&cid[0]);
+    pthread_create(&pid[0], NULL, module_pthread_stage_two, 0);
+    pthread_create(&pid[1], NULL, module_pthread_stage_two, 1);
     /*pthread_create(&pid[1], NULL, module_pthread_stage_two_memcpy,*/
     /*(void *)STAGE_TWO_BASE_CPU_ID);*/
 

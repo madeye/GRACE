@@ -27,7 +27,7 @@ static inline void module_info_init(void)
 #ifdef PPI_THREE_STAGE
 #define STAGE_ONE_BASE_CPU_ID 0
 #define STAGE_TWO_BASE_CPU_ID 1
-#define STAGE_THREE_BASE_CPU_ID 2
+#define STAGE_THREE_BASE_CPU_ID 3
 
 #define MAX_STAGE_NUM 2
 #ifdef CUDA
@@ -44,8 +44,7 @@ static inline void module_info_init(void)
 struct trace_info {
     volatile uint32_t buf_size;
     volatile uint8_t thread_id;
-    volatile uint8_t is_buf_full_0;
-    volatile uint8_t is_buf_full_1;
+    volatile uint8_t is_buf_full[3];
 };
 
 /*__attribute__ ((aligned (16)))*/
@@ -102,8 +101,9 @@ static inline void module_shared_buf_all_empty(void)
     for (i = 0; i < MAX_STAGE_NUM; i++) {
         for (j = 0; j < MAX_CORE_NUM; j++) {
             for (k = 0; k < MAX_CHUNK_NUM; k++) {
-                while (shared_buf.stage[i].core[j].chunk[k].info->is_buf_full_0 ||
-                        shared_buf.stage[i].core[j].chunk[k].info->is_buf_full_1);
+                while (shared_buf.stage[i].core[j].chunk[k].info->is_buf_full[0] ||
+                        shared_buf.stage[i].core[j].chunk[k].info->is_buf_full[1]
+                        || shared_buf.stage[i].core[j].chunk[k].info->is_buf_full[2]);
             }
         }
     }
@@ -240,14 +240,16 @@ static inline void module_shared_buf_copy(uint8_t sid, uint8_t cid, uint8_t kid,
 
     temp_chunk = &shared_buf.stage[sid].core[cid].chunk[kid];
 
-    while (temp_chunk->info->is_buf_full_0 || temp_chunk->info->is_buf_full_1);
+    while (temp_chunk->info->is_buf_full[0] || temp_chunk->info->is_buf_full[1]
+            || temp_chunk->info->is_buf_full[2]);
 
     memcpy(temp_chunk->buf, buf, size * sizeof(struct trace_content));
 
     temp_chunk->info->buf_size = size;
     temp_chunk->info->thread_id = tid;
-    temp_chunk->info->is_buf_full_0 = 1;
-    temp_chunk->info->is_buf_full_1 = 1;
+    temp_chunk->info->is_buf_full[0] = 1;
+    temp_chunk->info->is_buf_full[1] = 1;
+    temp_chunk->info->is_buf_full[2] = 1;
 }
 #endif
 #endif
