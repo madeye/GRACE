@@ -91,7 +91,7 @@ static inline void module_detector_stage_two(uint8_t tid,
         /*temp_entry = &temp_queue->load_entry[tail];*/
         /*prefetchw(temp_entry);*/
 
-        if(((content->address >> 2) & 1) == info.core_id) {
+        if ((content->address >> 3) & 1 == info.core_id) {
             if (content->type == TRACE_MEM_LOAD) {
                 module_history_load_record(content);
                 module_filter_load_record(content);
