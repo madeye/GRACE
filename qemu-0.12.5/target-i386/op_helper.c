@@ -25,6 +25,7 @@
 
 #ifdef PPI_DEBUG_TOOL
 #include "../module/cpu/profiler/process.h"
+#include "../module/cpu/profiler/copy.h"
 #include <stdlib.h>
 
 #define STACK_MASK 0xffff8000
@@ -38,6 +39,7 @@ extern uint8_t timing_start;                // Timing started flag
 extern uint8_t timing_end;                  // Timing ended flag
 extern uint32_t total_id;                   // Thread index
 extern uint32_t current_id;                 // Current thread index
+extern uint32_t last_id;                    // Last thread index
 extern struct ProcessQueue process_queue;   // Process queue
 extern pthread_mutex_t det_lock;
 extern pthread_cond_t  det_cond;
@@ -698,6 +700,9 @@ void helper_load_word_trace(target_ulong pc, target_ulong addr) {
 void helper_load_long_trace(target_ulong pc, target_ulong addr) {
     trace_mem_collection(current_id, TRACE_MEM_LOAD, TRACE_MEM_SIZE_LONG, 
             pc, addr, cts.index[current_id]);
+    if (env->trace_mem_ptr - env->debug_info.trace_mem_buf > TRACE_BUF_SIZE) {
+        trace_mem_buf_clear(last_id);
+    }
 }
 void helper_load_quad_trace(target_ulong pc, target_ulong addr) {
     trace_mem_collection(current_id, TRACE_MEM_LOAD, TRACE_MEM_SIZE_QUAD, 
